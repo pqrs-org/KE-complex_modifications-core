@@ -1,0 +1,14 @@
+name: KE-complex_modifications-core CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: macos-12
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: tests
+        run: make -C tests
