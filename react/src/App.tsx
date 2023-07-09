@@ -36,6 +36,8 @@ const App = () => {
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [lunrIndex, setLunrIndex] = useState<lunr.Index>();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [revision, setRevision] = useState("");
+  const [updatedAt, setUpdatedAt] = useState(0);
 
   //
   // Fetch dist.json
@@ -49,13 +51,21 @@ const App = () => {
     fetch(url)
       .then((res) => res.json())
       .then(
-        (result: { index: CategoryObject[]; example: CategoryObject[] }) => {
+        (result: {
+          index: CategoryObject[];
+          example: CategoryObject[];
+          revision: string;
+          updatedAt: number;
+        }) => {
           setAllCategories(
             [
               result.index.map((c) => new Category(c)),
               result.example.map((c) => new Category(c)),
             ].flat()
           );
+
+          setRevision(result.revision);
+          setUpdatedAt(result.updatedAt);
         },
         (error) => {
           console.log(error);
@@ -202,19 +212,30 @@ const App = () => {
             </Typography>
           </Link>
 
-          {fetching && <CircularProgress color="inherit" />}
+          {fetching && (
+            <CircularProgress color="inherit" sx={{ marginLeft: 4 }} />
+          )}
 
-          <Link
-            href="https://github.com/pqrs-org/KE-complex_modifications"
-            color="inherit"
-            target="_blank"
-            marginLeft="auto"
-          >
-            <Grid container direction="row" alignItems="center">
+          <Box sx={{ marginLeft: "auto", textAlign: "right" }}>
+            <Link
+              href="https://github.com/pqrs-org/KE-complex_modifications"
+              color="inherit"
+              target="_blank"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "end",
+              }}
+            >
               <OpenInNewIcon sx={{ mr: 0.5 }} />
               GitHub
-            </Grid>
-          </Link>
+            </Link>
+            {revision !== "" && (
+              <Box>{`revision: ${revision} / ${new Date(updatedAt * 1000)
+                .toISOString()
+                .substring(0, 10)}`}</Box>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
 
