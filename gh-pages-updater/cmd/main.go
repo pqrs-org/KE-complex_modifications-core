@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/pqrs-org/KE-complex_modifications-core/gh-pages-updater/internal/core"
@@ -14,11 +13,6 @@ func main() {
 	err := core.ReadConfig()
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
-
-	err = core.UpdateGitHubPages()
-	if err != nil {
-		log.Fatal(err)
 	}
 
 	gin.SetMode(gin.ReleaseMode)
