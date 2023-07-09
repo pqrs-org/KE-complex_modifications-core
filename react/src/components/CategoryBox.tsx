@@ -94,7 +94,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
               {f.object.json?.title}
 
               <Box sx={{ ml: "auto" }}>
-              {f.object.json?.author && (
+                {f.object.json?.author && (
                   <Chip
                     label={`Author: ${f.object.json.author}`}
                     variant="outlined"
