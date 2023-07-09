@@ -19,4 +19,4 @@ rebuild:
 	$(MAKE) all
 
 server:
-	ruby scripts/dev-server.rb
+	/usr/bin/python3 scripts/dev-server.py
