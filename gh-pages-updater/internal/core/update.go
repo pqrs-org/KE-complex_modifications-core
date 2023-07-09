@@ -32,10 +32,10 @@ func UpdateGitHubPages() error {
 		return err
 	}
 
-	//	_, err = hardResetToMain(ghpRepo)
-	//	if err != nil {
-	//		return err
-	//	}
+	_, err = hardResetToMain(ghpRepo)
+	if err != nil {
+		return err
+	}
 
 	//
 	// Build files
@@ -48,7 +48,7 @@ func UpdateGitHubPages() error {
 	)
 	err = cmd.Run()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to build /public/build/ files: %w", err)
 	}
 
 	//
@@ -56,17 +56,37 @@ func UpdateGitHubPages() error {
 	//
 
 	cmd = exec.Command(
-		"rsync",
-		"-Lav",
-		"--delete",
+		"rsync", "-La", "--delete",
 		"--exclude", "CNAME",
 		"--exclude", ".nojekyll",
-		fmt.Sprintf("%s/public/", Config.KEComplexModificationsRepositoryPath),
+		"--exclude", "build",
+		"--exclude", "json",
+		fmt.Sprintf("%s/core/react/dist/", Config.KEComplexModificationsRepositoryPath),
 		fmt.Sprintf("%s/docs", Config.GitHubPagesRepositoryPath),
 	)
 	err = cmd.Run()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to rsync docs: %w", err)
+	}
+
+	cmd = exec.Command(
+		"rsync", "-La", "--delete",
+		fmt.Sprintf("%s/public/build", Config.KEComplexModificationsRepositoryPath),
+		fmt.Sprintf("%s/docs", Config.GitHubPagesRepositoryPath),
+	)
+	err = cmd.Run()
+	if err != nil {
+		return fmt.Errorf("failed to rsync docs/build: %w", err)
+	}
+
+	cmd = exec.Command(
+		"rsync", "-La", "--delete",
+		fmt.Sprintf("%s/public/json", Config.KEComplexModificationsRepositoryPath),
+		fmt.Sprintf("%s/docs", Config.GitHubPagesRepositoryPath),
+	)
+	err = cmd.Run()
+	if err != nil {
+		return fmt.Errorf("failed to rsync docs/json: %w", err)
 	}
 
 	//
@@ -199,6 +219,13 @@ func commit(repo *git.Repository, message string) error {
 		return err
 	}
 
+	err = worktree.AddWithOptions(&git.AddOptions{
+		All: true,
+	})
+	if err != nil {
+		return err
+	}
+
 	//
 	// AllowEmptyCommits does not work properly, so new commit is added even if there are no changes.
 	// So we should check worktree status by hand.
@@ -214,8 +241,6 @@ func commit(repo *git.Repository, message string) error {
 	}
 
 	_, err = worktree.Commit(message, &git.CommitOptions{
-		All:               true,
-		AllowEmptyCommits: false,
 		Author: &object.Signature{
 			Name:  "gh-pages-updater",
 			Email: "tekezo@pqrs.org",
