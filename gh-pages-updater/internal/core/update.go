@@ -98,6 +98,15 @@ func UpdateGitHubPages() error {
 		return err
 	}
 
+	//
+	// Push
+	//
+
+	err = pushGitHubPagesRepository(ghpRepo)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -160,6 +169,17 @@ func getGitHubPagesRepository() (*git.Repository, error) {
 	}
 
 	return repo, nil
+}
+
+func pushGitHubPagesRepository(repo *git.Repository) error {
+	publicKeys, err := getSSHPublicKeys()
+	if err != nil {
+		return err
+	}
+
+	return repo.Push(&git.PushOptions{
+		Auth: publicKeys,
+	})
 }
 
 func getSSHPublicKeys() (*ssh.PublicKeys, error) {

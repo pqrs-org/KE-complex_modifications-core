@@ -24,7 +24,21 @@ func main() {
 		})
 	})
 
-	r.GET("/update-gh-pages", func(c *gin.Context) {
+	r.POST("/update-gh-pages", func(c *gin.Context) {
+		var requestBody struct {
+			Secret string
+		}
+
+		if err := c.BindJSON(&requestBody); err != nil {
+			c.JSON(400, gin.H{"error": "invalid request body"})
+			return
+		}
+
+		if requestBody.Secret != core.Config.Secret {
+			c.JSON(401, gin.H{"error": "invalid secret"})
+			return
+		}
+
 		err := core.UpdateGitHubPages()
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
