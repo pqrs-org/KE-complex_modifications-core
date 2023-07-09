@@ -73,10 +73,10 @@ json.each do |_type, groups|
 end
 
 open('| git rev-parse HEAD') do |f|
-  json['revision'] = f.read.strip
+  json['revision'] = f.read.strip[0..6]
 end
 open('| git log -1 --format="%at"') do |f|
-  json['updatedAt'] = Time.at(f.read.strip.to_i).utc
+  json['updatedAt'] = f.read.strip.to_i
 end
 
 puts JSON.pretty_generate(json)
