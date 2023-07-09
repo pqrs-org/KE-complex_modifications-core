@@ -23,7 +23,6 @@ class RequestHandler(SimpleHTTPRequestHandler, object):
 
         if trailing_slash:
             path += '/'
-        print(path)
         return path
 
 
