@@ -16,6 +16,7 @@ server = WEBrick::HTTPServer.new(
 
 server.mount_proc('/build/dist.json') do |_, res|
   res['Content-Type'] = 'application/json'
+  res['Access-Control-Allow-Origin'] = '*'
 
   system("bash #{__dir__}/update-public-build.sh")
   open('build/dist.json') do |f|
