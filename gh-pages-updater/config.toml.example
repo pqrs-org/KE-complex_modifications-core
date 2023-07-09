@@ -1,0 +1,6 @@
+hostname = "localhost"
+port = 28080
+
+KEComplexModificationsRepositoryPath = "/opt/repo/github/pqrs-org/KE-complex_modifications"
+GitHubPagesRepositoryPath            = "/opt/repo/github/pqrs-org/gh-pages-ke-complex-modifications.pqrs.org"
+SSHPrivateKeyPath                    = "/opt/ssh/id_ed25519"
