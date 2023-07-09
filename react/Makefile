@@ -3,17 +3,8 @@
 start:
 	npm run start
 
-build:
+build: install
 	npm run build
-
-deploy:
-	$(MAKE) install
-	$(MAKE) build
-	rsync -a --delete \
-		build/index.html \
-		build/static \
-		build/vendor \
-		../../public
 
 install:
 	npm ci --no-audit
