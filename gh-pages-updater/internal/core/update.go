@@ -45,6 +45,7 @@ func UpdateGitHubPages() error {
 		"make",
 		"-C",
 		Config.KEComplexModificationsRepositoryPath,
+		"update-public-build",
 	)
 	err = cmd.Run()
 	if err != nil {
