@@ -22,4 +22,4 @@ update-public-build:
 	bash scripts/update-public-build.sh
 
 server:
-	/usr/bin/python3 scripts/dev-server.py
+	/usr/bin/python3 scripts/dev_server.py

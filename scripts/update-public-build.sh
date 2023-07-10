@@ -9,7 +9,7 @@ cd $(dirname "$0")/../../public
 #
 
 mkdir -p build
-ruby ../core/scripts/make-distjson.rb >build/dist.json
+/usr/bin/python3 ../core/scripts/make_distjson.py
 
 #
 # Update extra_descriptions
