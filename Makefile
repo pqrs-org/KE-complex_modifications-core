@@ -18,5 +18,8 @@ rebuild:
 	touch ../src/json/*
 	$(MAKE) all
 
+update-public-build:
+	bash scripts/update-public-build.sh
+
 server:
 	/usr/bin/python3 scripts/dev-server.py
