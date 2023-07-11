@@ -21,6 +21,11 @@ def remember_cwd():
         os.chdir(cwd)
 
 
+def check_safe_path(path):
+    '''Check path is under cwd'''
+    return os.path.realpath(path).startswith(os.path.realpath(os.getcwd()))
+
+
 def make_distjson():
     '''Update public/build/dist.json'''
 
@@ -72,7 +77,11 @@ def make_distjson():
                         # Strip manipulators
                         #
 
-                        if file['path'] is not None:
+                        if 'path' in file:
+                            if not check_safe_path(file['path']):
+                                raise PermissionError(
+                                    f"cannot access {file['path']}")
+
                             with open(file['path'], encoding='utf-8') as json_file:
                                 j = json.load(json_file)
                                 for rule in j['rules']:
@@ -85,6 +94,10 @@ def make_distjson():
 
                         extra_description_text = ''
                         if 'extra_description_path' in file:
+                            if not check_safe_path(file['extra_description_path']):
+                                raise PermissionError(
+                                    f"cannot access {file['extra_description_path']}")
+
                             with open(file['extra_description_path'],
                                       encoding='utf-8') as extra_description_file:
                                 extra_description_text = extra_description_file.read()
