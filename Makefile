@@ -10,7 +10,8 @@ all:
 
 	sandbox-exec -f files/generator.sb bash scripts/update-json.sh
 	python3 scripts/lint_src_json.py ../src/json
-	python3 scripts/lint-public-json.py ../public/json
+	python3 scripts/lint_public_json.py ../public/json
+	bash scripts/apply-lint.sh '../public/json/*.json'
 	ruby scripts/lint-groups.rb
 	bash scripts/update-public-build.sh
 
