@@ -23,12 +23,12 @@ def lint_public_json(public_json_directory):
         #
 
         if not re.search(r'\.json$', file_path):
-            basename = os.path.basename(file_path)
+            path = f"{public_json_directory}/{os.path.basename(file_path)}"
             print('')
             print('----------------------------------------')
             print('ERROR:')
             print(
-                f"Please rename {public_json_directory}/{basename} to {public_json_directory}/{basename}.json")
+                f"Please rename {path} to {path}.json")
             print('----------------------------------------')
             print('')
             sys.exit(1)
