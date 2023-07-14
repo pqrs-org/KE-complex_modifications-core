@@ -27,8 +27,7 @@ def lint_public_json(public_json_directory):
             print('')
             print('----------------------------------------')
             print('ERROR:')
-            print(
-                f"Please rename {path} to {path}.json")
+            print(f"Please rename {path} to {path}.json")
             print('----------------------------------------')
             print('')
             sys.exit(1)
