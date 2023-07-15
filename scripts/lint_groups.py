@@ -47,9 +47,16 @@ def lint_groups(groups_json_file_path):
             print('Please add them into public/json.')
             print('----------------------------------------')
             print('')
-            print(orphan_files)
+            for file in orphan_files:
+                print(f'- {file}')
+            print('')
             sys.exit(1)
 
 
 if __name__ == "__main__":
-    lint_groups(f'{os.path.dirname(__file__)}/../../public/groups.json')
+    PUBLIC_JSON_FILE_PATH = sys.argv[1] if len(sys.argv) > 1 else ""
+    if not os.path.isfile(PUBLIC_JSON_FILE_PATH):
+        print(f'"{PUBLIC_JSON_FILE_PATH}" is not found')
+        sys.exit(1)
+
+    lint_groups(PUBLIC_JSON_FILE_PATH)

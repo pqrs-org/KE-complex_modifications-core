@@ -1,0 +1,25 @@
+{
+  "index": [
+    {
+      "name": "Modifier Keys",
+      "id": "modifier-keys",
+      "files": [
+        {
+          "path": "json/a.json"
+        },
+        {
+          "path": "json/b.json"
+        }
+      ]
+    },
+    {
+      "name": "Emulation Modes",
+      "id": "emulation-modes",
+      "files": [
+        {
+          "path": "json/b.json"
+        }
+      ]
+    }
+  ]
+}
