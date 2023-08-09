@@ -41,6 +41,20 @@ for srcfile in ../src/json/*.json.*; do
       fi
     fi
 
+    if [[ $extension = 'py' ]]; then
+      if python3 -c 'import sys; print(str(sys.version_info >= (3, 8)).lower())'; then
+        if python3 "$srcfile" >"$dstfile"; then
+          if scripts/apply-lint.sh "$dstfile"; then
+            echo "$dstfile"
+            failed=1
+          fi
+        fi
+      else
+        echo "Skip $srcfile due to python3 version not being >= 3.8"
+        failed=1
+      fi
+    fi
+
     if [[ $failed -eq 0 ]]; then
       rm -f "$dstfile"
       exit 1
