@@ -42,7 +42,7 @@ for srcfile in ../src/json/*.json.*; do
     fi
 
     if [[ $extension = 'py' ]]; then
-      if python3 -c 'import sys; print(str(sys.version_info >= (3, 8)).lower())'; then
+      if [[ $(python3 -c 'import sys; print(str(sys.version_info >= (3, 8)).lower())') = "true" ]]; then
         if python3 "$srcfile" >"$dstfile"; then
           if scripts/apply-lint.sh "$dstfile"; then
             echo "$dstfile"
