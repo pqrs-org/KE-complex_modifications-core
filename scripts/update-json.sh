@@ -1,6 +1,10 @@
 #!/bin/bash
 
+set -u # forbid undefined variables
 set -e # forbid command failure
+
+topdir="$(dirname $0)/.."
+karabiner_cli="${topdir}/bin/karabiner_cli"
 
 for srcfile in ../src/json/*.json.*; do
   extension="${srcfile##*.}"
@@ -12,7 +16,7 @@ for srcfile in ../src/json/*.json.*; do
     if [[ $extension = 'erb' ]]; then
       if scripts/erb2json.rb <"$srcfile" >"$dstfile"; then
         if scripts/apply-lint.sh "$dstfile"; then
-          echo "$dstfile"
+          echo "Updated: $dstfile"
           failed=1
         fi
       fi
@@ -21,23 +25,20 @@ for srcfile in ../src/json/*.json.*; do
     if [[ $extension = 'rb' ]]; then
       if ruby "$srcfile" >"$dstfile"; then
         if scripts/apply-lint.sh "$dstfile"; then
-          echo "$dstfile"
+          echo "Updated: $dstfile"
           failed=1
         fi
       fi
     fi
 
     if [[ $extension = 'js' ]]; then
-      if which -s node; then
-        if node "$srcfile" >"$dstfile"; then
-          if scripts/apply-lint.sh "$dstfile"; then
-            echo "$dstfile"
-            failed=1
-          fi
+      echo "$karabiner_cli --eval-js $srcfile"
+
+      if $karabiner_cli --eval-js "$srcfile" >"$dstfile"; then
+        if scripts/apply-lint.sh "$dstfile"; then
+          echo "Updated: $dstfile"
+          failed=1
         fi
-      else
-        echo "Skip $srcfile due to node command is not found"
-        failed=1
       fi
     fi
 
@@ -45,7 +46,7 @@ for srcfile in ../src/json/*.json.*; do
       if [[ $(python3 -c 'import sys; print(str(sys.version_info >= (3, 8)).lower())') = "true" ]]; then
         if python3 "$srcfile" >"$dstfile"; then
           if scripts/apply-lint.sh "$dstfile"; then
-            echo "$dstfile"
+            echo "Updated: $dstfile"
             failed=1
           fi
         fi
