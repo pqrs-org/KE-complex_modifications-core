@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -u # forbid undefined variables
+set -e # forbid command failure
+
 [[ -z "$(git status -s)" ]] ||
   (
     echo

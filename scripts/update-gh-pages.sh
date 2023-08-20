@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -u # forbid undefined variables
+set -e # forbid command failure
+
 result=$(curl -s \
   -X POST \
   -H "Content-Type: application/json" \
