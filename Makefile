@@ -11,7 +11,7 @@ all:
 	sandbox-exec -f files/generator.sb bash scripts/update-json.sh
 	python3 scripts/lint_src_json.py ../src/json
 	python3 scripts/lint_public_json.py ../public/json
-	bash scripts/apply-lint.sh '../public/json/*.json'
+	bash scripts/apply-lint.sh '../public/json/*.json' --silent
 	python3 scripts/lint_groups.py '../public/groups.json'
 	bash scripts/update-public-build.sh
 
