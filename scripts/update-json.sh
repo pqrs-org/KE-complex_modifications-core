@@ -57,7 +57,6 @@ for srcfile in ../src/json/*.json.*; do
     fi
 
     if [[ $failed -eq 0 ]]; then
-      rm -f "$dstfile"
       exit 1
     fi
   fi
