@@ -57,6 +57,8 @@ for srcfile in ../src/json/*.json.*; do
     fi
 
     if [[ $failed -eq 0 ]]; then
+      # Set mtime to 2000-01-01T00:00:00 to make $srcfile newer than $dstfile.
+      touch -t 0001010000 "$dstfile"
       exit 1
     fi
   fi
