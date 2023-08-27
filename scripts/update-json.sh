@@ -13,24 +13,6 @@ for srcfile in ../src/json/*.json.*; do
   if [[ "$srcfile" -nt "$dstfile" ]]; then
     failed=0
 
-    if [[ $extension = 'erb' ]]; then
-      if scripts/erb2json.rb <"$srcfile" >"$dstfile"; then
-        if scripts/apply-lint.sh "$dstfile"; then
-          echo "Updated: $dstfile"
-          failed=1
-        fi
-      fi
-    fi
-
-    if [[ $extension = 'rb' ]]; then
-      if ruby "$srcfile" >"$dstfile"; then
-        if scripts/apply-lint.sh "$dstfile"; then
-          echo "Updated: $dstfile"
-          failed=1
-        fi
-      fi
-    fi
-
     if [[ $extension = 'js' ]]; then
       echo "$karabiner_cli --eval-js $srcfile"
 
@@ -39,20 +21,6 @@ for srcfile in ../src/json/*.json.*; do
           echo "Updated: $dstfile"
           failed=1
         fi
-      fi
-    fi
-
-    if [[ $extension = 'py' ]]; then
-      if [[ $(python3 -c 'import sys; print(str(sys.version_info >= (3, 8)).lower())') = "true" ]]; then
-        if python3 "$srcfile" >"$dstfile"; then
-          if scripts/apply-lint.sh "$dstfile"; then
-            echo "Updated: $dstfile"
-            failed=1
-          fi
-        fi
-      else
-        echo "Skip $srcfile due to python3 version not being >= 3.8"
-        failed=1
       fi
     fi
 

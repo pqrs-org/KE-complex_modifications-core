@@ -3,6 +3,7 @@
 '''Lint src/json'''
 
 import glob
+import pathlib
 import os
 import re
 import sys
@@ -21,13 +22,26 @@ def lint_src_json(src_json_directory):
         # Check file extension
         #
 
-        if re.search(r'\.json$', file_path):
+        ext = pathlib.Path(file_path).suffix
+
+        if ext == '.json':
             basename = os.path.basename(file_path)
             print('')
             print('----------------------------------------')
             print('ERROR:')
             print(
                 f"Please move {src_json_directory}/{basename} to public/json/{basename}")
+            print('----------------------------------------')
+            print('')
+            sys.exit(1)
+
+        elif ext not in ['.js']:
+            basename = os.path.basename(file_path)
+            print('')
+            print('----------------------------------------')
+            print('ERROR:')
+            print(
+                f"Unsupported file type {src_json_directory}/{basename}")
             print('----------------------------------------')
             print('')
             sys.exit(1)
