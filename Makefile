@@ -3,6 +3,8 @@ all: build_rules
 	bash scripts/update-public-build.sh
 
 build_rules:
+# There are cases where only public/json needs to be updated, so it is separated into `build_rules`.
+# https://github.com/pqrs-org/KE-complex_modifications-core/pull/2
 	@echo
 	@echo "============================================================"
 	@echo "Using a pre-built binary for lint."
