@@ -18,30 +18,39 @@ def lint_src_json(src_json_directory):
 
     file_paths = glob.glob(f"{src_json_directory}/*")
     for file_path in file_paths:
+        basename = os.path.basename(file_path)
+
         #
         # Check file extension
         #
 
-        ext = pathlib.Path(file_path).suffix
-
-        if ext == '.json':
-            basename = os.path.basename(file_path)
+        if file_path.endswith('.json'):
             print('')
             print('----------------------------------------')
             print('ERROR:')
             print(
-                f"Please move {src_json_directory}/{basename} to public/json/{basename}")
+                f"Please move src/json/{basename} to public/json/{basename}")
             print('----------------------------------------')
             print('')
             sys.exit(1)
 
-        elif ext not in ['.js']:
-            basename = os.path.basename(file_path)
+        elif file_path.endswith('.js'):
+            if not file_path.endswith('.json.js'):
+                print('')
+                print('----------------------------------------')
+                print('ERROR:')
+                print(
+                    f"The file name must end with .json.js. src/json/{basename}")
+                print('----------------------------------------')
+                print('')
+                sys.exit(1)
+
+        else:
             print('')
             print('----------------------------------------')
             print('ERROR:')
             print(
-                f"Unsupported file type {src_json_directory}/{basename}")
+                f"Unsupported file type src/json/{basename}")
             print('----------------------------------------')
             print('')
             sys.exit(1)
