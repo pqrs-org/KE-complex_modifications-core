@@ -44,5 +44,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
         return path
 
 
+print('http://localhost:8000')
+
 httpd = HTTPServer(('localhost', 8000), RequestHandler)
 httpd.serve_forever()
