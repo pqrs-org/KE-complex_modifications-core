@@ -9,6 +9,7 @@ cd $(dirname "$0")/../../public
 # Update dist.json
 #
 
+rm -fr build
 mkdir -p build
 /usr/bin/python3 ../core/scripts/make_distjson.py
 
@@ -16,7 +17,7 @@ mkdir -p build
 # Update extra_descriptions
 #
 
-rsync -a extra_descriptions build
+cp -R extra_descriptions build
 
 for f in $(find extra_descriptions -name '*.html'); do
   mkdir -p $(dirname "build/$f")
