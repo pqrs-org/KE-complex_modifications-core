@@ -1,6 +1,6 @@
 all: build_rules
 	python3 scripts/lint_groups.py '../public/groups.json'
-	bash scripts/update-public-build.sh
+	bash scripts/update-dist.sh
 
 build_rules:
 # There are cases where only public/json needs to be updated, so it is separated into `build_rules`.
@@ -23,8 +23,8 @@ rebuild:
 	touch ../src/json/*
 	$(MAKE) all
 
-update-public-build:
-	bash scripts/update-public-build.sh
+update-dist:
+	bash scripts/update-dist.sh
 
-server:
-	/usr/bin/python3 scripts/dev_server.py
+preview-server: update-dist
+	(cd ../dist && /usr/bin/python3 ../core/scripts/preview_server.py)

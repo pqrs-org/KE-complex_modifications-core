@@ -1,7 +1,0 @@
-hostname = "localhost"
-port = 28080
-secret = "example-6i9-e89-532b-546-4f3-42ejf-hhr6b"
-
-KEComplexModificationsRepositoryPath = "/opt/repo/github/pqrs-org/KE-complex_modifications"
-GitHubPagesRepositoryPath            = "/opt/repo/github/pqrs-org/gh-pages-ke-complex-modifications.pqrs.org"
-SSHPrivateKeyPath                    = "/opt/ssh/id_ed25519"
