@@ -13,27 +13,35 @@ export const ExtraHTML = ({ src }: Props) => {
     let canceled = false;
     (async () => {
       try {
+        const shadow =
+          ref.current!.shadowRoot ??
+          ref.current!.attachShadow({ mode: "open" });
+
         const res = await fetch(src, { credentials: "same-origin" });
         if (!res.ok)
           throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
         const html = await res.text();
         if (canceled || !ref.current) return;
-        ref.current.innerHTML = html;
+
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = html;
 
         const base = toAbsoluteUrl(src);
         // Adjust relative URLs
-        ref.current.querySelectorAll<HTMLElement>("[src]").forEach((el) => {
+        wrapper.querySelectorAll<HTMLElement>("[src]").forEach((el) => {
           const v = (el as HTMLImageElement).getAttribute("src");
           const a = toAbsoluteUrl(v ?? "", base);
           if (a && a !== v) (el as HTMLImageElement).setAttribute("src", a);
         });
-        ref.current
+        wrapper
           .querySelectorAll<HTMLAnchorElement>("a[href], link[href]")
           .forEach((el) => {
             const v = el.getAttribute("href");
             const a = toAbsoluteUrl(v ?? "", base);
             if (a && a !== v) el.setAttribute("href", a);
           });
+
+        shadow.appendChild(wrapper);
       } catch (e) {
         if (!canceled) setErr(e);
       }
