@@ -8,15 +8,13 @@ build: install
 	npm run build
 
 install:
-	npm ci --no-audit
-	$(MAKE) audit
+	npm ci
 
 update:
-	npm update --no-audit
-	$(MAKE) audit
+	npm update
 
 audit:
-	npm audit --omit=dev
+	npm audit
 
 format:
 	npm run format
