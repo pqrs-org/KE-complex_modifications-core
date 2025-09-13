@@ -60,7 +60,7 @@ const App = () => {
             [
               result.index.map((c) => new Category(c)),
               result.example.map((c) => new Category(c)),
-            ].flat()
+            ].flat(),
           );
 
           setRevision(result.revision);
@@ -68,7 +68,7 @@ const App = () => {
         },
         (error) => {
           console.log(error);
-        }
+        },
       )
       .then(() => {
         setFetching(false);
@@ -127,11 +127,11 @@ const App = () => {
               },
               {
                 boost,
-              }
+              },
             );
           });
         });
-      })
+      }),
     );
   }, [searchQueryContext.query, allCategories, lunrIndex]);
 

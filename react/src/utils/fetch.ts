@@ -6,6 +6,6 @@ export const baseUrl = () => {
 
   return `${window.location.protocol}//${window.location.host}${window.location.pathname}`.replace(
     /\/$/,
-    ""
+    "",
   );
 };

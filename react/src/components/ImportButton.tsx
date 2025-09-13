@@ -65,7 +65,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
       const json = await response.json();
       // To avoid Unicode Problem, escape string before btoa: https://developer.mozilla.org/en-US/docs/Glossary/Base64
       const base64string = window.btoa(
-        unescape(encodeURIComponent(JSON.stringify(json)))
+        unescape(encodeURIComponent(JSON.stringify(json))),
       );
       const url = `https://genesy.github.io/karabiner-complex-rules-generator/#${base64string}`;
       window.open(url);
@@ -133,7 +133,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                       event.stopPropagation();
                       jsonModalContext.openModal(
                         jsonFile.object.json?.title ?? "",
-                        jsonFile.jsonUrl
+                        jsonFile.jsonUrl,
                       );
                       handleMenuClose(event.nativeEvent);
                     }}
