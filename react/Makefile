@@ -1,6 +1,7 @@
 .PHONY: build
 
 dev:
+	make -C .. update-dist
 	npm run dev
 
 build: install

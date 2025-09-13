@@ -10,26 +10,15 @@ cd $(dirname "$0")/../..
 #
 
 rm -fr dist
-mkdir -p dist/build
+mkdir dist
 /usr/bin/python3 core/scripts/make_distjson.py
 
 #
-# Copy json
+# Copy files
 #
 
 cp -R public/json dist
-
-#
-# Update extra_descriptions
-#
-
-cp -R public/extra_descriptions dist/build
-
-for f in $(find dist/build/extra_descriptions -name '*.html'); do
-  echo '<script src="../../vendor/js/iframeResizer.contentWindow.min.js"></script>' >"$f.tmp"
-  cat "$f" >>"$f.tmp"
-  mv "$f.tmp" "$f"
-done
+cp -R public/extra_descriptions dist
 
 #
 # Copy react files

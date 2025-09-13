@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-'''Update dist/build/dist.json'''
+'''Update dist/dist.json'''
 
 import contextlib
 import glob
@@ -27,7 +27,7 @@ def check_safe_path(path):
 
 
 def make_distjson():
-    '''Update dist/build/dist.json'''
+    '''Update dist/dist.json'''
 
     with remember_cwd():
         os.chdir(f'{os.path.dirname(__file__)}/../../public')
@@ -131,7 +131,7 @@ def make_distjson():
                                  capture_output=True, check=False, encoding='utf-8')
             groups_json['updatedAt'] = int(git.stdout.strip())
 
-            with open('../dist/build/dist.json', 'w', encoding='utf-8') as build_groups_json_file:
+            with open('../dist/dist.json', 'w', encoding='utf-8') as build_groups_json_file:
                 json.dump(groups_json, build_groups_json_file,
                           ensure_ascii=False, indent=2)
 
