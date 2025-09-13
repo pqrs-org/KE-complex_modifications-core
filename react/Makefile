@@ -4,8 +4,9 @@ dev:
 
 build:
 	rm -fr dist
-	cp node_modules/bootstrap/dist/css/bootstrap.min.css public/vendor
 	npm run build
+	mkdir -p dist/vendor
+	cp node_modules/bootstrap/dist/css/bootstrap.min.css dist/vendor
 
 install:
 	npm ci
