@@ -5,12 +5,13 @@ set -e # forbid command failure
 
 cd $(dirname "$0")/../..
 
+rm -fr dist
+mkdir dist
+
 #
 # Update dist.json
 #
 
-rm -fr dist
-mkdir dist
 /usr/bin/python3 core/scripts/make_distjson.py
 
 #
