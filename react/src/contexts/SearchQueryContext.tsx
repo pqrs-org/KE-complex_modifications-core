@@ -9,7 +9,7 @@ export const SearchQueryContextProvider = (props: {
   children: React.ReactNode;
 }) => {
   const [query, setQuery] = useState(
-    new URLSearchParams(window.location.search).get("q") ?? ""
+    new URLSearchParams(window.location.search).get("q") ?? "",
   );
   return (
     <SearchQueryContext.Provider

@@ -13,11 +13,10 @@ import {
   styled,
 } from "@mui/material";
 import { ArrowForwardIosSharp as ArrowForwardIosSharpIcon } from "@mui/icons-material";
-import IframeResizer from "iframe-resizer-react";
 import { LocationHashContext } from "../contexts";
 import { Category } from "../models";
-import { baseUrl } from "../utils/fetch";
 import { ImportButton } from "./ImportButton";
+import { ExtraHTML } from "./ExtraHTML";
 
 const color = "#28A745";
 
@@ -35,6 +34,7 @@ const CategoryBoxAccordion = styled((props: AccordionProps) => (
 
 const CategoryBoxAccordionSummary = styled((props: AccordionSummaryProps) => (
   <AccordionSummary
+    component="div"
     expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: "0.9rem" }} />}
     {...props}
   />
@@ -87,7 +87,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
         return (
           <CategoryBoxAccordion
             id={f.id}
-            TransitionProps={{ unmountOnExit: true }}
+            slotProps={{ transition: { unmountOnExit: true } }}
             key={f.id}
           >
             <CategoryBoxAccordionSummary>
@@ -148,18 +148,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
                 </Box>
               ))}
               {f.object.extra_description_path && (
-                <Box
-                  key={`${f.id}-rules-extra-description-${f.object.extra_description_path}`}
-                >
-                  <IframeResizer
-                    style={{ border: 0, width: "100%" }}
-                    heightCalculationMethod="lowestElement"
-                    src={`${baseUrl()}/build/${
-                      f.object.extra_description_path
-                    }`}
-                    title={f.object.extra_description_path}
-                  />
-                </Box>
+                <ExtraHTML src={f.object.extra_description_path} />
               )}
             </AccordionDetails>
           </CategoryBoxAccordion>

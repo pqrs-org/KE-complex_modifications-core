@@ -1,5 +1,4 @@
 import { KarabinerJsonFileObject } from "../types";
-import { baseUrl } from "../utils/fetch";
 
 export class KarabinerJsonFile {
   readonly object: KarabinerJsonFileObject;
@@ -18,8 +17,8 @@ export class KarabinerJsonFile {
       }
       this.id = id;
 
-      this.jsonUrl = `${baseUrl()}/${object.path}`;
-      this.anchorUrl = `${baseUrl()}/#${id}`;
+      this.jsonUrl = object.path ?? "";
+      this.anchorUrl = `#${id}`;
     }
   }
 }

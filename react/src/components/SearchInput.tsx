@@ -14,7 +14,7 @@ export const SearchInput = () => {
       window.history.pushState(
         { q: value },
         "",
-        "?q=" + encodeURIComponent(value)
+        "?q=" + encodeURIComponent(value),
       );
     }
   };
