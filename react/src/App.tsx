@@ -25,7 +25,6 @@ import {
   SearchInput,
   Snackbar,
 } from "./components";
-import { baseUrl } from "./utils/fetch";
 
 const App = () => {
   const locationHashContext = useContext(LocationHashContext);
@@ -45,9 +44,7 @@ const App = () => {
   useEffect(() => {
     setFetching(true);
 
-    const url = `${baseUrl()}/build/dist.json`;
-
-    fetch(url)
+    fetch("dist.json")
       .then((res) => res.json())
       .then(
         (result: {
@@ -205,7 +202,7 @@ const App = () => {
     <React.Fragment>
       <AppBar position="static">
         <Toolbar>
-          <Link href={`${baseUrl()}/`} color="inherit" underline="none">
+          <Link href={`./`} color="inherit" underline="none">
             <Typography sx={{ fontWeight: "bold" }}>
               Karabiner-Elements complex_modifications rules
             </Typography>
@@ -269,7 +266,7 @@ const App = () => {
                 <Button
                   variant="contained"
                   component={Link}
-                  href={`${baseUrl()}/`}
+                  href={`./`}
                   sx={{ ml: 2, textTransform: "none" }}
                 >
                   Show all rules

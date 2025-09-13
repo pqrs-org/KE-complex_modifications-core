@@ -21,9 +21,11 @@ export const ExtraHTML = ({ src }: Props) => {
 
         // Adjust relative URLs
         const abs = (value: string | null) => {
+          const base = `${window.location.protocol}//${window.location.host}${window.location.pathname}${src}`;
+
           if (!value) return value;
           try {
-            return new URL(value, src).href;
+            return new URL(value, base).href;
           } catch {
             return value;
           }
