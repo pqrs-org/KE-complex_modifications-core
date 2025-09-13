@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { toAbsoluteUrl } from "../utils/url";
 
 type Props = {
   src: string;
@@ -19,27 +20,18 @@ export const ExtraHTML = ({ src }: Props) => {
         if (canceled || !ref.current) return;
         ref.current.innerHTML = html;
 
+        const base = toAbsoluteUrl(src);
         // Adjust relative URLs
-        const abs = (value: string | null) => {
-          const base = `${window.location.protocol}//${window.location.host}${window.location.pathname}${src}`;
-
-          if (!value) return value;
-          try {
-            return new URL(value, base).href;
-          } catch {
-            return value;
-          }
-        };
         ref.current.querySelectorAll<HTMLElement>("[src]").forEach((el) => {
           const v = (el as HTMLImageElement).getAttribute("src");
-          const a = abs(v);
+          const a = toAbsoluteUrl(v ?? "", base);
           if (a && a !== v) (el as HTMLImageElement).setAttribute("src", a);
         });
         ref.current
           .querySelectorAll<HTMLAnchorElement>("a[href], link[href]")
           .forEach((el) => {
             const v = el.getAttribute("href");
-            const a = abs(v);
+            const a = toAbsoluteUrl(v ?? "", base);
             if (a && a !== v) el.setAttribute("href", a);
           });
       } catch (e) {

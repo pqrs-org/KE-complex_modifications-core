@@ -18,6 +18,8 @@ import {
 } from "@mui/icons-material";
 import { JsonModalContext, SnackbarContext } from "../contexts";
 import { KarabinerJsonFile } from "../models";
+import { toAbsoluteUrl } from "../utils/url";
+import { Base64 } from "js-base64";
 
 export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
   const jsonModalContext = useContext(JsonModalContext);
@@ -46,11 +48,13 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
   };
 
   const importJson = () => {
-    const url = encodeURIComponent(jsonFile.jsonUrl);
+    const url = encodeURIComponent(toAbsoluteUrl(jsonFile.jsonUrl));
     window.location.href = `karabiner://karabiner/assets/complex_modifications/import?url=${url}`;
   };
 
   const copyUrl = (url: string) => {
+    url = toAbsoluteUrl(url);
+
     if (navigator.clipboard !== undefined) {
       navigator.clipboard.writeText(url);
       snackbarContext.setText(`You just copied: ${url}`);
@@ -63,10 +67,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
     try {
       const response = await fetch(jsonFile.jsonUrl);
       const json = await response.json();
-      // To avoid Unicode Problem, escape string before btoa: https://developer.mozilla.org/en-US/docs/Glossary/Base64
-      const base64string = window.btoa(
-        unescape(encodeURIComponent(JSON.stringify(json))),
-      );
+      const base64string = Base64.encode(JSON.stringify(json));
       const url = `https://genesy.github.io/karabiner-complex-rules-generator/#${base64string}`;
       window.open(url);
     } catch (err) {

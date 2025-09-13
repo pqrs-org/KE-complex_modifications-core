@@ -8,6 +8,7 @@
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
     "bootstrap": "^5.3.8",
+    "js-base64": "^3.7.8",
     "lunr": "^2.3.9",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
