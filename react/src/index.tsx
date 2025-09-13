@@ -1,7 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { CssBaseline } from "@mui/material";
-import "bootstrap/dist/css/bootstrap.min.css";
 import App from "./App";
 import {
   JsonModalContextProvider,

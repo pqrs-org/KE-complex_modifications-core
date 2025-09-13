@@ -26,8 +26,11 @@ export const ExtraDescription = ({ src }: Props) => {
         const wrapper = document.createElement("div");
         wrapper.innerHTML = html;
 
-        const base = toAbsoluteUrl(src);
+        //
         // Adjust relative URLs
+        //
+
+        const base = toAbsoluteUrl(src);
         wrapper.querySelectorAll<HTMLElement>("[src]").forEach((el) => {
           const v = (el as HTMLImageElement).getAttribute("src");
           const a = toAbsoluteUrl(v ?? "", base);
@@ -40,6 +43,21 @@ export const ExtraDescription = ({ src }: Props) => {
             const a = toAbsoluteUrl(v ?? "", base);
             if (a && a !== v) el.setAttribute("href", a);
           });
+
+        //
+        // Inject bootstrap CSS
+        //
+
+        wrapper.dataset.bsTheme = "light";
+
+        const link = document.createElement("link");
+        link.setAttribute("rel", "stylesheet");
+        link.setAttribute("href", "vendor/bootstrap.min.css");
+        shadow.appendChild(link);
+
+        //
+        // Append extra description
+        //
 
         shadow.appendChild(wrapper);
       } catch (e) {

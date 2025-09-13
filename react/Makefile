@@ -1,10 +1,10 @@
-.PHONY: build
-
 dev:
 	make -C .. update-dist
 	npm run dev
 
-build: install
+build:
+	rm -fr dist
+	cp node_modules/bootstrap/dist/css/bootstrap.min.css public/vendor
 	npm run build
 
 install:

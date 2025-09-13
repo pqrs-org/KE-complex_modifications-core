@@ -28,6 +28,10 @@ export default defineConfig({
           "/extra_descriptions",
           sirv(resolve(dist, "extra_descriptions"), { dev: true }),
         );
+        server.middlewares.use(
+          "/vendor",
+          sirv(resolve(dist, "vendor"), { dev: true }),
+        );
 
         server.middlewares.use("/dist.json", async (_req, res, next) => {
           try {
