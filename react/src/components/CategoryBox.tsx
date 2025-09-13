@@ -16,7 +16,7 @@ import { ArrowForwardIosSharp as ArrowForwardIosSharpIcon } from "@mui/icons-mat
 import { LocationHashContext } from "../contexts";
 import { Category } from "../models";
 import { ImportButton } from "./ImportButton";
-import { ExtraHTML } from "./ExtraHTML";
+import { ExtraDescription } from "./ExtraDescription";
 
 const color = "#28A745";
 
@@ -148,7 +148,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
                 </Box>
               ))}
               {f.object.extra_description_path && (
-                <ExtraHTML src={f.object.extra_description_path} />
+                <ExtraDescription src={f.object.extra_description_path} />
               )}
             </AccordionDetails>
           </CategoryBoxAccordion>

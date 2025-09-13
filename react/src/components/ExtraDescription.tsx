@@ -5,7 +5,7 @@ type Props = {
   src: string;
 };
 
-export const ExtraHTML = ({ src }: Props) => {
+export const ExtraDescription = ({ src }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const [err, setErr] = useState<unknown>(null);
 
