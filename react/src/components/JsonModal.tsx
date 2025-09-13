@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import { JsonModalContext } from "../contexts";
+import SyntaxHighlighter from "react-syntax-highlighter";
 
 const style = {
   position: "absolute" as "absolute",
@@ -60,18 +61,16 @@ export const JsonModal = () => {
               <CloseIcon />
             </IconButton>
           </Typography>
-          <Typography
-            id="modal-modal-description"
-            sx={{
-              mt: 2,
+          <SyntaxHighlighter
+            language="json"
+            customStyle={{
               minHeight: "100px",
               maxHeight: "calc(90vh - 40px)",
               overflow: "auto",
-              whiteSpace: "pre-wrap",
             }}
           >
             {jsonModalContext.jsonString}
-          </Typography>
+          </SyntaxHighlighter>
         </Box>
       </Modal>
     </React.Fragment>
