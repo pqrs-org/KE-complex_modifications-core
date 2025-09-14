@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Box } from "@mui/material";
 import { toAbsoluteUrl } from "../utils/url";
 
 type Props = {
@@ -70,7 +71,7 @@ export const ExtraDescription = ({ src }: Props) => {
   }, []);
 
   if (err) {
-    return <div role="alert">Failed to load {src}</div>;
+    return <Box role="alert">Failed to load {src}</Box>;
   }
-  return <div ref={ref} />;
+  return <Box ref={ref}></Box>;
 };

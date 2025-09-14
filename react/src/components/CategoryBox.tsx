@@ -10,6 +10,7 @@ import {
   Divider,
   Grid,
   Link,
+  Typography,
   styled,
 } from "@mui/material";
 import { ArrowForwardIosSharp as ArrowForwardIosSharpIcon } from "@mui/icons-material";
@@ -148,7 +149,31 @@ export const CategoryBox = ({ category }: { category: Category }) => {
                 </Box>
               ))}
               {f.object.extra_description_path && (
-                <ExtraDescription src={f.object.extra_description_path} />
+                <Box
+                  sx={{
+                    p: 2,
+                    mt: 2,
+                    border: `1px solid gray`,
+                    position: "relative",
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      position: "absolute",
+                      top: 0,
+                      left: 16,
+                      transform: "translateY(-50%)",
+                      px: 0.5,
+                      bgcolor: "white",
+                      color: "text.secondary",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Description
+                  </Typography>
+                  <ExtraDescription src={f.object.extra_description_path} />
+                </Box>
               )}
             </AccordionDetails>
           </CategoryBoxAccordion>
