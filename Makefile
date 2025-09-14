@@ -27,5 +27,5 @@ rebuild:
 update-dist:
 	bash scripts/update-dist.sh
 
-preview-server: update-dist
-	(cd ../dist && /usr/bin/python3 ../core/scripts/preview_server.py)
+preview-server:
+	/usr/bin/python3 scripts/preview_server.py
