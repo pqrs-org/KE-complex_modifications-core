@@ -56,6 +56,42 @@ const CategoryBoxAccordionSummary = styled((props: AccordionSummaryProps) => (
   },
 }));
 
+const GroupBox = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <Box
+      sx={{
+        p: 2,
+        mt: 2,
+        border: `1px solid gray`,
+        position: "relative",
+      }}
+    >
+      <Typography
+        variant="caption"
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 16,
+          transform: "translateY(-50%)",
+          px: 0.5,
+          bgcolor: "white",
+          color: "text.secondary",
+          fontWeight: 600,
+        }}
+      >
+        {label}
+      </Typography>
+      {children}
+    </Box>
+  );
+};
+
 export const CategoryBox = ({ category }: { category: Category }) => {
   const locationHashContext = useContext(LocationHashContext);
 
@@ -132,48 +168,28 @@ export const CategoryBox = ({ category }: { category: Category }) => {
               </Box>
             </CategoryBoxAccordionSummary>
             <AccordionDetails sx={{ pt: 0 }}>
-              <List sx={{ px: 2 }} disablePadding>
-                {f.object.json?.rules?.map((r, i) => (
-                  <ListItem key={`${f.id}-rules-${i}`} disablePadding>
-                    <ListItemIcon sx={{ minWidth: 0, mr: 0.5 }}>
-                      <StarIcon sx={{ color }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={r.description}
-                      secondary={
-                        r.available_since &&
-                        `Karabiner-Elements ${r.available_since} or later`
-                      }
-                    />
-                  </ListItem>
-                ))}
-              </List>
+              <GroupBox label="Rules">
+                <List disablePadding>
+                  {f.object.json?.rules?.map((r, i) => (
+                    <ListItem key={`${f.id}-rules-${i}`} disablePadding>
+                      <ListItemIcon sx={{ minWidth: 0, mr: 0.5 }}>
+                        <StarIcon sx={{ color }} />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={r.description}
+                        secondary={
+                          r.available_since &&
+                          `Karabiner-Elements ${r.available_since} or later`
+                        }
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </GroupBox>
               {f.object.extra_description_path && (
-                <Box
-                  sx={{
-                    p: 2,
-                    mt: 2,
-                    border: `1px solid gray`,
-                    position: "relative",
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      position: "absolute",
-                      top: 0,
-                      left: 16,
-                      transform: "translateY(-50%)",
-                      px: 0.5,
-                      bgcolor: "white",
-                      color: "text.secondary",
-                      fontWeight: 600,
-                    }}
-                  >
-                    Description
-                  </Typography>
+                <GroupBox label="Description">
                   <ExtraDescription src={f.object.extra_description_path} />
-                </Box>
+                </GroupBox>
               )}
             </AccordionDetails>
           </CategoryBoxAccordion>
