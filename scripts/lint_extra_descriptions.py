@@ -12,7 +12,8 @@ import sys
 def lint_extra_descriptions(public_directory):
     '''Lint public/extra_descriptions'''
 
-    pattern = re.compile(r'<\s*/?\s*(html|body)', re.I)
+    html_pattern = re.compile(r'<\s*/?\s*(html|body)', re.I)
+    data_image_pattern = re.compile(r'data:image/', re.I)
 
     with open(f"{public_directory}/groups.json", encoding='utf-8') as groups_json_file:
         groups_json = json.load(groups_json_file)
@@ -22,12 +23,23 @@ def lint_extra_descriptions(public_directory):
                 for file in category['files']:
                     if 'extra_description_path' in file:
                         path = f"{public_directory}/{file['extra_description_path']}"
-                        if pattern.search(pathlib.Path(path).read_text("utf-8", "ignore")):
+                        html = pathlib.Path(path).read_text("utf-8", "ignore")
+                        if html_pattern.search(html):
                             print('')
                             print('----------------------------------------')
                             print('ERROR:')
                             print(
                                 f"Do not include <html> or <body> in {file['extra_description_path']}")
+                            print('----------------------------------------')
+                            print('')
+                            sys.exit(1)
+
+                        if data_image_pattern.search(html):
+                            print('')
+                            print('----------------------------------------')
+                            print('ERROR:')
+                            print(
+                                f"Do not include data:image/* in {file['extra_description_path']}")
                             print('----------------------------------------')
                             print('')
                             sys.exit(1)
