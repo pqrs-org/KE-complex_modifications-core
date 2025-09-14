@@ -7,13 +7,18 @@ import {
   AccordionSummaryProps,
   Box,
   Chip,
-  Divider,
-  Grid,
   Link,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
   Typography,
   styled,
 } from "@mui/material";
-import { ArrowForwardIosSharp as ArrowForwardIosSharpIcon } from "@mui/icons-material";
+import {
+  ArrowForwardIosSharp as ArrowForwardIosSharpIcon,
+  Star as StarIcon,
+} from "@mui/icons-material";
 import { LocationHashContext } from "../contexts";
 import { Category } from "../models";
 import { ImportButton } from "./ImportButton";
@@ -126,28 +131,23 @@ export const CategoryBox = ({ category }: { category: Category }) => {
                 <ImportButton jsonFile={f} />
               </Box>
             </CategoryBoxAccordionSummary>
-            <AccordionDetails>
-              {f.object.json?.rules?.map((r, i) => (
-                <Box key={`${f.id}-rules-${i}`}>
-                  <Grid
-                    container
-                    direction="row"
-                    alignItems="center"
-                    sx={{ px: 2, my: 1 }}
-                  >
-                    <Box>{r.description}</Box>
-                    <Box sx={{ ml: "auto" }}>
-                      {r.available_since && (
-                        <Chip
-                          label={`Karabiner-Elements ${r.available_since} or later`}
-                          variant="outlined"
-                        />
-                      )}
-                    </Box>
-                  </Grid>
-                  <Divider />
-                </Box>
-              ))}
+            <AccordionDetails sx={{ pt: 0 }}>
+              <List sx={{ px: 2 }} disablePadding>
+                {f.object.json?.rules?.map((r, i) => (
+                  <ListItem key={`${f.id}-rules-${i}`} disablePadding>
+                    <ListItemIcon sx={{ minWidth: 0, mr: 0.5 }}>
+                      <StarIcon sx={{ color }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={r.description}
+                      secondary={
+                        r.available_since &&
+                        `Karabiner-Elements ${r.available_since} or later`
+                      }
+                    />
+                  </ListItem>
+                ))}
+              </List>
               {f.object.extra_description_path && (
                 <Box
                   sx={{
