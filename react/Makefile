@@ -1,21 +1,21 @@
 dev:
 	make -C .. update-dist
-	npm run dev
+	pnpm run dev
 
 build:
 	rm -fr dist
-	npm run build
+	pnpm run build
 	mkdir -p dist/vendor
 	cp node_modules/bootstrap/dist/css/bootstrap.min.css dist/vendor
 
 install:
-	npm ci
+	pnpm install
 
 update:
-	npm update
+	pnpm update
 
 audit:
-	npm audit
+	pnpm audit
 
 format:
-	npm run format
+	pnpm run format
