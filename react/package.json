@@ -26,8 +26,10 @@
     "vite": "^7.1.5",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "overrides": {
-    "prismjs": ">=1.30.0"
+  "pnpm": {
+    "overrides": {
+      "prismjs": ">=1.30.0"
+    }
   },
   "type": "module",
   "scripts": {
