@@ -9,7 +9,7 @@ build:
 	cp node_modules/bootstrap/dist/css/bootstrap.min.css dist/vendor
 
 install:
-	pnpm install
+	pnpm install --frozen-lockfile
 
 update:
 	pnpm update
