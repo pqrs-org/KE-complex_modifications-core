@@ -5,25 +5,33 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.4",
-    "@mui/material": "^7.3.4",
+    "@mui/icons-material": "^7.3.7",
+    "@mui/material": "^7.3.7",
     "js-base64": "^3.7.8",
     "lunr": "^2.3.9",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "react-syntax-highlighter": "^15.6.6"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/lunr": "^2.3.7",
-    "@types/node": "^24.9.1",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "@vitejs/plugin-react": "^5.1.0",
+    "@types/node": "^24.10.9",
+    "@types/react": "^19.2.9",
+    "@types/react-dom": "^19.2.3",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vitejs/plugin-react": "^5.1.2",
     "bootstrap": "^5.3.8",
-    "prettier": "^3.6.2",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "globals": "^15.15.0",
+    "prettier": "^3.8.0",
     "sirv": "^3.0.2",
     "typescript": "^5.9.3",
-    "vite": "^7.1.12",
+    "vite": "^7.3.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "pnpm": {
@@ -36,6 +44,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "prettier --write 'src/**/*.{ts,tsx}'"
+    "format": "prettier --write 'src/**/*.{ts,tsx}'",
+    "lint": "eslint 'src/**/*.{ts,tsx}'"
   }
 }

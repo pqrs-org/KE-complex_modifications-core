@@ -19,3 +19,6 @@ audit:
 
 format:
 	pnpm run format
+
+lint:
+	pnpm run lint
