@@ -2,7 +2,7 @@ import React, { createContext, useState } from "react";
 
 export const SearchQueryContext = createContext({
   query: "",
-  setQuery: (_: React.SetStateAction<string>) => {},
+  setQuery: () => {},
 });
 
 export const SearchQueryContextProvider = (props: {

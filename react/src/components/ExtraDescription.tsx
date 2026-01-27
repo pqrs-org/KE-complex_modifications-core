@@ -68,7 +68,7 @@ export const ExtraDescription = ({ src }: Props) => {
     return () => {
       canceled = true;
     };
-  }, []);
+  }, [src]);
 
   if (err) {
     return <Box role="alert">Failed to load {src}</Box>;

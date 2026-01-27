@@ -28,7 +28,7 @@ const color = "#28A745";
 
 const CategoryBoxAccordion = styled((props: AccordionProps) => (
   <Accordion disableGutters elevation={0} square {...props} />
-))(({ theme }) => ({
+))(() => ({
   border: `1px solid ${color}`,
   "&:not(:last-child)": {
     borderBottom: 0,

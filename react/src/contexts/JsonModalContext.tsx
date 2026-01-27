@@ -6,8 +6,8 @@ export const JsonModalContext = createContext({
   fetching: false,
   jsonString: "",
 
-  setOpen: (_open: React.SetStateAction<boolean>) => {},
-  openModal: async (_title: string, _jsonString: string) => {},
+  setOpen: () => {},
+  openModal: async () => {},
 });
 
 export const JsonModalContextProvider = (props: {

@@ -261,8 +261,8 @@ const App = () => {
             <Alert variant="outlined" severity="warning" icon={false}>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <InfoOutlinedIcon sx={{ mr: 1 }} />
-                Rules are filtered by "
-                <strong>{locationHashContext.hash}</strong>".
+                Rules are filtered by &quot;
+                <strong>{locationHashContext.hash}</strong>&quot;.
                 <Button
                   variant="contained"
                   component={Link}

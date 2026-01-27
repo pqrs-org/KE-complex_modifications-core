@@ -2,7 +2,7 @@ import React, { createContext, useState } from "react";
 
 export const SnackbarContext = createContext({
   text: "",
-  setText: (_: React.SetStateAction<string>) => {},
+  setText: () => {},
 });
 
 export const SnackbarContextProvider = (props: {
