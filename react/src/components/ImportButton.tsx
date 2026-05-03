@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Button,
   ButtonGroup,
@@ -30,17 +30,16 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
   //
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const anchorRef = useRef<HTMLDivElement>(null);
+  const [anchorElement, setAnchorElement] = useState<HTMLDivElement | null>(
+    null,
+  );
 
   const handleMenuToggle = () => {
     setMenuOpen((prevOpen) => !prevOpen);
   };
 
   const handleMenuClose = (event: Event) => {
-    if (
-      anchorRef.current &&
-      anchorRef.current.contains(event.target as HTMLElement)
-    ) {
+    if (anchorElement?.contains(event.target as HTMLElement)) {
       return;
     }
 
@@ -78,7 +77,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
 
   return (
     <>
-      <ButtonGroup variant="contained" ref={anchorRef}>
+      <ButtonGroup variant="contained" ref={setAnchorElement}>
         <Button
           size="small"
           sx={{ textTransform: "none" }}
@@ -103,7 +102,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
 
       <Popper
         open={menuOpen}
-        anchorEl={anchorRef.current}
+        anchorEl={anchorElement}
         transition
         style={{ zIndex: 910 }}
       >
