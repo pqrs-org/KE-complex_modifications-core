@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   AppBar,
@@ -30,20 +30,18 @@ const App = () => {
   const locationHashContext = useContext(LocationHashContext);
   const searchQueryContext = useContext(SearchQueryContext);
 
-  const [fetching, setFetching] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
-  const [lunrIndex, setLunrIndex] = useState<lunr.Index>();
-  const [categories, setCategories] = useState<Category[]>([]);
   const [revision, setRevision] = useState("");
   const [updatedAt, setUpdatedAt] = useState(0);
+  const searchQuery = searchQueryContext.query;
+  const hasSearchQuery = searchQuery !== "";
 
   //
   // Fetch dist.json
   //
 
   useEffect(() => {
-    setFetching(true);
-
     fetch("dist.json")
       .then((res) => res.json())
       .then(
@@ -76,74 +74,66 @@ const App = () => {
   // Update lunrIndex
   //
 
-  useEffect(() => {
-    // Skip if lunrIndex is already built.
-    if (lunrIndex !== undefined) {
-      return;
-    }
-
+  const lunrIndex = useMemo(() => {
     // Skip if allCategories is not initialized.
     if (allCategories.length === 0) {
-      return;
+      return undefined;
     }
 
     // Skip if search query is empty.
-    if (searchQueryContext.query === "") {
-      return;
+    if (!hasSearchQuery) {
+      return undefined;
     }
 
-    setLunrIndex(
-      lunr((l) => {
-        l.ref("fileId");
-        l.field("title", { boost: 2 });
-        l.field("text");
+    return lunr((l) => {
+      l.ref("fileId");
+      l.field("title", { boost: 2 });
+      l.field("text");
 
-        allCategories.forEach((c) => {
-          c.files.forEach((f) => {
-            let text = "";
-            if (f.object.json?.maintainers !== undefined) {
-              f.object.json?.maintainers.forEach((m) => {
-                text = `${text} ${m ?? ""}`;
-              });
-            }
-            f.object.json?.rules?.forEach((r) => {
-              text = `${text} ${r.description ?? ""}`;
+      allCategories.forEach((c) => {
+        c.files.forEach((f) => {
+          let text = "";
+          if (f.object.json?.maintainers !== undefined) {
+            f.object.json?.maintainers.forEach((m) => {
+              text = `${text} ${m ?? ""}`;
             });
-            text = `${text} ${f.object.extra_description_text ?? ""}`;
-
-            let boost = 1;
-            if (f.object.json?.maintainers || f.object.json?.author) {
-              boost *= 2;
-            }
-
-            l.add(
-              {
-                fileId: f.id,
-                title: f.object.json?.title ?? "",
-                text: text.toLowerCase(),
-              },
-              {
-                boost,
-              },
-            );
+          }
+          f.object.json?.rules?.forEach((r) => {
+            text = `${text} ${r.description ?? ""}`;
           });
+          text = `${text} ${f.object.extra_description_text ?? ""}`;
+
+          let boost = 1;
+          if (f.object.json?.maintainers || f.object.json?.author) {
+            boost *= 2;
+          }
+
+          l.add(
+            {
+              fileId: f.id,
+              title: f.object.json?.title ?? "",
+              text: text.toLowerCase(),
+            },
+            {
+              boost,
+            },
+          );
         });
-      }),
-    );
-  }, [searchQueryContext.query, allCategories, lunrIndex]);
+      });
+    });
+  }, [allCategories, hasSearchQuery]);
 
   //
   // Update categories
   //
 
-  useEffect(() => {
+  const categories = useMemo(() => {
     if (allCategories.length === 0) {
-      return;
+      return [];
     }
 
-    if (searchQueryContext.query === "") {
-      setCategories(allCategories);
-      return;
+    if (searchQuery === "") {
+      return allCategories;
     }
 
     //
@@ -151,52 +141,49 @@ const App = () => {
     //
 
     if (lunrIndex === undefined) {
-      setCategories([]);
-    } else {
-      const filteredCategories: Category[] = [
-        {
-          object: {
-            id: "__search_result__",
-            name: "Search Result",
-          },
-          files: [] as KarabinerJsonFile[],
+      return [];
+    }
+
+    const filteredCategories: Category[] = [
+      {
+        object: {
+          id: "__search_result__",
+          name: "Search Result",
         },
-      ];
+        files: [] as KarabinerJsonFile[],
+      },
+    ];
 
-      const results = lunrIndex.query((q) => {
-        lunr
-          .tokenizer(searchQueryContext.query.toLowerCase())
-          .forEach((token) => {
-            const queryString = token.toString();
-            q.term(queryString, {
-              boost: 100,
-            });
-            q.term(queryString, {
-              wildcard:
-                lunr.Query.wildcard.LEADING | lunr.Query.wildcard.TRAILING,
-              boost: 10,
-            });
-            q.term(queryString, {
-              editDistance: 2,
-            });
-          });
-      });
-
-      results.forEach((r) => {
-        const fileId = r.ref;
-
-        allCategories.forEach((c) => {
-          c.files.forEach((f) => {
-            if (f.id === fileId) {
-              filteredCategories[0].files.push(f);
-            }
-          });
+    const results = lunrIndex.query((q) => {
+      lunr.tokenizer(searchQuery.toLowerCase()).forEach((token) => {
+        const queryString = token.toString();
+        q.term(queryString, {
+          boost: 100,
+        });
+        q.term(queryString, {
+          wildcard: lunr.Query.wildcard.LEADING | lunr.Query.wildcard.TRAILING,
+          boost: 10,
+        });
+        q.term(queryString, {
+          editDistance: 2,
         });
       });
+    });
 
-      setCategories(filteredCategories);
-    }
-  }, [searchQueryContext.query, allCategories, lunrIndex]);
+    results.forEach((r) => {
+      const fileId = r.ref;
+
+      allCategories.forEach((c) => {
+        c.files.forEach((f) => {
+          if (f.id === fileId) {
+            filteredCategories[0].files.push(f);
+          }
+        });
+      });
+    });
+
+    return filteredCategories;
+  }, [searchQuery, allCategories, lunrIndex]);
 
   return (
     <React.Fragment>
