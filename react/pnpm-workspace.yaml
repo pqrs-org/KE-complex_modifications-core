@@ -1,3 +1,5 @@
+allowBuilds:
+  esbuild: false
 minimumReleaseAge: 10080
 overrides:
   prismjs: ">=1.30.0"
