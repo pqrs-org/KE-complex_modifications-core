@@ -1,16 +1,38 @@
-import React, { createContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 
-export const SearchQueryContext = createContext({
-  query: "",
-  setQuery: () => {},
-});
+type SearchQueryContextValue = {
+  query: string;
+  setQuery: Dispatch<SetStateAction<string>>;
+};
 
-export const SearchQueryContextProvider = (props: {
-  children: React.ReactNode;
+const SearchQueryContext = createContext<SearchQueryContextValue | undefined>(
+  undefined,
+);
+
+const getSearchQuery = () =>
+  new URLSearchParams(window.location.search).get("q") ?? "";
+
+export const SearchQueryContextProvider = ({
+  children,
+}: {
+  children: ReactNode;
 }) => {
-  const [query, setQuery] = useState(
-    new URLSearchParams(window.location.search).get("q") ?? "",
-  );
+  const [query, setQuery] = useState(getSearchQuery);
+
+  useEffect(() => {
+    const handlePopState = () => setQuery(getSearchQuery());
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   return (
     <SearchQueryContext.Provider
       value={{
@@ -18,7 +40,17 @@ export const SearchQueryContextProvider = (props: {
         setQuery,
       }}
     >
-      {props.children}
+      {children}
     </SearchQueryContext.Provider>
   );
+};
+
+export const useSearchQuery = () => {
+  const context = useContext(SearchQueryContext);
+  if (context === undefined) {
+    throw new Error(
+      "useSearchQuery must be used within SearchQueryContextProvider",
+    );
+  }
+  return context;
 };
