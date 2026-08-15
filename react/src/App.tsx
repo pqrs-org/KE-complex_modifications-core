@@ -16,7 +16,7 @@ import {
 } from "@mui/icons-material";
 import lunr from "lunr";
 import { useLocationHash, useSearchQuery } from "./contexts";
-import { Category, KarabinerJsonFile } from "./models";
+import { Category } from "./models";
 import { isDistResult } from "./utils/distResult";
 import {
   CategoryBox,
@@ -103,26 +103,27 @@ const App = () => {
 
       allCategories.forEach((c) => {
         c.files.forEach((f) => {
+          const { json } = f.object;
           let text = "";
-          if (f.object.json?.maintainers !== undefined) {
-            f.object.json?.maintainers.forEach((m) => {
+          if (json.maintainers !== undefined) {
+            json.maintainers.forEach((m) => {
               text = `${text} ${m ?? ""}`;
             });
           }
-          f.object.json?.rules?.forEach((r) => {
+          json.rules?.forEach((r) => {
             text = `${text} ${r.description ?? ""}`;
           });
           text = `${text} ${f.object.extra_description_text ?? ""}`;
 
           let boost = 1;
-          if (f.object.json?.maintainers || f.object.json?.author) {
+          if (json.maintainers || json.author) {
             boost *= 2;
           }
 
           l.add(
             {
               fileId: f.id,
-              title: f.object.json?.title ?? "",
+              title: json.title ?? "",
               text: text.toLowerCase(),
             },
             {
@@ -155,14 +156,12 @@ const App = () => {
       return [];
     }
 
-    const filteredCategories: Category[] = [
-      {
-        object: {
-          id: "__search_result__",
-          name: "Search Result",
-        },
-        files: [] as KarabinerJsonFile[],
-      },
+    const filteredCategories = [
+      new Category({
+        id: "__search_result__",
+        name: "Search Result",
+        files: [],
+      }),
     ];
 
     const results = lunrIndex.query((q) => {

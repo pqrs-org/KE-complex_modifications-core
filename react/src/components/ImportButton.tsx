@@ -206,7 +206,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                     onClick={(event) => {
                       event.stopPropagation();
                       void jsonModal.openModal(
-                        jsonFile.object.json?.title ?? "",
+                        jsonFile.object.json.title ?? "",
                         jsonFile.jsonUrl,
                       );
                       closeMenu(true);

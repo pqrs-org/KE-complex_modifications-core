@@ -126,10 +126,20 @@ export const CategoryBox = ({ category }: { category: Category }) => {
           }
         }
 
+        const elementIdPrefix = [category.object.id, f.id]
+          .map(encodeURIComponent)
+          .join("-");
+        const summaryId = `${elementIdPrefix}-summary`;
+        const regionId = `${elementIdPrefix}-details`;
+
         return (
           <CategoryBoxAccordion
             id={f.id}
-            slotProps={{ transition: { unmountOnExit: true } }}
+            slotProps={{
+              heading: { component: "div" },
+              region: { id: regionId, "aria-labelledby": summaryId },
+              transition: { unmountOnExit: true },
+            }}
             key={f.id}
           >
             <Box
@@ -141,9 +151,11 @@ export const CategoryBox = ({ category }: { category: Category }) => {
               }}
             >
               <CategoryBoxAccordionSummary
+                id={summaryId}
+                aria-controls={regionId}
                 sx={{ flex: "1 1 20rem", minWidth: 0 }}
               >
-                {f.object.json?.title}
+                {f.object.json.title}
               </CategoryBoxAccordionSummary>
 
               <Box
@@ -156,15 +168,15 @@ export const CategoryBox = ({ category }: { category: Category }) => {
                   py: 1,
                 }}
               >
-                {f.object.json?.author && (
+                {f.object.json.author && (
                   <Chip
                     label={`Author: ${f.object.json.author}`}
                     variant="outlined"
                     sx={{ marginRight: 2 }}
                   />
                 )}
-                {f.object.json?.maintainers &&
-                  f.object.json?.maintainers.map((m) => (
+                {f.object.json.maintainers &&
+                  f.object.json.maintainers.map((m) => (
                     <Chip
                       label={
                         <>
@@ -190,7 +202,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
             <AccordionDetails sx={{ pt: 0 }}>
               <GroupBox label="Rules">
                 <List disablePadding>
-                  {f.object.json?.rules?.map((r, i) => (
+                  {f.object.json.rules?.map((r, i) => (
                     <ListItem key={`${f.id}-rules-${i}`} disablePadding>
                       <ListItemIcon sx={{ minWidth: 0, mr: 0.5 }}>
                         <StarIcon sx={{ color }} />
