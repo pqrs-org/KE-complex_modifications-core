@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Chip, Divider, Grid, Link } from "@mui/material";
 import { Category } from "../models";
 
