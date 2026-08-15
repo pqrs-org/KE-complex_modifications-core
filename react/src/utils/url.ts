@@ -8,3 +8,6 @@ export const toAbsoluteUrl = (
     return href;
   }
 };
+
+export const toKarabinerImportUrl = (jsonUrl: string): string =>
+  `karabiner://karabiner/assets/complex_modifications/import?url=${encodeURIComponent(toAbsoluteUrl(jsonUrl))}`;
