@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   Button,
   ButtonGroup,
@@ -24,6 +24,7 @@ import { Base64 } from "js-base64";
 export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
   const jsonModal = useJsonModal();
   const { setText: setSnackbarText } = useSnackbar();
+  const menuId = useId();
 
   //
   // Menu
@@ -109,6 +110,9 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
         <Button
           size="small"
           aria-label="Open import menu"
+          aria-controls={menuOpen ? menuId : undefined}
+          aria-expanded={menuOpen}
+          aria-haspopup="menu"
           onClick={(event) => {
             event.stopPropagation();
             handleMenuToggle();
@@ -134,7 +138,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
           >
             <Paper>
               <ClickAwayListener onClickAway={handleMenuClose}>
-                <MenuList id="split-button-menu">
+                <MenuList id={menuId}>
                   <MenuItem
                     onClick={(event) => {
                       event.stopPropagation();

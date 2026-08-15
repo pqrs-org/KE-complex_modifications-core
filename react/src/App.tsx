@@ -17,7 +17,7 @@ import {
 import lunr from "lunr";
 import { useLocationHash, useSearchQuery } from "./contexts";
 import { Category, KarabinerJsonFile } from "./models";
-import { CategoryObject } from "./types";
+import { isDistResult } from "./utils/distResult";
 import {
   CategoryBox,
   JsonModal,
@@ -25,13 +25,6 @@ import {
   SearchInput,
   Snackbar,
 } from "./components";
-
-type DistResult = {
-  index: CategoryObject[];
-  example: CategoryObject[];
-  revision: string;
-  updatedAt: number;
-};
 
 const App = () => {
   const { hash } = useLocationHash();
@@ -62,7 +55,10 @@ const App = () => {
           );
         }
 
-        const result = (await response.json()) as DistResult;
+        const result: unknown = await response.json();
+        if (!isDistResult(result)) {
+          throw new Error("dist.json has an invalid structure");
+        }
         setAllCategories(
           result.index
             .map((category) => new Category(category))
