@@ -26,8 +26,20 @@ import { ExtraDescription } from "./ExtraDescription";
 
 const color = "#28A745";
 
-const CategoryBoxAccordion = styled((props: AccordionProps) => (
-  <Accordion disableGutters elevation={0} square {...props} />
+const CategoryBoxAccordion = styled(({ slots, ...props }: AccordionProps) => (
+  <Accordion
+    disableGutters
+    elevation={0}
+    square
+    slots={{
+      ...slots,
+      // MUI wraps the first Accordion child in an h3 by default. The first
+      // child here is the whole header row, including file actions, so use
+      // a div to keep those actions out of a heading.
+      heading: "div",
+    }}
+    {...props}
+  />
 ))(() => ({
   border: `1px solid ${color}`,
   "&:not(:last-child)": {
@@ -40,7 +52,6 @@ const CategoryBoxAccordion = styled((props: AccordionProps) => (
 
 const CategoryBoxAccordionSummary = styled((props: AccordionSummaryProps) => (
   <AccordionSummary
-    component="div"
     expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: "0.9rem" }} />}
     {...props}
   />
@@ -136,7 +147,6 @@ export const CategoryBox = ({ category }: { category: Category }) => {
           <CategoryBoxAccordion
             id={f.id}
             slotProps={{
-              heading: { component: "div" },
               region: { id: regionId, "aria-labelledby": summaryId },
               transition: { unmountOnExit: true },
             }}
