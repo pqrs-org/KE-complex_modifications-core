@@ -1,4 +1,4 @@
-import React from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { CssBaseline } from "@mui/material";
 import App from "./App";
@@ -14,7 +14,7 @@ if (!container) throw new Error("#root not found");
 
 const root = createRoot(container);
 root.render(
-  <React.StrictMode>
+  <StrictMode>
     <JsonModalContextProvider>
       <LocationHashContextProvider>
         <SearchQueryContextProvider>
@@ -25,5 +25,5 @@ root.render(
         </SearchQueryContextProvider>
       </LocationHashContextProvider>
     </JsonModalContextProvider>
-  </React.StrictMode>,
+  </StrictMode>,
 );
