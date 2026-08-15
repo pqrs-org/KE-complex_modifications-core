@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   AppBar,
@@ -15,7 +15,7 @@ import {
   OpenInNew as OpenInNewIcon,
 } from "@mui/icons-material";
 import lunr from "lunr";
-import { LocationHashContext, SearchQueryContext } from "./contexts";
+import { useLocationHash, useSearchQuery } from "./contexts";
 import { Category, KarabinerJsonFile } from "./models";
 import { CategoryObject } from "./types";
 import {
@@ -26,15 +26,22 @@ import {
   Snackbar,
 } from "./components";
 
+type DistResult = {
+  index: CategoryObject[];
+  example: CategoryObject[];
+  revision: string;
+  updatedAt: number;
+};
+
 const App = () => {
-  const locationHashContext = useContext(LocationHashContext);
-  const searchQueryContext = useContext(SearchQueryContext);
+  const { hash } = useLocationHash();
+  const { query: searchQuery } = useSearchQuery();
 
   const [fetching, setFetching] = useState(true);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [revision, setRevision] = useState("");
   const [updatedAt, setUpdatedAt] = useState(0);
-  const searchQuery = searchQueryContext.query;
+  const [fetchError, setFetchError] = useState("");
   const hasSearchQuery = searchQuery !== "";
 
   //
@@ -42,32 +49,40 @@ const App = () => {
   //
 
   useEffect(() => {
-    fetch("dist.json")
-      .then((res) => res.json())
-      .then(
-        (result: {
-          index: CategoryObject[];
-          example: CategoryObject[];
-          revision: string;
-          updatedAt: number;
-        }) => {
-          setAllCategories(
-            [
-              result.index.map((c) => new Category(c)),
-              result.example.map((c) => new Category(c)),
-            ].flat(),
-          );
+    const controller = new AbortController();
 
-          setRevision(result.revision);
-          setUpdatedAt(result.updatedAt);
-        },
-        (error) => {
-          console.log(error);
-        },
-      )
-      .then(() => {
-        setFetching(false);
-      });
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("dist.json", {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(
+            `Fetch failed: ${response.status} ${response.statusText}`,
+          );
+        }
+
+        const result = (await response.json()) as DistResult;
+        setAllCategories(
+          result.index
+            .map((category) => new Category(category))
+            .concat(result.example.map((category) => new Category(category))),
+        );
+        setRevision(result.revision);
+        setUpdatedAt(result.updatedAt);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error(error);
+        setFetchError("Failed to load rules. Please reload the page.");
+      } finally {
+        if (!controller.signal.aborted) {
+          setFetching(false);
+        }
+      }
+    };
+
+    void fetchCategories();
+    return () => controller.abort();
   }, []);
 
   //
@@ -186,10 +201,10 @@ const App = () => {
   }, [searchQuery, allCategories, lunrIndex]);
 
   return (
-    <React.Fragment>
+    <Fragment>
       <AppBar position="static">
         <Toolbar>
-          <Link href={`./`} color="inherit" underline="none">
+          <Link href="./" color="inherit" underline="none">
             <Typography sx={{ fontWeight: "bold" }}>
               Karabiner-Elements complex_modifications rules
             </Typography>
@@ -223,16 +238,22 @@ const App = () => {
       </AppBar>
 
       <Container>
+        {fetchError !== "" && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {fetchError}
+          </Alert>
+        )}
+
         {/*
          ** Search & Table of Contents
          **/}
-        {locationHashContext.hash === "" && (
+        {hash === "" && (
           <>
             <Box sx={{ mt: 4, textAlign: "center" }}>
-              <SearchInput />
+              <SearchInput key={searchQuery} />
             </Box>
 
-            {searchQueryContext.query === "" && (
+            {searchQuery === "" && (
               <Box sx={{ mt: 4 }}>
                 <TableOfContents categories={categories} />
               </Box>
@@ -243,17 +264,17 @@ const App = () => {
         {/*
          ** Show all button
          **/}
-        {locationHashContext.hash !== "" && (
+        {hash !== "" && (
           <Box sx={{ mt: 2 }}>
             <Alert variant="outlined" severity="warning" icon={false}>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <InfoOutlinedIcon sx={{ mr: 1 }} />
                 Rules are filtered by &quot;
-                <strong>{locationHashContext.hash}</strong>&quot;.
+                <strong>{hash}</strong>&quot;.
                 <Button
                   variant="contained"
                   component={Link}
-                  href={`./`}
+                  href="./"
                   sx={{ ml: 2, textTransform: "none" }}
                 >
                   Show all rules
@@ -267,13 +288,12 @@ const App = () => {
          ** Categories
          **/}
         {categories.map((c) => {
-          if (locationHashContext.hash !== "") {
+          if (hash !== "") {
             if (
               // location.hash is not category id
-              locationHashContext.hash !== c.object.id &&
+              hash !== c.object.id &&
               // location.hash is not file id
-              c.files.find((f) => locationHashContext.hash === f.id) ===
-                undefined
+              c.files.find((f) => hash === f.id) === undefined
             ) {
               return undefined;
             }
@@ -281,7 +301,7 @@ const App = () => {
 
           return (
             <Box sx={{ mt: 4 }} id={c.object.id} key={c.object.id}>
-              <CategoryBox category={c}></CategoryBox>
+              <CategoryBox category={c} />
             </Box>
           );
         })}
@@ -289,7 +309,7 @@ const App = () => {
 
       <JsonModal />
       <Snackbar />
-    </React.Fragment>
+    </Fragment>
   );
 };
 
