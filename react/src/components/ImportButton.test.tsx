@@ -15,18 +15,22 @@ import { ImportButton } from "./ImportButton";
 
 const renderImportButton = () =>
   render(
-    <JsonModalContextProvider>
-      <SnackbarContextProvider>
-        <ImportButton
-          jsonFile={
-            new KarabinerJsonFile({
-              path: "json/example.json",
-              json: { title: "Example" },
-            })
-          }
-        />
-      </SnackbarContextProvider>
-    </JsonModalContextProvider>,
+    <>
+      <button>Before import controls</button>
+      <JsonModalContextProvider>
+        <SnackbarContextProvider>
+          <ImportButton
+            jsonFile={
+              new KarabinerJsonFile({
+                path: "json/example.json",
+                json: { title: "Example" },
+              })
+            }
+          />
+        </SnackbarContextProvider>
+      </JsonModalContextProvider>
+      <button>After import controls</button>
+    </>,
   );
 
 afterEach(cleanup);
@@ -47,4 +51,25 @@ describe("ImportButton", () => {
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
     await waitFor(() => expect(document.activeElement).toBe(menuButton));
   });
+
+  it.each([
+    [false, "After import controls"],
+    [true, "Import"],
+  ])(
+    "closes the menu and moves focus when Tab is pressed (shift: %s)",
+    async (shiftKey, expectedButtonName) => {
+      renderImportButton();
+      fireEvent.click(screen.getByRole("button", { name: "Open import menu" }));
+      const menu = await screen.findByRole("menu");
+
+      fireEvent.keyDown(menu, { key: "Tab", shiftKey });
+
+      await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+      await waitFor(() =>
+        expect(document.activeElement).toBe(
+          screen.getByRole("button", { name: expectedButtonName }),
+        ),
+      );
+    },
+  );
 });

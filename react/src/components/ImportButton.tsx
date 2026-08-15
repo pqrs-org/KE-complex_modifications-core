@@ -48,6 +48,30 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
     }
   };
 
+  const moveFocusOutsideMenu = (backwards: boolean) => {
+    const menuButton = menuButtonRef.current;
+    if (menuButton === null) return;
+
+    const focusableElements = Array.from(
+      menuButton.ownerDocument.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter(
+      (element) =>
+        element.tabIndex >= 0 &&
+        !element.closest(
+          '[hidden], [aria-hidden="true"], [inert], [role="menu"]',
+        ),
+    );
+    const currentIndex = focusableElements.indexOf(menuButton);
+    if (currentIndex === -1 || focusableElements.length < 2) return;
+
+    const nextIndex = backwards
+      ? (currentIndex - 1 + focusableElements.length) % focusableElements.length
+      : (currentIndex + 1) % focusableElements.length;
+    requestAnimationFrame(() => focusableElements[nextIndex]?.focus());
+  };
+
   const handleMenuToggle = () => {
     setMenuOpen((prevOpen) => !prevOpen);
   };
@@ -63,7 +87,8 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
   const handleMenuKeyDown = (event: ReactKeyboardEvent) => {
     if (event.key === "Tab") {
       event.preventDefault();
-      closeMenu(true);
+      closeMenu();
+      moveFocusOutsideMenu(event.shiftKey);
     } else if (event.key === "Escape") {
       closeMenu(true);
     }
