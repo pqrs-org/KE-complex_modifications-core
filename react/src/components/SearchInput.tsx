@@ -1,15 +1,15 @@
-import React, { useContext, useState } from "react";
+import { useState } from "react";
 import { Box, FormControl, InputAdornment, OutlinedInput } from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
-import { SearchQueryContext } from "../contexts";
+import { useSearchQuery } from "../contexts";
 
 export const SearchInput = () => {
-  const searchQueryContext = useContext(SearchQueryContext);
-  const [value, setValue] = useState(searchQueryContext.query);
+  const { query, setQuery } = useSearchQuery();
+  const [value, setValue] = useState(query);
 
   const submit = () => {
-    if (searchQueryContext.query !== value) {
-      searchQueryContext.setQuery(value);
+    if (query !== value) {
+      setQuery(value);
 
       window.history.pushState(
         { q: value },
@@ -21,7 +21,7 @@ export const SearchInput = () => {
 
   return (
     <Box>
-      <FormControl sx={{ width: "50ch" }} variant="outlined">
+      <FormControl sx={{ width: "100%", maxWidth: "50ch" }} variant="outlined">
         <OutlinedInput
           value={value}
           placeholder="Search..."
@@ -33,7 +33,7 @@ export const SearchInput = () => {
           onChange={(event) => {
             setValue(event.target.value);
           }}
-          onKeyPress={(e) => {
+          onKeyDown={(e) => {
             if (e.key === "Enter") {
               submit();
             }
