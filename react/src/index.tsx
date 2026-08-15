@@ -4,7 +4,6 @@ import { CssBaseline } from "@mui/material";
 import App from "./App";
 import {
   JsonModalContextProvider,
-  LocationHashContextProvider,
   SearchQueryContextProvider,
   SnackbarContextProvider,
 } from "./contexts";
@@ -16,14 +15,12 @@ const root = createRoot(container);
 root.render(
   <StrictMode>
     <JsonModalContextProvider>
-      <LocationHashContextProvider>
-        <SearchQueryContextProvider>
-          <SnackbarContextProvider>
-            <CssBaseline />
-            <App />
-          </SnackbarContextProvider>
-        </SearchQueryContextProvider>
-      </LocationHashContextProvider>
+      <SearchQueryContextProvider>
+        <SnackbarContextProvider>
+          <CssBaseline />
+          <App />
+        </SnackbarContextProvider>
+      </SearchQueryContextProvider>
     </JsonModalContextProvider>
   </StrictMode>,
 );

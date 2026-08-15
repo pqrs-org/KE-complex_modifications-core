@@ -12,9 +12,13 @@ import {
 } from "@mui/material";
 import { OpenInNew as OpenInNewIcon } from "@mui/icons-material";
 import lunr from "lunr";
-import { useLocationHash, useSearchQuery } from "./contexts";
+import { useSearchQuery } from "./contexts";
 import { Category } from "./models";
 import { isDistResult } from "./utils/distResult";
+import {
+  clearHashTargetHighlight,
+  highlightLocationHashTarget,
+} from "./utils/hashTarget";
 import {
   CategoryBox,
   JsonModal,
@@ -24,7 +28,6 @@ import {
 } from "./components";
 
 const App = () => {
-  const { hash } = useLocationHash();
   const { query: searchQuery } = useSearchQuery();
   const sharedRulePath = new URLSearchParams(window.location.search).get(
     "rule",
@@ -81,16 +84,26 @@ const App = () => {
     return () => controller.abort();
   }, []);
 
-  // The target elements are rendered after dist.json has loaded, so repeat
-  // fragment navigation once the categories are available.
+  // The initial hash target does not exist until dist.json has loaded. Mark
+  // and scroll to it after rendering, then update the mark directly when the
+  // hash changes so the rule list does not have to re-render.
   useEffect(() => {
-    if (hash === "" || allCategories.length === 0) return;
+    if (allCategories.length === 0) return;
 
-    const frame = requestAnimationFrame(() =>
-      document.getElementById(hash)?.scrollIntoView?.(),
-    );
-    return () => cancelAnimationFrame(frame);
-  }, [hash, allCategories]);
+    const target = highlightLocationHashTarget();
+    const handleHashChange = () => highlightLocationHashTarget();
+    window.addEventListener("hashchange", handleHashChange);
+
+    const frame =
+      target === null
+        ? undefined
+        : requestAnimationFrame(() => target.scrollIntoView?.());
+    return () => {
+      if (frame !== undefined) cancelAnimationFrame(frame);
+      window.removeEventListener("hashchange", handleHashChange);
+      clearHashTargetHighlight();
+    };
+  }, [allCategories]);
 
   //
   // Update lunrIndex
@@ -303,14 +316,13 @@ const App = () => {
             sx={{
               mt: 4,
               scrollMarginTop: 2,
-              '&[data-highlighted="true"]': {
+              '&[data-hash-highlighted="true"]': {
                 "--category-highlight-color": "#3DFC69",
                 "--category-highlight-text-color": "black",
               },
             }}
             id={category.object.id}
             key={category.object.id}
-            data-highlighted={hash === category.object.id}
           >
             <CategoryBox
               category={category}

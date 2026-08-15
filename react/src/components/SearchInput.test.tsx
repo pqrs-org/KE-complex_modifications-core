@@ -40,4 +40,16 @@ describe("SearchInput", () => {
     expect(screen.getByTestId("query").textContent).toBe("example query");
     expect(window.location.search).toBe("?q=example%20query");
   });
+
+  it("removes the query parameter when the search is cleared", () => {
+    window.history.replaceState(null, "", "/?q=example#category");
+    renderSearchInput();
+    const input = screen.getByRole("textbox", { name: "Search rules" });
+    fireEvent.change(input, { target: { value: "" } });
+
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(screen.getByTestId("query").textContent).toBe("");
+    expect(window.location.href).toBe("http://localhost:3000/");
+  });
 });

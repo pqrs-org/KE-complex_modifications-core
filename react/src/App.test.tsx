@@ -11,7 +11,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 import {
   JsonModalContextProvider,
-  LocationHashContextProvider,
   SearchQueryContextProvider,
   SnackbarContextProvider,
 } from "./contexts";
@@ -19,13 +18,11 @@ import {
 const renderApp = () =>
   render(
     <JsonModalContextProvider>
-      <LocationHashContextProvider>
-        <SearchQueryContextProvider>
-          <SnackbarContextProvider>
-            <App />
-          </SnackbarContextProvider>
-        </SearchQueryContextProvider>
-      </LocationHashContextProvider>
+      <SearchQueryContextProvider>
+        <SnackbarContextProvider>
+          <App />
+        </SnackbarContextProvider>
+      </SearchQueryContextProvider>
     </JsonModalContextProvider>,
   );
 
@@ -252,25 +249,29 @@ describe("App", () => {
     expect(
       document
         .getElementById("Examples: Others")
-        ?.getAttribute("data-highlighted"),
+        ?.getAttribute("data-hash-highlighted"),
     ).toBe("true");
     expect(
       document
         .getElementById("Other category")
-        ?.getAttribute("data-highlighted"),
-    ).toBe("false");
+        ?.getAttribute("data-hash-highlighted"),
+    ).toBeNull();
 
-    fireEvent.click(screen.getByRole("link", { name: "Other category" }));
+    const link = screen.getByRole("link", { name: "Other category" });
+    link.addEventListener("click", (event) => event.preventDefault(), {
+      once: true,
+    });
+    fireEvent.click(link);
 
     expect(
       document
         .getElementById("Examples: Others")
-        ?.getAttribute("data-highlighted"),
-    ).toBe("false");
+        ?.getAttribute("data-hash-highlighted"),
+    ).toBeNull();
     expect(
       document
         .getElementById("Other category")
-        ?.getAttribute("data-highlighted"),
+        ?.getAttribute("data-hash-highlighted"),
     ).toBe("true");
   });
 });

@@ -1,9 +1,8 @@
 import { Box, Chip, Divider, Grid, Link } from "@mui/material";
-import { useLocationHash } from "../contexts";
 import { Category } from "../models";
+import { highlightElementById } from "../utils/hashTarget";
 
 export const TableOfContents = ({ categories }: { categories: Category[] }) => {
-  const { setHash } = useLocationHash();
   const color = "black";
 
   return (
@@ -32,7 +31,7 @@ export const TableOfContents = ({ categories }: { categories: Category[] }) => {
               sx={{ px: 2, my: 1 }}
             >
               <Link
-                href={`./#${encodeURIComponent(c.object.id)}`}
+                href={`#${encodeURIComponent(c.object.id)}`}
                 onClick={(event) => {
                   if (
                     event.button === 0 &&
@@ -41,7 +40,7 @@ export const TableOfContents = ({ categories }: { categories: Category[] }) => {
                     !event.metaKey &&
                     !event.shiftKey
                   ) {
-                    setHash(c.object.id);
+                    highlightElementById(c.object.id);
                   }
                 }}
               >
