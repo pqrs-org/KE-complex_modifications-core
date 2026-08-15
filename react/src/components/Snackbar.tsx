@@ -1,22 +1,21 @@
-import React, { useContext } from "react";
 import { Snackbar as MuiSnackbar } from "@mui/material";
-import { SnackbarContext } from "../contexts";
+import { useSnackbar } from "../contexts";
 
 export const Snackbar = () => {
-  const snackbarContext = useContext(SnackbarContext);
+  const { text, setText } = useSnackbar();
 
   return (
     <MuiSnackbar
-      open={snackbarContext.text !== ""}
+      open={text !== ""}
       autoHideDuration={3000}
       onClose={(_event, reason) => {
         if (reason === "clickaway") {
           return;
         }
 
-        snackbarContext.setText("");
+        setText("");
       }}
-      message={snackbarContext.text}
+      message={text}
     />
   );
 };
