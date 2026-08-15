@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { Fragment, Suspense, lazy } from "react";
 import {
   Backdrop,
   Box,
@@ -8,8 +8,9 @@ import {
   Typography,
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { JsonModalContext } from "../contexts";
-import SyntaxHighlighter from "react-syntax-highlighter";
+import { useJsonModal } from "../contexts";
+
+const JsonSyntaxHighlighter = lazy(() => import("./JsonSyntaxHighlighter"));
 
 const style = {
   position: "absolute",
@@ -24,14 +25,14 @@ const style = {
 } as const;
 
 export const JsonModal = () => {
-  const jsonModalContext = useContext(JsonModalContext);
+  const jsonModalContext = useJsonModal();
 
   const handleClose = () => {
     jsonModalContext.setOpen(false);
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={jsonModalContext.fetching}
@@ -57,22 +58,17 @@ export const JsonModal = () => {
             }}
           >
             <Box> {jsonModalContext.title}</Box>
-            <IconButton onClick={handleClose}>
+            <IconButton aria-label="Close JSON viewer" onClick={handleClose}>
               <CloseIcon />
             </IconButton>
           </Typography>
-          <SyntaxHighlighter
-            language="json"
-            customStyle={{
-              minHeight: "100px",
-              maxHeight: "calc(90vh - 40px)",
-              overflow: "auto",
-            }}
-          >
-            {jsonModalContext.jsonString}
-          </SyntaxHighlighter>
+          <Suspense fallback={<CircularProgress />}>
+            <JsonSyntaxHighlighter>
+              {jsonModalContext.jsonString}
+            </JsonSyntaxHighlighter>
+          </Suspense>
         </Box>
       </Modal>
-    </React.Fragment>
+    </Fragment>
   );
 };
