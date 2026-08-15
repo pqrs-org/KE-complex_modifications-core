@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useState } from "react";
 import {
   Button,
   ButtonGroup,
@@ -16,14 +16,14 @@ import {
   ContentCopy as ContentCopyIcon,
   Launch as LaunchIcon,
 } from "@mui/icons-material";
-import { JsonModalContext, SnackbarContext } from "../contexts";
+import { useJsonModal, useSnackbar } from "../contexts";
 import { KarabinerJsonFile } from "../models";
 import { toAbsoluteUrl } from "../utils/url";
 import { Base64 } from "js-base64";
 
 export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
-  const jsonModalContext = useContext(JsonModalContext);
-  const snackbarContext = useContext(SnackbarContext);
+  const jsonModal = useJsonModal();
+  const { setText: setSnackbarText } = useSnackbar();
 
   //
   // Menu
@@ -51,27 +51,44 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
     window.location.href = `karabiner://karabiner/assets/complex_modifications/import?url=${url}`;
   };
 
-  const copyUrl = (url: string) => {
-    url = toAbsoluteUrl(url);
+  const copyUrl = async (url: string) => {
+    const absoluteUrl = toAbsoluteUrl(url);
 
-    if (navigator.clipboard !== undefined) {
-      navigator.clipboard.writeText(url);
-      snackbarContext.setText(`You just copied: ${url}`);
-    } else {
-      snackbarContext.setText(`ERROR: Failed to copy: ${url}`);
+    try {
+      if (navigator.clipboard === undefined) {
+        throw new Error("Clipboard API is not available");
+      }
+      await navigator.clipboard.writeText(absoluteUrl);
+      setSnackbarText(`You just copied: ${absoluteUrl}`);
+    } catch (error) {
+      console.error(error);
+      setSnackbarText(`ERROR: Failed to copy: ${absoluteUrl}`);
     }
   };
 
   const openEditor = async () => {
+    const editorWindow = window.open("about:blank", "_blank");
+    if (editorWindow === null) {
+      setSnackbarText("ERROR: The editor window was blocked");
+      return;
+    }
+    editorWindow.opener = null;
+
     try {
       const response = await fetch(jsonFile.jsonUrl);
-      const json = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          `Fetch failed: ${response.status} ${response.statusText}`,
+        );
+      }
+      const json: unknown = await response.json();
       const base64string = Base64.encode(JSON.stringify(json));
       const url = `https://genesy.github.io/karabiner-complex-rules-generator/#${base64string}`;
-      window.open(url);
-    } catch (err) {
-      console.log(err);
-      snackbarContext.setText("ERROR: Failed to open editor");
+      editorWindow.location.replace(url);
+    } catch (error) {
+      editorWindow.close();
+      console.error(error);
+      setSnackbarText("ERROR: Failed to open editor");
     }
   };
 
@@ -91,6 +108,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
 
         <Button
           size="small"
+          aria-label="Open import menu"
           onClick={(event) => {
             event.stopPropagation();
             handleMenuToggle();
@@ -131,7 +149,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                   <MenuItem
                     onClick={(event) => {
                       event.stopPropagation();
-                      jsonModalContext.openModal(
+                      void jsonModal.openModal(
                         jsonFile.object.json?.title ?? "",
                         jsonFile.jsonUrl,
                       );
@@ -145,7 +163,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                   <MenuItem
                     onClick={(event) => {
                       event.stopPropagation();
-                      copyUrl(jsonFile.anchorUrl);
+                      void copyUrl(jsonFile.anchorUrl);
                       handleMenuClose(event.nativeEvent);
                     }}
                   >
@@ -156,7 +174,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                   <MenuItem
                     onClick={(event) => {
                       event.stopPropagation();
-                      copyUrl(jsonFile.jsonUrl);
+                      void copyUrl(jsonFile.jsonUrl);
                       handleMenuClose(event.nativeEvent);
                     }}
                   >
@@ -167,7 +185,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                   <MenuItem
                     onClick={(event) => {
                       event.stopPropagation();
-                      openEditor();
+                      void openEditor();
                       handleMenuClose(event.nativeEvent);
                     }}
                   >
