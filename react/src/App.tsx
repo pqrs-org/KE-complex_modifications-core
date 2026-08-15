@@ -156,14 +156,6 @@ const App = () => {
       return [];
     }
 
-    const filteredCategories = [
-      new Category({
-        id: "__search_result__",
-        name: "Search Result",
-        files: [],
-      }),
-    ];
-
     const results = lunrIndex.query((q) => {
       lunr.tokenizer(searchQuery.toLowerCase()).forEach((token) => {
         const queryString = token.toString();
@@ -180,19 +172,23 @@ const App = () => {
       });
     });
 
-    results.forEach((r) => {
-      const fileId = r.ref;
-
-      allCategories.forEach((c) => {
-        c.files.forEach((f) => {
-          if (f.id === fileId) {
-            filteredCategories[0].files.push(f);
-          }
-        });
-      });
+    const filesById = new Map(
+      allCategories.flatMap((category) =>
+        category.files.map((file) => [file.id, file.object] as const),
+      ),
+    );
+    const files = results.flatMap((result) => {
+      const file = filesById.get(result.ref);
+      return file === undefined ? [] : [file];
     });
 
-    return filteredCategories;
+    return [
+      new Category({
+        id: "__search_result__",
+        name: "Search Result",
+        files,
+      }),
+    ];
   }, [searchQuery, allCategories, lunrIndex]);
 
   return (

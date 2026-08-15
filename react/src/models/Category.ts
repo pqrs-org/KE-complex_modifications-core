@@ -3,7 +3,7 @@ import { KarabinerJsonFile } from "./KarabinerJsonFile";
 
 export class Category {
   readonly object: CategoryObject;
-  readonly files: KarabinerJsonFile[];
+  readonly files: readonly KarabinerJsonFile[];
 
   constructor(object: CategoryObject) {
     this.object = object;

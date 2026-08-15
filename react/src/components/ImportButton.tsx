@@ -23,7 +23,7 @@ import {
 } from "@mui/icons-material";
 import { useJsonModal, useSnackbar } from "../contexts";
 import { KarabinerJsonFile } from "../models";
-import { toAbsoluteUrl } from "../utils/url";
+import { toAbsoluteUrl, toKarabinerImportUrl } from "../utils/url";
 import { Base64 } from "js-base64";
 
 export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
@@ -95,8 +95,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
   };
 
   const importJson = () => {
-    const url = encodeURIComponent(toAbsoluteUrl(jsonFile.jsonUrl));
-    window.location.href = `karabiner://karabiner/assets/complex_modifications/import?url=${url}`;
+    window.location.href = toKarabinerImportUrl(jsonFile.jsonUrl);
   };
 
   const copyUrl = async (url: string) => {
