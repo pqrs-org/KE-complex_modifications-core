@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import type { ReactNode } from "react";
 import {
   Accordion,
   AccordionDetails,
@@ -19,7 +19,7 @@ import {
   ArrowForwardIosSharp as ArrowForwardIosSharpIcon,
   Star as StarIcon,
 } from "@mui/icons-material";
-import { LocationHashContext } from "../contexts";
+import { useLocationHash } from "../contexts";
 import { Category } from "../models";
 import { ImportButton } from "./ImportButton";
 import { ExtraDescription } from "./ExtraDescription";
@@ -61,7 +61,7 @@ const GroupBox = ({
   children,
 }: {
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) => {
   return (
     <Box
@@ -93,7 +93,7 @@ const GroupBox = ({
 };
 
 export const CategoryBox = ({ category }: { category: Category }) => {
-  const locationHashContext = useContext(LocationHashContext);
+  const { hash } = useLocationHash();
 
   return (
     <Box
@@ -115,12 +115,12 @@ export const CategoryBox = ({ category }: { category: Category }) => {
       </Box>
 
       {category.files.map((f) => {
-        if (locationHashContext.hash !== "") {
+        if (hash !== "") {
           if (
             // location.hash is not file id
-            locationHashContext.hash !== f.id &&
+            hash !== f.id &&
             // location.hash is not category id
-            locationHashContext.hash !== category.object.id
+            hash !== category.object.id
           ) {
             return undefined;
           }
