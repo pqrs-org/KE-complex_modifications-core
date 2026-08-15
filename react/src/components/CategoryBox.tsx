@@ -105,7 +105,13 @@ const GroupBox = ({
   );
 };
 
-export const CategoryBox = ({ category }: { category: Category }) => {
+export const CategoryBox = ({
+  category,
+  defaultExpanded = false,
+}: {
+  category: Category;
+  defaultExpanded?: boolean;
+}) => {
   return (
     <Box
       sx={{
@@ -135,6 +141,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
         return (
           <CategoryBoxAccordion
             id={f.id}
+            defaultExpanded={defaultExpanded}
             slotProps={{
               region: { id: regionId, "aria-labelledby": summaryId },
               transition: { unmountOnExit: true },

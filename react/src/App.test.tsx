@@ -160,9 +160,10 @@ describe("App", () => {
 
     renderApp();
 
-    expect(
-      await screen.findByRole("button", { name: "Second rule" }),
-    ).not.toBeNull();
+    const selectedRule = await screen.findByRole("button", {
+      name: "Second rule",
+    });
+    expect(selectedRule.getAttribute("aria-expanded")).toBe("false");
     expect(screen.getByRole("button", { name: "First rule" })).not.toBeNull();
     await waitFor(() => expect(scrollIntoView).toHaveBeenCalledOnce());
   });
@@ -198,9 +199,10 @@ describe("App", () => {
 
     renderApp();
 
-    expect(
-      await screen.findByRole("button", { name: "Second rule" }),
-    ).not.toBeNull();
+    const selectedRule = await screen.findByRole("button", {
+      name: "Second rule",
+    });
+    expect(selectedRule.getAttribute("aria-expanded")).toBe("true");
     expect(screen.queryByRole("button", { name: "First rule" })).toBeNull();
     expect(screen.queryByRole("textbox", { name: "Search rules" })).toBeNull();
     expect(screen.getByRole("link", { name: "Show all rules" })).not.toBeNull();

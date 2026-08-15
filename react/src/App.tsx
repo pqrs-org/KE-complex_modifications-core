@@ -312,7 +312,10 @@ const App = () => {
             key={category.object.id}
             data-highlighted={hash === category.object.id}
           >
-            <CategoryBox category={category} />
+            <CategoryBox
+              category={category}
+              defaultExpanded={sharedRulePath !== null}
+            />
           </Box>
         ))}
       </Container>
