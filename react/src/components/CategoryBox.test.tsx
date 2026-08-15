@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   JsonModalContextProvider,
@@ -13,7 +13,7 @@ import { CategoryBox } from "./CategoryBox";
 afterEach(cleanup);
 
 describe("CategoryBox", () => {
-  it("keeps file actions outside the accordion summary", () => {
+  it("keeps file actions outside the accordion summary and heading", () => {
     const category = new Category({
       id: "category",
       name: "Category",
@@ -39,5 +39,13 @@ describe("CategoryBox", () => {
     const menuButton = screen.getByRole("button", { name: "Open import menu" });
     expect(summary.contains(importButton)).toBe(false);
     expect(summary.contains(menuButton)).toBe(false);
+    expect(importButton.closest("h1, h2, h3, h4, h5, h6")).toBeNull();
+    expect(menuButton.closest("h1, h2, h3, h4, h5, h6")).toBeNull();
+
+    fireEvent.click(summary);
+    const regionId = summary.getAttribute("aria-controls");
+    const region = regionId === null ? null : document.getElementById(regionId);
+    expect(region).not.toBeNull();
+    expect(region?.getAttribute("aria-labelledby")).toBe(summary.id);
   });
 });

@@ -79,6 +79,37 @@ describe("removeExecutableContent", () => {
 });
 
 describe("ExtraDescription", () => {
+  it("resolves relative image and link URLs against the description URL", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        text: vi
+          .fn()
+          .mockResolvedValue(
+            '<a href="docs/readme.html">Docs</a><img src="../images/example.png">',
+          ),
+      }),
+    );
+
+    const view = render(
+      createElement(ExtraDescription, {
+        src: "https://example.com/extra/descriptions/example.html",
+      }),
+    );
+    const shadowHost = view.container.firstElementChild as HTMLElement;
+
+    await waitFor(() =>
+      expect(shadowHost.shadowRoot?.querySelector("a")).not.toBeNull(),
+    );
+    expect(
+      shadowHost.shadowRoot?.querySelector("a")?.getAttribute("href"),
+    ).toBe("https://example.com/extra/descriptions/docs/readme.html");
+    expect(
+      shadowHost.shadowRoot?.querySelector("img")?.getAttribute("src"),
+    ).toBe("https://example.com/extra/images/example.png");
+  });
+
   it("retries with a new source after a fetch error", async () => {
     vi.stubGlobal(
       "fetch",
@@ -107,5 +138,33 @@ describe("ExtraDescription", () => {
       ),
     );
     expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("aborts an in-flight request when unmounted", async () => {
+    let requestSignal: AbortSignal | undefined;
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation(
+          (_src: string, { signal }: { signal: AbortSignal }) => {
+            requestSignal = signal;
+            return new Promise<Response>((_resolve, reject) => {
+              signal.addEventListener("abort", () =>
+                reject(new DOMException("Aborted", "AbortError")),
+              );
+            });
+          },
+        ),
+    );
+
+    const view = render(
+      createElement(ExtraDescription, { src: "description.html" }),
+    );
+    await waitFor(() => expect(requestSignal).not.toBeUndefined());
+
+    view.unmount();
+
+    expect(requestSignal?.aborted).toBe(true);
   });
 });
