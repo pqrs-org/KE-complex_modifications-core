@@ -44,7 +44,6 @@ export const JsonModal = () => {
         open={jsonModalContext.open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
           <Typography
