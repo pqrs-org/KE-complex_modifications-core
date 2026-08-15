@@ -31,6 +31,12 @@ describe("isDistResult", () => {
   it("rejects an invalid timestamp", () => {
     expect(isDistResult({ ...validResult, updatedAt: undefined })).toBe(false);
     expect(isDistResult({ ...validResult, updatedAt: Number.NaN })).toBe(false);
+    expect(isDistResult({ ...validResult, updatedAt: -1 })).toBe(false);
+    expect(isDistResult({ ...validResult, updatedAt: 1.5 })).toBe(false);
+    expect(isDistResult({ ...validResult, updatedAt: 1e300 })).toBe(false);
+    expect(isDistResult({ ...validResult, updatedAt: 8_640_000_000_001 })).toBe(
+      false,
+    );
   });
 
   it("rejects invalid nested category data", () => {

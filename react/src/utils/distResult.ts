@@ -46,6 +46,12 @@ const isCategory = (value: unknown): value is CategoryObject =>
   Array.isArray(value.files) &&
   value.files.every(isJsonFile);
 
+const isUnixTimestamp = (value: unknown): value is number =>
+  typeof value === "number" &&
+  Number.isSafeInteger(value) &&
+  value >= 0 &&
+  Number.isFinite(new Date(value * 1000).getTime());
+
 export const isDistResult = (value: unknown): value is DistResult =>
   isRecord(value) &&
   Array.isArray(value.index) &&
@@ -53,5 +59,4 @@ export const isDistResult = (value: unknown): value is DistResult =>
   Array.isArray(value.example) &&
   value.example.every(isCategory) &&
   typeof value.revision === "string" &&
-  typeof value.updatedAt === "number" &&
-  Number.isFinite(value.updatedAt);
+  isUnixTimestamp(value.updatedAt);
