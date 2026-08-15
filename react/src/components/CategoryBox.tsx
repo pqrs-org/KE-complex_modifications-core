@@ -132,10 +132,30 @@ export const CategoryBox = ({ category }: { category: Category }) => {
             slotProps={{ transition: { unmountOnExit: true } }}
             key={f.id}
           >
-            <CategoryBoxAccordionSummary>
-              {f.object.json?.title}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                flexWrap: "wrap",
+                backgroundColor: "white",
+              }}
+            >
+              <CategoryBoxAccordionSummary
+                sx={{ flex: "1 1 20rem", minWidth: 0 }}
+              >
+                {f.object.json?.title}
+              </CategoryBoxAccordionSummary>
 
-              <Box sx={{ ml: "auto" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 1,
+                  px: 2,
+                  py: 1,
+                }}
+              >
                 {f.object.json?.author && (
                   <Chip
                     label={`Author: ${f.object.json.author}`}
@@ -166,7 +186,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
 
                 <ImportButton jsonFile={f} />
               </Box>
-            </CategoryBoxAccordionSummary>
+            </Box>
             <AccordionDetails sx={{ pt: 0 }}>
               <GroupBox label="Rules">
                 <List disablePadding>
