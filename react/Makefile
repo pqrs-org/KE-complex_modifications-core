@@ -12,7 +12,9 @@ check:
 	pnpm run format:check
 	pnpm run lint
 	pnpm run test
-	pnpm run build
+	@check_dist="$$(mktemp -d)"; \
+	trap 'rm -rf "$$check_dist"' EXIT; \
+	pnpm run build --outDir "$$check_dist" --emptyOutDir
 
 install:
 	pnpm install --frozen-lockfile
