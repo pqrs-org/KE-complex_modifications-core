@@ -21,13 +21,26 @@ export const removeExecutableContent = (root: HTMLElement) => {
     for (const attribute of Array.from(element.attributes)) {
       const name = attribute.name.toLowerCase();
       const value = attribute.value.trim();
+      const isUrlAttribute = [
+        "href",
+        "src",
+        "xlink:href",
+        "action",
+        "formaction",
+      ].includes(name);
+      let hasExecutableProtocol = false;
+      if (isUrlAttribute) {
+        try {
+          hasExecutableProtocol =
+            new URL(value, document.baseURI).protocol === "javascript:";
+        } catch {
+          // Invalid URLs are left unchanged and handled by the browser.
+        }
+      }
 
       if (name.startsWith("on") || name === "srcdoc") {
         element.removeAttribute(attribute.name);
-      } else if (
-        ["href", "src", "xlink:href", "action", "formaction"].includes(name) &&
-        /^javascript:/i.test(value)
-      ) {
+      } else if (isUrlAttribute && hasExecutableProtocol) {
         element.removeAttribute(attribute.name);
       }
     }
@@ -101,8 +114,10 @@ export const ExtraDescription = ({ src }: Props) => {
     };
   }, [src]);
 
-  if (err) {
-    return <Box role="alert">Failed to load {src}</Box>;
-  }
-  return <Box ref={ref} />;
+  return (
+    <>
+      {err && <Box role="alert">Failed to load {src}</Box>}
+      <Box ref={ref} />
+    </>
+  );
 };

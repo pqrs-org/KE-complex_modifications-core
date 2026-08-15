@@ -1,13 +1,21 @@
 // @vitest-environment jsdom
 
-import { describe, expect, it } from "vitest";
-import { removeExecutableContent } from "./ExtraDescription";
+import { createElement } from "react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { ExtraDescription, removeExecutableContent } from "./ExtraDescription";
 
 const createRoot = (html: string) => {
   const root = document.createElement("div");
   root.innerHTML = html;
   return root;
 };
+
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe("removeExecutableContent", () => {
   it("removes elements that can embed or execute code", () => {
@@ -30,6 +38,7 @@ describe("removeExecutableContent", () => {
       <button onclick="alert('click')">Button</button>
       <div srcdoc="<script>alert('srcdoc')</script>"></div>
       <a href=" javascript:alert('link')">Link</a>
+      <a id="line-break" href="java&#10;script:alert('line-break')">Link</a>
       <img src="JAVASCRIPT:alert('image')" onerror="alert('error')">
       <form action="javascript:alert('form')"></form>
       <button formaction="javascript:alert('formaction')">Submit</button>
@@ -39,6 +48,7 @@ describe("removeExecutableContent", () => {
 
     expect(root.querySelector("[onclick], [onerror], [srcdoc]")).toBeNull();
     expect(root.querySelector("a")?.hasAttribute("href")).toBe(false);
+    expect(root.querySelector("#line-break")?.hasAttribute("href")).toBe(false);
     expect(root.querySelector("img")?.hasAttribute("src")).toBe(false);
     expect(root.querySelector("form")?.hasAttribute("action")).toBe(false);
     expect(root.querySelector("button[formaction]")).toBeNull();
@@ -65,5 +75,37 @@ describe("removeExecutableContent", () => {
     expect(root.querySelector("img")?.getAttribute("src")).toBe(
       "images/example.png",
     );
+  });
+});
+
+describe("ExtraDescription", () => {
+  it("retries with a new source after a fetch error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockRejectedValueOnce(new Error("Fetch failed"))
+        .mockResolvedValueOnce({
+          ok: true,
+          text: vi.fn().mockResolvedValue("<p>Loaded description</p>"),
+        }),
+    );
+
+    const view = render(
+      createElement(ExtraDescription, { src: "failed-description.html" }),
+    );
+    const shadowHost = view.container.firstElementChild as HTMLElement;
+    await screen.findByRole("alert");
+
+    view.rerender(
+      createElement(ExtraDescription, { src: "loaded-description.html" }),
+    );
+
+    await waitFor(() =>
+      expect(shadowHost.shadowRoot?.textContent).toContain(
+        "Loaded description",
+      ),
+    );
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 });
