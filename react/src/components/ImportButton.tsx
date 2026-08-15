@@ -1,4 +1,9 @@
-import { useId, useState } from "react";
+import {
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import {
   Button,
   ButtonGroup,
@@ -34,6 +39,14 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
   const [anchorElement, setAnchorElement] = useState<HTMLDivElement | null>(
     null,
   );
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  const closeMenu = (restoreFocus = false) => {
+    setMenuOpen(false);
+    if (restoreFocus) {
+      requestAnimationFrame(() => menuButtonRef.current?.focus());
+    }
+  };
 
   const handleMenuToggle = () => {
     setMenuOpen((prevOpen) => !prevOpen);
@@ -44,7 +57,16 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
       return;
     }
 
-    setMenuOpen(false);
+    closeMenu();
+  };
+
+  const handleMenuKeyDown = (event: ReactKeyboardEvent) => {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      closeMenu(true);
+    } else if (event.key === "Escape") {
+      closeMenu(true);
+    }
   };
 
   const importJson = () => {
@@ -108,6 +130,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
         </Button>
 
         <Button
+          ref={menuButtonRef}
           size="small"
           aria-label="Open import menu"
           aria-controls={menuOpen ? menuId : undefined}
@@ -138,12 +161,16 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
           >
             <Paper>
               <ClickAwayListener onClickAway={handleMenuClose}>
-                <MenuList id={menuId}>
+                <MenuList
+                  id={menuId}
+                  autoFocusItem={menuOpen}
+                  onKeyDown={handleMenuKeyDown}
+                >
                   <MenuItem
                     onClick={(event) => {
                       event.stopPropagation();
                       importJson();
-                      handleMenuClose(event.nativeEvent);
+                      closeMenu(true);
                     }}
                   >
                     Import to Karabiner-Elements
@@ -157,7 +184,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                         jsonFile.object.json?.title ?? "",
                         jsonFile.jsonUrl,
                       );
-                      handleMenuClose(event.nativeEvent);
+                      closeMenu(true);
                     }}
                   >
                     <CodeIcon sx={{ marginRight: 1 }} />
@@ -168,7 +195,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                     onClick={(event) => {
                       event.stopPropagation();
                       void copyUrl(jsonFile.anchorUrl);
-                      handleMenuClose(event.nativeEvent);
+                      closeMenu(true);
                     }}
                   >
                     <ContentCopyIcon sx={{ marginRight: 1 }} />
@@ -179,7 +206,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                     onClick={(event) => {
                       event.stopPropagation();
                       void copyUrl(jsonFile.jsonUrl);
-                      handleMenuClose(event.nativeEvent);
+                      closeMenu(true);
                     }}
                   >
                     <ContentCopyIcon sx={{ marginRight: 1 }} />
@@ -190,7 +217,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                     onClick={(event) => {
                       event.stopPropagation();
                       void openEditor();
-                      handleMenuClose(event.nativeEvent);
+                      closeMenu(true);
                     }}
                   >
                     <LaunchIcon sx={{ marginRight: 1 }} />
