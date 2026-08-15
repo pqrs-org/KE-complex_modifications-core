@@ -9,11 +9,11 @@ make install
 ## Run in the development mode
 
 ```shell
-make start
+make dev
 ```
 
 ## Update dist files
 
 ```shell
-make deploy
+make build
 ```
