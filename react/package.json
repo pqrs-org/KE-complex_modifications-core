@@ -39,11 +39,13 @@
     "vitest": "^4.1.10"
   },
   "type": "module",
+  "packageManager": "pnpm@11.21.0",
   "scripts": {
     "dev": "vite",
     "build": "pnpm typecheck && vite build",
     "preview": "vite preview",
     "format": "prettier --write index.html 'src/**/*.{ts,tsx}'",
+    "format:check": "prettier --check index.html 'src/**/*.{ts,tsx}'",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
