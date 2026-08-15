@@ -10,7 +10,7 @@ describe("KarabinerJsonFile", () => {
 
     expect(file.id).toBe("example.rule");
     expect(file.jsonUrl).toBe("json/example.rule.json");
-    expect(file.anchorUrl).toBe("#example.rule");
+    expect(file.shareUrl).toBe("?rule=json%2Fexample.rule.json");
   });
 });
 

@@ -2,11 +2,7 @@
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  JsonModalContextProvider,
-  LocationHashContextProvider,
-  SnackbarContextProvider,
-} from "../contexts";
+import { JsonModalContextProvider, SnackbarContextProvider } from "../contexts";
 import { Category } from "../models";
 import { CategoryBox } from "./CategoryBox";
 
@@ -26,11 +22,9 @@ describe("CategoryBox", () => {
     });
     render(
       <JsonModalContextProvider>
-        <LocationHashContextProvider>
-          <SnackbarContextProvider>
-            <CategoryBox category={category} />
-          </SnackbarContextProvider>
-        </LocationHashContextProvider>
+        <SnackbarContextProvider>
+          <CategoryBox category={category} />
+        </SnackbarContextProvider>
       </JsonModalContextProvider>,
     );
 

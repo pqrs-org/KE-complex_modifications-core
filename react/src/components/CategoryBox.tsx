@@ -19,12 +19,13 @@ import {
   ArrowForwardIosSharp as ArrowForwardIosSharpIcon,
   Star as StarIcon,
 } from "@mui/icons-material";
-import { useLocationHash } from "../contexts";
 import { Category } from "../models";
 import { ImportButton } from "./ImportButton";
 import { ExtraDescription } from "./ExtraDescription";
 
 const color = "#28A745";
+const categoryColor = `var(--category-highlight-color, ${color})`;
+const categoryTextColor = "var(--category-highlight-text-color, white)";
 
 const CategoryBoxAccordion = styled(({ slots, ...props }: AccordionProps) => (
   <Accordion
@@ -40,8 +41,9 @@ const CategoryBoxAccordion = styled(({ slots, ...props }: AccordionProps) => (
     }}
     {...props}
   />
-))(() => ({
-  border: `1px solid ${color}`,
+))(({ theme }) => ({
+  border: `1px solid ${categoryColor}`,
+  scrollMarginTop: theme.spacing(2),
   "&:not(:last-child)": {
     borderBottom: 0,
   },
@@ -104,19 +106,17 @@ const GroupBox = ({
 };
 
 export const CategoryBox = ({ category }: { category: Category }) => {
-  const { hash } = useLocationHash();
-
   return (
     <Box
       sx={{
-        border: `1px solid ${color}`,
+        border: `1px solid ${categoryColor}`,
       }}
     >
       <Box
         sx={{
           p: 2,
-          color: "white",
-          backgroundColor: color,
+          color: categoryTextColor,
+          backgroundColor: categoryColor,
           position: "sticky",
           top: 0,
           zIndex: 900,
@@ -126,17 +126,6 @@ export const CategoryBox = ({ category }: { category: Category }) => {
       </Box>
 
       {category.files.map((f) => {
-        if (hash !== "") {
-          if (
-            // location.hash is not file id
-            hash !== f.id &&
-            // location.hash is not category id
-            hash !== category.object.id
-          ) {
-            return undefined;
-          }
-        }
-
         const elementIdPrefix = [category.object.id, f.id]
           .map(encodeURIComponent)
           .join("-");

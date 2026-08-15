@@ -4,7 +4,7 @@ export class KarabinerJsonFile {
   readonly object: KarabinerJsonFileObject;
   readonly id: string;
   readonly jsonUrl: string;
-  readonly anchorUrl: string;
+  readonly shareUrl: string;
 
   constructor(object: KarabinerJsonFileObject) {
     this.object = object;
@@ -15,6 +15,6 @@ export class KarabinerJsonFile {
     }
     this.id = id;
     this.jsonUrl = object.path;
-    this.anchorUrl = `#${id}`;
+    this.shareUrl = `?rule=${encodeURIComponent(object.path)}`;
   }
 }

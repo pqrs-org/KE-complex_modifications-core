@@ -109,7 +109,7 @@ describe("ImportButton", () => {
   });
 
   it.each([
-    ["Copy URL", "#example"],
+    ["Copy URL", "?rule=json%2Fexample.json"],
     ["Copy JSON URL", "json/example.json"],
   ])("copies the URL from %s", async (menuItemName, url) => {
     const writeText = vi.fn().mockResolvedValue(undefined);

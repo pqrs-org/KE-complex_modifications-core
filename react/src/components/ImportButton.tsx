@@ -218,7 +218,7 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                   <MenuItem
                     onClick={(event) => {
                       event.stopPropagation();
-                      void copyUrl(jsonFile.anchorUrl);
+                      void copyUrl(jsonFile.shareUrl);
                       closeMenu(true);
                     }}
                   >

@@ -3,18 +3,28 @@ import {
   useContext,
   useEffect,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
 
 type LocationHashContextValue = {
   hash: string;
+  setHash: Dispatch<SetStateAction<string>>;
 };
 
 const LocationHashContext = createContext<LocationHashContextValue | undefined>(
   undefined,
 );
 
-const getLocationHash = () => window.location.hash.slice(1);
+const getLocationHash = () => {
+  const hash = window.location.hash.slice(1);
+  try {
+    return decodeURIComponent(hash);
+  } catch {
+    return hash;
+  }
+};
 
 export const LocationHashContextProvider = ({
   children,
@@ -30,7 +40,7 @@ export const LocationHashContextProvider = ({
   }, []);
 
   return (
-    <LocationHashContext.Provider value={{ hash }}>
+    <LocationHashContext.Provider value={{ hash, setHash }}>
       {children}
     </LocationHashContext.Provider>
   );

@@ -10,10 +10,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import {
-  InfoOutlined as InfoOutlinedIcon,
-  OpenInNew as OpenInNewIcon,
-} from "@mui/icons-material";
+import { OpenInNew as OpenInNewIcon } from "@mui/icons-material";
 import lunr from "lunr";
 import { useLocationHash, useSearchQuery } from "./contexts";
 import { Category } from "./models";
@@ -29,6 +26,9 @@ import {
 const App = () => {
   const { hash } = useLocationHash();
   const { query: searchQuery } = useSearchQuery();
+  const sharedRulePath = new URLSearchParams(window.location.search).get(
+    "rule",
+  );
 
   const [fetching, setFetching] = useState(true);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
@@ -80,6 +80,17 @@ const App = () => {
     void fetchCategories();
     return () => controller.abort();
   }, []);
+
+  // The target elements are rendered after dist.json has loaded, so repeat
+  // fragment navigation once the categories are available.
+  useEffect(() => {
+    if (hash === "" || allCategories.length === 0) return;
+
+    const frame = requestAnimationFrame(() =>
+      document.getElementById(hash)?.scrollIntoView?.(),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [hash, allCategories]);
 
   //
   // Update lunrIndex
@@ -144,6 +155,17 @@ const App = () => {
       return [];
     }
 
+    if (sharedRulePath !== null) {
+      return allCategories.flatMap((category) => {
+        const files = category.object.files.filter(
+          (file) => file.path === sharedRulePath,
+        );
+        return files.length === 0
+          ? []
+          : [new Category({ ...category.object, files })];
+      });
+    }
+
     if (searchQuery === "") {
       return allCategories;
     }
@@ -189,7 +211,7 @@ const App = () => {
         files,
       }),
     ];
-  }, [searchQuery, allCategories, lunrIndex]);
+  }, [searchQuery, sharedRulePath, allCategories, lunrIndex]);
 
   return (
     <Fragment>
@@ -228,7 +250,7 @@ const App = () => {
         </Toolbar>
       </AppBar>
 
-      <Container>
+      <Container sx={{ pb: 4 }}>
         {fetchError !== "" && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {fetchError}
@@ -238,7 +260,7 @@ const App = () => {
         {/*
          ** Search & Table of Contents
          **/}
-        {hash === "" && (
+        {sharedRulePath === null ? (
           <>
             <Box sx={{ mt: 4, textAlign: "center" }}>
               <SearchInput key={searchQuery} />
@@ -250,27 +272,25 @@ const App = () => {
               </Box>
             )}
           </>
-        )}
-
-        {/*
-         ** Show all button
-         **/}
-        {hash !== "" && (
+        ) : (
           <Box sx={{ mt: 2 }}>
-            <Alert variant="outlined" severity="warning" icon={false}>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <InfoOutlinedIcon sx={{ mr: 1 }} />
-                Rules are filtered by &quot;
-                <strong>{hash}</strong>&quot;.
+            <Alert
+              variant="outlined"
+              severity={categories.length === 0 && !fetching ? "error" : "info"}
+              action={
                 <Button
-                  variant="contained"
                   component={Link}
                   href="./"
-                  sx={{ ml: 2, textTransform: "none" }}
+                  variant="contained"
+                  sx={{ textTransform: "none" }}
                 >
                   Show all rules
                 </Button>
-              </Box>
+              }
+            >
+              {categories.length === 0 && !fetching
+                ? "The shared rule was not found."
+                : "Showing a shared rule."}
             </Alert>
           </Box>
         )}
@@ -278,24 +298,23 @@ const App = () => {
         {/*
          ** Categories
          **/}
-        {categories.map((c) => {
-          if (hash !== "") {
-            if (
-              // location.hash is not category id
-              hash !== c.object.id &&
-              // location.hash is not file id
-              c.files.find((f) => hash === f.id) === undefined
-            ) {
-              return undefined;
-            }
-          }
-
-          return (
-            <Box sx={{ mt: 4 }} id={c.object.id} key={c.object.id}>
-              <CategoryBox category={c} />
-            </Box>
-          );
-        })}
+        {categories.map((category) => (
+          <Box
+            sx={{
+              mt: 4,
+              scrollMarginTop: 2,
+              '&[data-highlighted="true"]': {
+                "--category-highlight-color": "#3DFC69",
+                "--category-highlight-text-color": "black",
+              },
+            }}
+            id={category.object.id}
+            key={category.object.id}
+            data-highlighted={hash === category.object.id}
+          >
+            <CategoryBox category={category} />
+          </Box>
+        ))}
       </Container>
 
       <JsonModal />
