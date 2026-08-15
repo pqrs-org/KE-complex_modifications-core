@@ -56,5 +56,16 @@ describe("isDistResult", () => {
         ],
       }),
     ).toBe(false);
+    expect(
+      isDistResult({
+        ...validResult,
+        index: [
+          {
+            ...validResult.index[0],
+            files: [{ path: "json/example.json", json: [] }],
+          },
+        ],
+      }),
+    ).toBe(false);
   });
 });
