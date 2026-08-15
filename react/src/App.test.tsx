@@ -182,7 +182,10 @@ describe("App", () => {
                 },
                 {
                   path: "json/second.json",
-                  json: { title: "Second rule", rules: [] },
+                  json: {
+                    title: "Second rule",
+                    rules: [{ description: "Second rule description" }],
+                  },
                 },
               ],
             },
@@ -196,13 +199,25 @@ describe("App", () => {
 
     renderApp();
 
-    const selectedRule = await screen.findByRole("button", {
-      name: "Second rule",
-    });
-    expect(selectedRule.getAttribute("aria-expanded")).toBe("true");
+    expect(await screen.findByText("Second rule description")).not.toBeNull();
+    expect(screen.getAllByText("Second rule")).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: "Second rule" })).toBeNull();
     expect(screen.queryByRole("button", { name: "First rule" })).toBeNull();
     expect(screen.queryByRole("textbox", { name: "Search rules" })).toBeNull();
+    expect(
+      screen.queryByRole("navigation", { name: "Table of contents" }),
+    ).toBeNull();
+    expect(screen.queryByText("Category")).toBeNull();
     expect(screen.getByRole("link", { name: "Show all rules" })).not.toBeNull();
+    expect(screen.getByRole("alert").textContent).toContain(
+      "Showing only the rule specified by this URL: “Second rule”.",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open import menu" }));
+    expect(await screen.findByRole("menu")).not.toBeNull();
+    expect(
+      screen.queryByRole("menuitem", { name: "Open rule in new tab" }),
+    ).toBeNull();
   });
 
   it("does not filter categories using a percent-encoded location hash", async () => {

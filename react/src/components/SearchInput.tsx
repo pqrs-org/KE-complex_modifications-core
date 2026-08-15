@@ -1,29 +1,36 @@
 import { useState } from "react";
-import { Box, FormControl, InputAdornment, OutlinedInput } from "@mui/material";
-import { Search as SearchIcon } from "@mui/icons-material";
+import {
+  Box,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  OutlinedInput,
+} from "@mui/material";
+import { Clear as ClearIcon, Search as SearchIcon } from "@mui/icons-material";
 import { useSearchQuery } from "../contexts";
 
 export const SearchInput = () => {
   const { query, setQuery } = useSearchQuery();
   const [value, setValue] = useState(query);
 
-  const submit = () => {
-    if (query !== value) {
-      setQuery(value);
+  const submit = (nextValue = value) => {
+    if (query !== nextValue) {
+      setQuery(nextValue);
 
       window.history.pushState(
-        { q: value },
+        { q: nextValue },
         "",
-        value === ""
+        nextValue === ""
           ? window.location.pathname
-          : "?q=" + encodeURIComponent(value),
+          : "?q=" + encodeURIComponent(nextValue),
       );
+      window.scrollTo({ top: 0, left: 0 });
     }
   };
 
   return (
     <Box>
-      <FormControl sx={{ width: "100%", maxWidth: "50ch" }} variant="outlined">
+      <FormControl sx={{ width: "100%" }} variant="outlined">
         <OutlinedInput
           value={value}
           placeholder="Search..."
@@ -32,6 +39,23 @@ export const SearchInput = () => {
             <InputAdornment position="start">
               <SearchIcon />
             </InputAdornment>
+          }
+          endAdornment={
+            value === "" ? undefined : (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="Clear search"
+                  edge="end"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    setValue("");
+                    submit("");
+                  }}
+                >
+                  <ClearIcon />
+                </IconButton>
+              </InputAdornment>
+            )
           }
           onChange={(event) => {
             setValue(event.target.value);

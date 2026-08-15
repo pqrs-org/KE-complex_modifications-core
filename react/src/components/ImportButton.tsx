@@ -20,13 +20,20 @@ import {
   Code as CodeIcon,
   ContentCopy as ContentCopyIcon,
   Launch as LaunchIcon,
+  OpenInNew as OpenInNewIcon,
 } from "@mui/icons-material";
 import { useJsonModal, useSnackbar } from "../contexts";
 import { KarabinerJsonFile } from "../models";
 import { toAbsoluteUrl, toKarabinerImportUrl } from "../utils/url";
 import { Base64 } from "js-base64";
 
-export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
+export const ImportButton = ({
+  jsonFile,
+  showOpenRule = true,
+}: {
+  jsonFile: KarabinerJsonFile;
+  showOpenRule?: boolean;
+}) => {
   const jsonModal = useJsonModal();
   const { setText: setSnackbarText } = useSnackbar();
   const menuId = useId();
@@ -214,6 +221,22 @@ export const ImportButton = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
                     <CodeIcon sx={{ marginRight: 1 }} />
                     <small>Show JSON</small>
                   </MenuItem>
+
+                  {showOpenRule && (
+                    <MenuItem
+                      component="a"
+                      href={toAbsoluteUrl(jsonFile.shareUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        closeMenu(true);
+                      }}
+                    >
+                      <OpenInNewIcon sx={{ marginRight: 1 }} />
+                      Open rule in new tab
+                    </MenuItem>
+                  )}
 
                   <MenuItem
                     onClick={(event) => {

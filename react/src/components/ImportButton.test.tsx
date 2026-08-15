@@ -126,6 +126,21 @@ describe("ImportButton", () => {
     );
   });
 
+  it("links to the shared rule in a new tab", async () => {
+    renderImportButton();
+    const menu = await openMenu();
+
+    const link = within(menu).getByRole("menuitem", {
+      name: "Open rule in new tab",
+    });
+
+    expect(link.getAttribute("href")).toBe(
+      new URL("?rule=json%2Fexample.json", document.baseURI).href,
+    );
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+  });
+
   it("shows an error when the clipboard API is unavailable", async () => {
     setClipboard(undefined);
     vi.spyOn(console, "error").mockImplementation(() => undefined);

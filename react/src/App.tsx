@@ -22,9 +22,10 @@ import {
 import {
   CategoryBox,
   JsonModal,
-  TableOfContents,
   SearchInput,
+  SharedRuleView,
   Snackbar,
+  TableOfContents,
 } from "./components";
 
 const App = () => {
@@ -226,6 +227,9 @@ const App = () => {
     ];
   }, [searchQuery, sharedRulePath, allCategories, lunrIndex]);
 
+  const sharedRule =
+    sharedRulePath === null ? undefined : categories[0]?.files[0];
+
   return (
     <Fragment>
       <AppBar position="static">
@@ -263,73 +267,120 @@ const App = () => {
         </Toolbar>
       </AppBar>
 
-      <Container sx={{ pb: 4 }}>
+      <Container maxWidth="xl">
         {fetchError !== "" && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {fetchError}
           </Alert>
         )}
 
-        {/*
-         ** Search & Table of Contents
-         **/}
         {sharedRulePath === null ? (
-          <>
-            <Box sx={{ mt: 4, textAlign: "center" }}>
-              <SearchInput key={searchQuery} />
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr)",
+                md: "18rem minmax(0, 1fr)",
+              },
+              gap: 4,
+              alignItems: "start",
+            }}
+          >
+            <Box
+              component="nav"
+              aria-label="Table of contents"
+              sx={{
+                mt: 2,
+                py: 2,
+                position: { md: "sticky" },
+                top: { md: 0 },
+                height: { md: "100vh" },
+                boxSizing: "border-box",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <TableOfContents categories={categories} />
             </Box>
 
-            {searchQuery === "" && (
-              <Box sx={{ mt: 4 }}>
-                <TableOfContents categories={categories} />
+            <Box sx={{ "--sticky-search-height": "88px" }}>
+              <Box
+                sx={{
+                  mt: 2,
+                  py: 2,
+                  textAlign: "center",
+                  position: { md: "sticky" },
+                  top: { md: 0 },
+                  zIndex: 910,
+                  bgcolor: "background.default",
+                }}
+              >
+                <SearchInput key={searchQuery} />
+              </Box>
+
+              {categories.map((category) => (
+                <Box
+                  sx={{
+                    mt: 0,
+                    mb: 4,
+                    scrollMarginTop: {
+                      xs: "16px",
+                      md: "var(--sticky-search-height)",
+                    },
+                    '&[data-hash-highlighted="true"]': {
+                      "--category-highlight-color": "#3DFC69",
+                      "--category-highlight-text-color": "black",
+                    },
+                  }}
+                  id={category.object.id}
+                  key={category.object.id}
+                >
+                  <CategoryBox category={category} />
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        ) : (
+          <>
+            <Box sx={{ mt: 4 }}>
+              <Alert
+                variant="outlined"
+                severity={
+                  sharedRule === undefined && !fetching ? "error" : "info"
+                }
+                action={
+                  <Button
+                    component={Link}
+                    href="./"
+                    variant="outlined"
+                    sx={{ textTransform: "none" }}
+                  >
+                    Show all rules
+                  </Button>
+                }
+              >
+                {sharedRule !== undefined ? (
+                  <>
+                    Showing only the rule specified by this URL: &ldquo;
+                    <strong>
+                      {sharedRule.object.json.title ?? sharedRule.id}
+                    </strong>
+                    &rdquo;.
+                  </>
+                ) : fetching ? (
+                  "Loading the rule specified by this URL..."
+                ) : (
+                  "The rule was not found."
+                )}
+              </Alert>
+            </Box>
+            {sharedRule !== undefined && (
+              <Box sx={{ mt: 2, mb: 4 }}>
+                <SharedRuleView jsonFile={sharedRule} />
               </Box>
             )}
           </>
-        ) : (
-          <Box sx={{ mt: 2 }}>
-            <Alert
-              variant="outlined"
-              severity={categories.length === 0 && !fetching ? "error" : "info"}
-              action={
-                <Button
-                  component={Link}
-                  href="./"
-                  variant="contained"
-                  sx={{ textTransform: "none" }}
-                >
-                  Show all rules
-                </Button>
-              }
-            >
-              {categories.length === 0 && !fetching
-                ? "The shared rule was not found."
-                : "Showing a shared rule."}
-            </Alert>
-          </Box>
         )}
-
-        {/*
-         ** Categories
-         **/}
-        {categories.map((category) => (
-          <Box
-            sx={{
-              mt: 4,
-              scrollMarginTop: 2,
-              '&[data-hash-highlighted="true"]': {
-                "--category-highlight-color": "#3DFC69",
-                "--category-highlight-text-color": "black",
-              },
-            }}
-            id={category.object.id}
-            key={category.object.id}
-          >
-            <CategoryBox
-              category={category}
-              defaultExpanded={sharedRulePath !== null}
-            />
-          </Box>
-        ))}
       </Container>
 
       <JsonModal />
