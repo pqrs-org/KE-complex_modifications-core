@@ -1,49 +1,15 @@
 // @vitest-environment jsdom
 
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { JsonModalContextProvider, useJsonModal } from ".";
 
-const JsonModalProbe = () => {
-  const jsonModal = useJsonModal();
-  return (
-    <>
-      <output data-testid="open">{String(jsonModal.open)}</output>
-      <output data-testid="fetching">{String(jsonModal.fetching)}</output>
-      <output data-testid="title">{jsonModal.title}</output>
-      <output data-testid="json">{jsonModal.jsonString}</output>
-      <button
-        onClick={() => void jsonModal.openModal("Example", "example.json")}
-      >
-        Load example
-      </button>
-      <button onClick={() => void jsonModal.openModal("Broken", "broken.json")}>
-        Load broken
-      </button>
-      <button
-        onClick={() => {
-          void jsonModal.openModal("First", "first.json");
-          void jsonModal.openModal("Latest", "latest.json");
-        }}
-      >
-        Load competing requests
-      </button>
-    </>
-  );
-};
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <JsonModalContextProvider>{children}</JsonModalContextProvider>
+);
 
-const renderJsonModal = () =>
-  render(
-    <JsonModalContextProvider>
-      <JsonModalProbe />
-    </JsonModalContextProvider>,
-  );
+const renderJsonModalHook = () => renderHook(() => useJsonModal(), { wrapper });
 
 const jsonResponse = (json: unknown, ok = true) =>
   ({
@@ -54,7 +20,6 @@ const jsonResponse = (json: unknown, ok = true) =>
   }) as unknown as Response;
 
 afterEach(() => {
-  cleanup();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -62,32 +27,26 @@ afterEach(() => {
 describe("JsonModalContextProvider", () => {
   it("loads and formats JSON before opening the modal", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ key: 1 })));
-    renderJsonModal();
+    const { result } = renderJsonModalHook();
 
-    fireEvent.click(screen.getByRole("button", { name: "Load example" }));
+    await act(() => result.current.openModal("Example", "example.json"));
 
-    await waitFor(() =>
-      expect(screen.getByTestId("open").textContent).toBe("true"),
-    );
-    expect(screen.getByTestId("fetching").textContent).toBe("false");
-    expect(screen.getByTestId("title").textContent).toBe("Example");
-    expect(screen.getByTestId("json").textContent).toBe(
-      JSON.stringify({ key: 1 }, null, 2),
-    );
+    expect(result.current.open).toBe(true);
+    expect(result.current.fetching).toBe(false);
+    expect(result.current.title).toBe("Example");
+    expect(result.current.jsonString).toBe(JSON.stringify({ key: 1 }, null, 2));
   });
 
   it("shows an error when the response is not successful", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({}, false)));
     vi.spyOn(console, "error").mockImplementation(() => undefined);
-    renderJsonModal();
+    const { result } = renderJsonModalHook();
 
-    fireEvent.click(screen.getByRole("button", { name: "Load broken" }));
+    await act(() => result.current.openModal("Broken", "broken.json"));
 
-    await waitFor(() =>
-      expect(screen.getByTestId("open").textContent).toBe("true"),
-    );
-    expect(screen.getByTestId("fetching").textContent).toBe("false");
-    expect(screen.getByTestId("json").textContent).toBe(
+    expect(result.current.open).toBe(true);
+    expect(result.current.fetching).toBe(false);
+    expect(result.current.jsonString).toBe(
       "ERROR: Failed to fetch: broken.json",
     );
   });
@@ -105,18 +64,18 @@ describe("JsonModalContextProvider", () => {
       )
       .mockResolvedValueOnce(jsonResponse({ request: "latest" }));
     vi.stubGlobal("fetch", fetchMock);
-    renderJsonModal();
+    const { result } = renderJsonModalHook();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Load competing requests" }),
-    );
+    await act(async () => {
+      const firstRequest = result.current.openModal("First", "first.json");
+      const latestRequest = result.current.openModal("Latest", "latest.json");
+      await Promise.all([firstRequest, latestRequest]);
+    });
 
-    await waitFor(() =>
-      expect(screen.getByTestId("json").textContent).toBe(
-        JSON.stringify({ request: "latest" }, null, 2),
-      ),
+    expect(result.current.jsonString).toBe(
+      JSON.stringify({ request: "latest" }, null, 2),
     );
-    expect(screen.getByTestId("title").textContent).toBe("Latest");
+    expect(result.current.title).toBe("Latest");
   });
 
   it("aborts an in-flight request when the provider is unmounted", async () => {
@@ -136,11 +95,14 @@ describe("JsonModalContextProvider", () => {
           },
         ),
     );
-    const view = renderJsonModal();
-    fireEvent.click(screen.getByRole("button", { name: "Load example" }));
+    const { result, unmount } = renderJsonModalHook();
 
-    view.unmount();
-    await Promise.resolve();
+    let request: Promise<void> | undefined;
+    act(() => {
+      request = result.current.openModal("Example", "example.json");
+    });
+    unmount();
+    await request;
 
     expect(requestSignal?.aborted).toBe(true);
   });
