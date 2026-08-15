@@ -25,6 +25,7 @@ export const SearchInput = () => {
         <OutlinedInput
           value={value}
           placeholder="Search..."
+          slotProps={{ input: { "aria-label": "Search rules" } }}
           startAdornment={
             <InputAdornment position="start">
               <SearchIcon />
