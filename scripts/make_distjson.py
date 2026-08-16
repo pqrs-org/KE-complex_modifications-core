@@ -23,7 +23,24 @@ def remember_cwd():
 
 def check_safe_path(path):
     '''Check path is under cwd'''
-    return os.path.realpath(path).startswith(os.path.realpath(os.getcwd()))
+    root = os.path.realpath(os.getcwd())
+    target = os.path.realpath(path)
+    return os.path.commonpath((root, target)) == root
+
+
+def extract_text_from_html(source):
+    '''Extract searchable text from an HTML fragment'''
+    # Remove each <style> block separately.
+    source = re.sub(
+        r'<style\b[^>]*>.*?</style\s*>', '', source,
+        flags=re.IGNORECASE | re.DOTALL)
+    # Strip tags.
+    source = re.sub(r'</?[^>]*>', '', source, flags=re.MULTILINE)
+    # Unescape entities.
+    source = html.unescape(source)
+    # Collapse spaces.
+    source = re.sub(r'\s+', ' ', source, flags=re.MULTILINE)
+    return source.strip()
 
 
 def make_distjson():
@@ -100,22 +117,8 @@ def make_distjson():
 
                             with open(file['extra_description_path'],
                                       encoding='utf-8') as extra_description_file:
-                                extra_description_text = extra_description_file.read()
-                                # Remove <style>
-                                extra_description_text = re.sub(
-                                    '<style.*</style>', '', extra_description_text,
-                                    flags=re.MULTILINE | re.DOTALL)
-                                # Strip tags
-                                extra_description_text = re.sub(
-                                    '</?[^>]*>', '', extra_description_text, flags=re.MULTILINE)
-                                # Unescape entities
-                                extra_description_text = html.unescape(
-                                    extra_description_text)
-                                # Collapse spaces
-                                extra_description_text = re.sub(
-                                    r'\s+', ' ', extra_description_text, flags=re.MULTILINE)
-                                # Strip
-                                extra_description_text = extra_description_text.strip()
+                                extra_description_text = extract_text_from_html(
+                                    extra_description_file.read())
 
                         file['extra_description_text'] = extra_description_text
 
