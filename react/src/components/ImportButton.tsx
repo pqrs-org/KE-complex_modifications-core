@@ -8,7 +8,6 @@ import {
   Button,
   ButtonGroup,
   ClickAwayListener,
-  Divider,
   Grow,
   Paper,
   MenuList,
@@ -182,31 +181,6 @@ export const ImportButton = ({
                   autoFocusItem={menuOpen}
                   onKeyDown={handleMenuKeyDown}
                 >
-                  <MenuItem
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      importJson();
-                      closeMenu(true);
-                    }}
-                  >
-                    Import to Karabiner-Elements
-                  </MenuItem>
-                  <Divider />
-
-                  <MenuItem
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      void jsonModal.openModal(
-                        jsonFile.object.json.title ?? "",
-                        jsonFile.jsonUrl,
-                      );
-                      closeMenu(true);
-                    }}
-                  >
-                    <CodeIcon sx={{ marginRight: 1 }} />
-                    <small>Show JSON</small>
-                  </MenuItem>
-
                   {showOpenRule && (
                     <MenuItem
                       component="a"
@@ -219,9 +193,23 @@ export const ImportButton = ({
                       }}
                     >
                       <OpenInNewIcon sx={{ marginRight: 1 }} />
-                      Open rule in new tab
+                      Open shareable rule page in new tab
                     </MenuItem>
                   )}
+
+                  <MenuItem
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void jsonModal.openModal(
+                        jsonFile.object.json.title ?? "",
+                        jsonFile.jsonUrl,
+                      );
+                      closeMenu(true);
+                    }}
+                  >
+                    <CodeIcon sx={{ marginRight: 1 }} />
+                    Show JSON
+                  </MenuItem>
 
                   <MenuItem
                     onClick={(event) => {

@@ -559,7 +559,9 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open import menu" }));
     expect(await screen.findByRole("menu")).not.toBeNull();
     expect(
-      screen.queryByRole("menuitem", { name: "Open rule in new tab" }),
+      screen.queryByRole("menuitem", {
+        name: "Open shareable rule page in new tab",
+      }),
     ).toBeNull();
   });
 

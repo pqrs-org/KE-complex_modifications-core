@@ -67,7 +67,7 @@ describe("ImportButton", () => {
 
     const menu = await openMenu();
     const firstItem = within(menu).getByRole("menuitem", {
-      name: "Import to Karabiner-Elements",
+      name: "Open shareable rule page in new tab",
     });
     await waitFor(() => expect(document.activeElement).toBe(firstItem));
 
@@ -131,7 +131,7 @@ describe("ImportButton", () => {
     const menu = await openMenu();
 
     const link = within(menu).getByRole("menuitem", {
-      name: "Open rule in new tab",
+      name: "Open shareable rule page in new tab",
     });
 
     expect(link.getAttribute("href")).toBe(
