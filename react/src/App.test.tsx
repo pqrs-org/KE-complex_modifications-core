@@ -121,6 +121,81 @@ describe("App", () => {
     expect(screen.getByText(/revision: revision/)).not.toBeNull();
   });
 
+  it("uses the metadata ranking within regular categories", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        response({
+          index: [
+            {
+              id: "category",
+              name: "Category",
+              files: [
+                {
+                  path: "json/plain.json",
+                  json: { title: "Plain regular priority", rules: [] },
+                },
+                {
+                  path: "json/short-documented.json",
+                  extra_description_path: "extra_descriptions/short.html",
+                  extra_description_text: "Short.",
+                  json: {
+                    title: "Short documented regular priority",
+                    rules: [],
+                  },
+                },
+                {
+                  path: "json/long-documented.json",
+                  extra_description_path: "extra_descriptions/long.html",
+                  extra_description_text: "Detailed documentation.",
+                  json: {
+                    title: "Long documented regular priority",
+                    rules: [],
+                  },
+                },
+                {
+                  path: "json/maintained.json",
+                  json: {
+                    title: "Maintained regular priority",
+                    maintainers: ["maintainer"],
+                    rules: [],
+                  },
+                },
+                {
+                  path: "json/both.json",
+                  extra_description_path: "extra_descriptions/both.html",
+                  extra_description_text: "Description.",
+                  json: {
+                    title: "Both regular priority",
+                    author: "author",
+                    rules: [],
+                  },
+                },
+              ],
+            },
+          ],
+          example: [],
+          revision: "revision",
+          updatedAt: 1_700_000_000,
+        }),
+      ),
+    );
+
+    renderApp();
+
+    expect(
+      (
+        await screen.findAllByRole("button", { name: / regular priority$/ })
+      ).map((button) => button.getAttribute("aria-label")),
+    ).toEqual([
+      "Both regular priority",
+      "Maintained regular priority",
+      "Long documented regular priority",
+      "Short documented regular priority",
+      "Plain regular priority",
+    ]);
+  });
+
   it("shows an error for an invalid dist.json structure", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response({})));
     vi.spyOn(console, "error").mockImplementation(() => undefined);

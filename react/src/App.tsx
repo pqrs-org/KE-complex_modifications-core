@@ -18,6 +18,7 @@ import { isDistResult } from "./utils/distResult";
 import {
   configureUnicodeTrimmer,
   searchIndex,
+  sortCategoryFiles,
   sortSearchResults,
 } from "./utils/search";
 import {
@@ -211,7 +212,13 @@ const App = () => {
     }
 
     if (searchQuery === "") {
-      return allCategories;
+      return allCategories.map(
+        (category) =>
+          new Category({
+            ...category.object,
+            files: sortCategoryFiles(category.object.files),
+          }),
+      );
     }
 
     //
@@ -229,23 +236,7 @@ const App = () => {
         category.files.map((file) => [file.id, file.object] as const),
       ),
     );
-    const searchMetadataById = new Map(
-      Array.from(filesById, ([fileId, file]) => [
-        fileId,
-        {
-          title: file.json.title,
-          author: file.json.author,
-          maintainers: file.json.maintainers,
-          extraDescriptionPath: file.extra_description_path,
-          extraDescriptionText: file.extra_description_text,
-        },
-      ]),
-    );
-    const sortedResults = sortSearchResults(
-      results,
-      searchMetadataById,
-      searchQuery,
-    );
+    const sortedResults = sortSearchResults(results, filesById, searchQuery);
     const files = sortedResults.flatMap((result) => {
       const file = filesById.get(result.ref);
       return file === undefined ? [] : [file];

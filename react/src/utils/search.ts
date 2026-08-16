@@ -1,4 +1,5 @@
 import lunr from "lunr";
+import type { KarabinerJsonFileObject } from "../types";
 
 const unicodeTrimmer = (token: lunr.Token) =>
   token.update((value) =>
@@ -37,32 +38,45 @@ export const titleIncludesSearchQuery = (
   );
 };
 
-type SearchResultMetadata = {
-  readonly title?: string;
-  readonly author?: string;
-  readonly maintainers?: readonly string[];
-  readonly extraDescriptionPath?: string;
-  readonly extraDescriptionText?: string;
-};
+const getFileRanking = (
+  file: KarabinerJsonFileObject,
+  searchQuery: string,
+) => ({
+  priority: getDocumentPriority({
+    author: file.json.author,
+    maintainers: file.json.maintainers,
+    extraDescriptionPath: file.extra_description_path,
+  }),
+  titleMatches: titleIncludesSearchQuery(file.json.title ?? "", searchQuery),
+  extraDescriptionLength: file.extra_description_path
+    ? (file.extra_description_text?.length ?? 0)
+    : 0,
+});
+
+export const sortCategoryFiles = (files: readonly KarabinerJsonFileObject[]) =>
+  files.toSorted((a, b) => {
+    const aRanking = getFileRanking(a, "");
+    const bRanking = getFileRanking(b, "");
+
+    // Regular category order (highest priority first):
+    // 1. Metadata tier: author/maintainers + extra description,
+    //    author/maintainers, extra description, neither.
+    // 2. The extra description is longer.
+    return (
+      bRanking.priority - aRanking.priority ||
+      bRanking.extraDescriptionLength - aRanking.extraDescriptionLength
+    );
+  });
 
 export const sortSearchResults = (
   results: readonly lunr.Index.Result[],
-  metadataById: ReadonlyMap<string, SearchResultMetadata>,
+  filesById: ReadonlyMap<string, KarabinerJsonFileObject>,
   searchQuery: string,
 ) => {
   const rankingsById = new Map(
-    Array.from(metadataById, ([id, metadata]) => [
+    Array.from(filesById, ([id, file]) => [
       id,
-      {
-        priority: getDocumentPriority(metadata),
-        titleMatches: titleIncludesSearchQuery(
-          metadata.title ?? "",
-          searchQuery,
-        ),
-        extraDescriptionLength: metadata.extraDescriptionPath
-          ? (metadata.extraDescriptionText?.length ?? 0)
-          : 0,
-      },
+      getFileRanking(file, searchQuery),
     ]),
   );
 
