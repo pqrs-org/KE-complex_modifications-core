@@ -1,4 +1,5 @@
 all: build_rules
+	python3 scripts/sort_groups.py '../public/groups.json'
 	python3 scripts/lint_groups.py '../public/groups.json'
 	bash scripts/update-dist.sh
 
