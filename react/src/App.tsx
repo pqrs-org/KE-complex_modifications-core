@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   AppBar,
@@ -231,7 +231,7 @@ const App = () => {
     sharedRulePath === null ? undefined : categories[0]?.files[0];
 
   return (
-    <Fragment>
+    <>
       <AppBar position="static">
         <Toolbar>
           <Link href="./" color="inherit" underline="none">
@@ -391,7 +391,7 @@ const App = () => {
 
       <JsonModal />
       <Snackbar />
-    </Fragment>
+    </>
   );
 };
 

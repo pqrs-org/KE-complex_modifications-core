@@ -24,14 +24,14 @@ export const SnackbarContextProvider = ({
   const [text, setText] = useState("");
 
   return (
-    <SnackbarContext.Provider
+    <SnackbarContext
       value={{
         text,
         setText,
       }}
     >
       {children}
-    </SnackbarContext.Provider>
+    </SnackbarContext>
   );
 };
 

@@ -34,14 +34,14 @@ export const SearchQueryContextProvider = ({
   }, []);
 
   return (
-    <SearchQueryContext.Provider
+    <SearchQueryContext
       value={{
         query,
         setQuery,
       }}
     >
       {children}
-    </SearchQueryContext.Provider>
+    </SearchQueryContext>
   );
 };
 

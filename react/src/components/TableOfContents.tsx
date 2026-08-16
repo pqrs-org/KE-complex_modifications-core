@@ -1,5 +1,5 @@
 import { Box, Chip, Divider, Link } from "@mui/material";
-import { Category } from "../models";
+import type { Category } from "../models";
 import { highlightElementById } from "../utils/hashTarget";
 
 export const TableOfContents = ({ categories }: { categories: Category[] }) => {

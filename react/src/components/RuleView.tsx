@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Star as StarIcon } from "@mui/icons-material";
-import { KarabinerJsonFile } from "../models";
+import type { KarabinerJsonFile } from "../models";
 import { ExtraDescription } from "./ExtraDescription";
 import { ImportButton } from "./ImportButton";
 import { ruleHeaderLineHeight } from "./ruleHeaderLayout";

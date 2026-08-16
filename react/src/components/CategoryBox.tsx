@@ -1,13 +1,13 @@
 import {
   Accordion,
   AccordionDetails,
-  AccordionProps,
   AccordionSummary,
   Box,
   styled,
+  type AccordionProps,
 } from "@mui/material";
 import { ArrowForwardIosSharp as ArrowForwardIosSharpIcon } from "@mui/icons-material";
-import { Category } from "../models";
+import type { Category } from "../models";
 import { RuleDetails, RuleHeader, RuleHeaderContent } from "./RuleView";
 
 const color = "#28A745";

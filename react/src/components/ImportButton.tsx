@@ -23,7 +23,7 @@ import {
   OpenInNew as OpenInNewIcon,
 } from "@mui/icons-material";
 import { useJsonModal, useSnackbar } from "../contexts";
-import { KarabinerJsonFile } from "../models";
+import type { KarabinerJsonFile } from "../models";
 import { toAbsoluteUrl, toKarabinerImportUrl } from "../utils/url";
 import { Base64 } from "js-base64";
 import { ruleHeaderLineHeight } from "./ruleHeaderLayout";

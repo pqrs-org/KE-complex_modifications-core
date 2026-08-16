@@ -1,4 +1,4 @@
-import { Fragment, Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import {
   Backdrop,
   Box,
@@ -32,7 +32,7 @@ export const JsonModal = () => {
   };
 
   return (
-    <Fragment>
+    <>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={jsonModalContext.fetching}
@@ -68,6 +68,6 @@ export const JsonModal = () => {
           </Suspense>
         </Box>
       </Modal>
-    </Fragment>
+    </>
   );
 };

@@ -78,11 +78,7 @@ export const JsonModalContextProvider = ({
     [open, title, fetching, jsonString, openModal],
   );
 
-  return (
-    <JsonModalContext.Provider value={value}>
-      {children}
-    </JsonModalContext.Provider>
-  );
+  return <JsonModalContext value={value}>{children}</JsonModalContext>;
 };
 
 export const useJsonModal = () => {
