@@ -39,7 +39,6 @@ const App = () => {
   const [revision, setRevision] = useState("");
   const [updatedAt, setUpdatedAt] = useState(0);
   const [fetchError, setFetchError] = useState("");
-  const hasSearchQuery = searchQuery !== "";
 
   //
   // Fetch dist.json
@@ -111,13 +110,9 @@ const App = () => {
   //
 
   const lunrIndex = useMemo(() => {
-    // Skip if allCategories is not initialized.
-    if (allCategories.length === 0) {
-      return undefined;
-    }
-
-    // Skip if search query is empty.
-    if (!hasSearchQuery) {
+    // Shared rule pages do not provide search. On the regular page, build the
+    // index once per dist.json result and retain it when the query is cleared.
+    if (allCategories.length === 0 || sharedRulePath !== null) {
       return undefined;
     }
 
@@ -158,7 +153,7 @@ const App = () => {
         });
       });
     });
-  }, [allCategories, hasSearchQuery]);
+  }, [allCategories, sharedRulePath]);
 
   //
   // Update categories
