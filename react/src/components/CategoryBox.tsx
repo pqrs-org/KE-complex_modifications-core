@@ -3,13 +3,12 @@ import {
   AccordionDetails,
   AccordionProps,
   AccordionSummary,
-  AccordionSummaryProps,
   Box,
   styled,
 } from "@mui/material";
 import { ArrowForwardIosSharp as ArrowForwardIosSharpIcon } from "@mui/icons-material";
 import { Category } from "../models";
-import { RuleActions, RuleDetails } from "./RuleView";
+import { RuleDetails, RuleHeader, RuleHeaderContent } from "./RuleView";
 
 const color = "#28A745";
 const categoryColor = `var(--category-highlight-color, ${color})`;
@@ -38,25 +37,30 @@ const CategoryBoxAccordion = styled(({ slots, ...props }: AccordionProps) => (
   "&:before": {
     display: "none",
   },
+  "& .Rule-expandIcon": {
+    marginRight: theme.spacing(1),
+    fontSize: "0.9rem",
+    verticalAlign: "middle",
+    transition: theme.transitions.create("transform", {
+      duration: theme.transitions.duration.shortest,
+    }),
+  },
+  "&.Mui-expanded .Rule-expandIcon": {
+    transform: "rotate(90deg)",
+  },
 }));
 
-const CategoryBoxAccordionSummary = styled((props: AccordionSummaryProps) => (
-  <AccordionSummary
-    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: "0.9rem" }} />}
-    {...props}
-  />
-))(({ theme }) => ({
+const CategoryBoxAccordionSummary = styled(AccordionSummary)(() => ({
   // AccordionSummary renders a native button. Inherit the surrounding font
   // instead of using the browser's smaller default button font.
   font: "inherit",
-  backgroundColor: "white",
-  flexDirection: "row-reverse",
-  "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
-    transform: "rotate(90deg)",
-  },
+  position: "absolute",
+  inset: 0,
+  zIndex: 0,
+  minHeight: 0,
+  padding: 0,
   "& .MuiAccordionSummary-content": {
-    marginLeft: theme.spacing(1),
-    alignItems: "center",
+    display: "none",
   },
 }));
 
@@ -97,24 +101,27 @@ export const CategoryBox = ({ category }: { category: Category }) => {
             }}
             key={f.id}
           >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                flexWrap: "wrap",
-                backgroundColor: "white",
-              }}
+            <RuleHeader
+              jsonFile={f}
+              control={
+                <CategoryBoxAccordionSummary
+                  id={summaryId}
+                  aria-controls={regionId}
+                  aria-label={f.object.json.title}
+                />
+              }
             >
-              <CategoryBoxAccordionSummary
-                id={summaryId}
-                aria-controls={regionId}
-                sx={{ flex: "1 1 20rem", minWidth: 0 }}
-              >
-                {f.object.json.title}
-              </CategoryBoxAccordionSummary>
-
-              <RuleActions jsonFile={f} />
-            </Box>
+              {/* Keep the visible label in normal inline flow so it can wrap
+                  around the floated import action. The summary is a separate
+                  control layer because metadata links cannot be nested in it. */}
+              <RuleHeaderContent
+                jsonFile={f}
+                leading={
+                  <ArrowForwardIosSharpIcon className="Rule-expandIcon" />
+                }
+                overlaidBySummary
+              />
+            </RuleHeader>
             <AccordionDetails sx={{ pt: 0 }}>
               <RuleDetails jsonFile={f} />
             </AccordionDetails>

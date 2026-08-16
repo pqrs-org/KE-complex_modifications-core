@@ -16,7 +16,11 @@ describe("CategoryBox", () => {
       files: [
         {
           path: "json/example.json",
-          json: { title: "Example", rules: [] },
+          json: {
+            title: "Example",
+            maintainers: ["example-maintainer"],
+            rules: [],
+          },
         },
       ],
     });
@@ -35,6 +39,22 @@ describe("CategoryBox", () => {
     expect(summary.contains(menuButton)).toBe(false);
     expect(importButton.closest("h1, h2, h3, h4, h5, h6")).toBeNull();
     expect(menuButton.closest("h1, h2, h3, h4, h5, h6")).toBeNull();
+    expect(
+      summary.compareDocumentPosition(importButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).not.toBe(0);
+
+    const visibleTitle = screen.getByText("Example", { selector: "span" });
+    expect(visibleTitle.parentElement?.getAttribute("aria-hidden")).toBe(
+      "true",
+    );
+
+    const maintainerLink = screen.getByRole("link", {
+      name: "example-maintainer",
+    });
+    maintainerLink.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(maintainerLink);
+    expect(summary.getAttribute("aria-expanded")).toBe("false");
 
     fireEvent.click(summary);
     const regionId = summary.getAttribute("aria-controls");

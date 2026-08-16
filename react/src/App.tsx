@@ -298,12 +298,18 @@ const App = () => {
                 boxSizing: "border-box",
                 display: "flex",
                 flexDirection: "column",
+                order: { xs: 2, md: 1 },
               }}
             >
               <TableOfContents categories={categories} />
             </Box>
 
-            <Box sx={{ "--sticky-search-height": "88px" }}>
+            <Box
+              sx={{
+                "--sticky-search-height": "88px",
+                order: { xs: 1, md: 2 },
+              }}
+            >
               <Box
                 sx={{
                   mt: 2,

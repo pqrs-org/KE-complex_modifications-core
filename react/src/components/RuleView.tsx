@@ -13,8 +13,15 @@ import { Star as StarIcon } from "@mui/icons-material";
 import { KarabinerJsonFile } from "../models";
 import { ExtraDescription } from "./ExtraDescription";
 import { ImportButton } from "./ImportButton";
+import { ruleHeaderLineHeight } from "./ruleHeaderLayout";
 
 const color = "#28A745";
+const metadataChipSx = {
+  marginInlineStart: "1.5rem",
+  height: ruleHeaderLineHeight,
+  fontSize: "0.75rem",
+  verticalAlign: "middle",
+} as const;
 
 const GroupBox = ({
   label,
@@ -50,50 +57,116 @@ const GroupBox = ({
   </Box>
 );
 
-export const RuleActions = ({
+export const RuleMetadata = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
+  const author = jsonFile.object.json.author;
+  const maintainers = jsonFile.object.json.maintainers ?? [];
+
+  if (!author && maintainers.length === 0) return null;
+
+  return (
+    <Box
+      component="span"
+      sx={{ position: "relative", zIndex: 2, pointerEvents: "auto" }}
+    >
+      {author && (
+        <Chip
+          component="span"
+          label={`Author: ${author}`}
+          variant="outlined"
+          sx={metadataChipSx}
+        />
+      )}
+      {maintainers.map((maintainer) => (
+        <Chip
+          component="span"
+          label={
+            <>
+              Maintained by @
+              <Link
+                href={`https://github.com/${maintainer}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {maintainer}
+              </Link>
+            </>
+          }
+          variant="outlined"
+          sx={metadataChipSx}
+          key={`${jsonFile.id}-maintainers-${maintainer}`}
+        />
+      ))}
+    </Box>
+  );
+};
+
+const RuleImportAction = ({
   jsonFile,
   showOpenRule = true,
 }: {
   jsonFile: KarabinerJsonFile;
   showOpenRule?: boolean;
 }) => (
+  <Box sx={{ px: { xs: 1, sm: 2 }, py: 1.5 }}>
+    <ImportButton jsonFile={jsonFile} showOpenRule={showOpenRule} />
+  </Box>
+);
+
+export const RuleHeader = ({
+  jsonFile,
+  showOpenRule = true,
+  control,
+  children,
+}: {
+  jsonFile: KarabinerJsonFile;
+  showOpenRule?: boolean;
+  control?: ReactNode;
+  children: ReactNode;
+}) => (
   <Box
     sx={{
-      display: "flex",
-      alignItems: "center",
-      flexWrap: "wrap",
-      gap: 1,
-      px: 2,
-      py: 1,
+      display: "flow-root",
+      position: "relative",
+      backgroundColor: "white",
     }}
   >
-    {jsonFile.object.json.author && (
-      <Chip
-        label={`Author: ${jsonFile.object.json.author}`}
-        variant="outlined"
-        sx={{ marginRight: 2 }}
-      />
-    )}
-    {jsonFile.object.json.maintainers?.map((maintainer) => (
-      <Chip
-        label={
-          <>
-            Maintained by @
-            <Link
-              href={`https://github.com/${maintainer}`}
-              target="_blank"
-              onClick={(event) => event.stopPropagation()}
-            >
-              {maintainer}
-            </Link>
-          </>
-        }
-        variant="outlined"
-        sx={{ marginRight: 2 }}
-        key={`${jsonFile.id}-maintainers-${maintainer}`}
-      />
-    ))}
-    <ImportButton jsonFile={jsonFile} showOpenRule={showOpenRule} />
+    {control}
+    <Box sx={{ float: "right", position: "relative", zIndex: 1 }}>
+      <RuleImportAction jsonFile={jsonFile} showOpenRule={showOpenRule} />
+    </Box>
+    {children}
+  </Box>
+);
+
+export const RuleHeaderContent = ({
+  jsonFile,
+  leading,
+  overlaidBySummary = false,
+}: {
+  jsonFile: KarabinerJsonFile;
+  leading?: ReactNode;
+  overlaidBySummary?: boolean;
+}) => (
+  <Box
+    sx={{
+      minWidth: 0,
+      px: 2,
+      py: 1.5,
+      lineHeight: ruleHeaderLineHeight,
+      textAlign: "left",
+      overflowWrap: "anywhere",
+      ...(overlaidBySummary && {
+        position: "relative",
+        zIndex: 1,
+        pointerEvents: "none",
+      }),
+    }}
+  >
+    <Box component="span" aria-hidden={overlaidBySummary ? true : undefined}>
+      {leading}
+      <Box component="span">{jsonFile.object.json.title}</Box>
+    </Box>
+    <RuleMetadata jsonFile={jsonFile} />
   </Box>
 );
 
@@ -131,19 +204,9 @@ export const SharedRuleView = ({
   jsonFile: KarabinerJsonFile;
 }) => (
   <Box sx={{ border: `1px solid ${color}` }}>
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        flexWrap: "wrap",
-        backgroundColor: "white",
-      }}
-    >
-      <Box sx={{ flex: "1 1 20rem", minWidth: 0, px: 2, py: 1.5 }}>
-        {jsonFile.object.json.title}
-      </Box>
-      <RuleActions jsonFile={jsonFile} showOpenRule={false} />
-    </Box>
+    <RuleHeader jsonFile={jsonFile} showOpenRule={false}>
+      <RuleHeaderContent jsonFile={jsonFile} />
+    </RuleHeader>
     <Box sx={{ px: 2, pb: 2 }}>
       <RuleDetails jsonFile={jsonFile} />
     </Box>

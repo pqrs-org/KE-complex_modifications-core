@@ -26,6 +26,7 @@ import { useJsonModal, useSnackbar } from "../contexts";
 import { KarabinerJsonFile } from "../models";
 import { toAbsoluteUrl, toKarabinerImportUrl } from "../utils/url";
 import { Base64 } from "js-base64";
+import { ruleHeaderLineHeight } from "./ruleHeaderLayout";
 
 export const ImportButton = ({
   jsonFile,
@@ -148,10 +149,21 @@ export const ImportButton = ({
 
   return (
     <>
-      <ButtonGroup variant="contained" ref={setAnchorElement}>
+      <ButtonGroup
+        variant="contained"
+        ref={setAnchorElement}
+        sx={{
+          height: ruleHeaderLineHeight,
+          "& .MuiButton-root": {
+            minHeight: ruleHeaderLineHeight,
+            py: 0,
+            lineHeight: 1,
+          },
+        }}
+      >
         <Button
           size="small"
-          sx={{ textTransform: "none" }}
+          sx={{ px: { sm: 2 }, fontSize: "1rem", textTransform: "none" }}
           onClick={(event) => {
             event.stopPropagation();
             importJson();
@@ -163,6 +175,7 @@ export const ImportButton = ({
         <Button
           ref={menuButtonRef}
           size="small"
+          sx={{ px: { sm: 1.25 } }}
           aria-label="Open import menu"
           aria-controls={menuOpen ? menuId : undefined}
           aria-expanded={menuOpen}
@@ -172,7 +185,7 @@ export const ImportButton = ({
             handleMenuToggle();
           }}
         >
-          <ArrowDropDownIcon />
+          <ArrowDropDownIcon sx={{ fontSize: "1.25rem" }} />
         </Button>
       </ButtonGroup>
 
