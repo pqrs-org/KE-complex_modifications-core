@@ -303,6 +303,63 @@ describe("App", () => {
     expect(names[4]).toBe("Needle plain priority");
   });
 
+  it("prioritizes title matches over extra description length", async () => {
+    window.history.replaceState(null, "", "/?q=needle");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        response({
+          index: [
+            {
+              id: "category",
+              name: "Category",
+              files: [
+                {
+                  path: "json/short.json",
+                  extra_description_path: "extra_descriptions/short.html",
+                  extra_description_text: "Short.",
+                  json: {
+                    title: "Needle short description priority",
+                    author: "author",
+                    rules: [],
+                  },
+                },
+                {
+                  path: "json/long.json",
+                  extra_description_path: "extra_descriptions/long.html",
+                  extra_description_text: "Detailed documentation. ".repeat(
+                    100,
+                  ),
+                  json: {
+                    title: "Long description priority",
+                    author: "author",
+                    rules: [{ description: "needle" }],
+                  },
+                },
+              ],
+            },
+          ],
+          example: [],
+          revision: "revision",
+          updatedAt: 1_700_000_000,
+        }),
+      ),
+    );
+
+    renderApp();
+
+    expect(
+      (
+        await screen.findAllByRole("button", {
+          name: /description priority$/,
+        })
+      ).map((button) => button.getAttribute("aria-label")),
+    ).toEqual([
+      "Needle short description priority",
+      "Long description priority",
+    ]);
+  });
+
   it("does not filter files using the location hash", async () => {
     window.history.replaceState(null, "", "/#second");
     const scrollIntoView = vi.fn();

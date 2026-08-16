@@ -17,8 +17,8 @@ import { Category, SEARCH_RESULT_CATEGORY_ID } from "./models";
 import { isDistResult } from "./utils/distResult";
 import {
   configureUnicodeTrimmer,
-  getDocumentPriority,
   searchIndex,
+  sortSearchResults,
 } from "./utils/search";
 import {
   clearHashTargetHighlight,
@@ -229,21 +229,22 @@ const App = () => {
         category.files.map((file) => [file.id, file.object] as const),
       ),
     );
-    const prioritiesById = new Map(
+    const searchMetadataById = new Map(
       Array.from(filesById, ([fileId, file]) => [
         fileId,
-        getDocumentPriority({
+        {
+          title: file.json.title,
           author: file.json.author,
           maintainers: file.json.maintainers,
           extraDescriptionPath: file.extra_description_path,
-        }),
+          extraDescriptionText: file.extra_description_text,
+        },
       ]),
     );
-
-    const sortedResults = results.toSorted(
-      (a, b) =>
-        (prioritiesById.get(b.ref) ?? 0) - (prioritiesById.get(a.ref) ?? 0) ||
-        b.score - a.score,
+    const sortedResults = sortSearchResults(
+      results,
+      searchMetadataById,
+      searchQuery,
     );
     const files = sortedResults.flatMap((result) => {
       const file = filesById.get(result.ref);

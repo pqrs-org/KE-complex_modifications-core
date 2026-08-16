@@ -5,6 +5,7 @@ import {
   getDocumentPriority,
   getEditDistance,
   searchIndex,
+  titleIncludesSearchQuery,
 } from "./search";
 
 describe("getDocumentPriority", () => {
@@ -29,6 +30,20 @@ describe("getDocumentPriority", () => {
         extraDescriptionPath: "description.html",
       }),
     ).toBe(3);
+  });
+});
+
+describe("titleIncludesSearchQuery", () => {
+  it("requires every query token in the title", () => {
+    expect(
+      titleIncludesSearchQuery("Universal Emacs Keybindings", "emacs"),
+    ).toBe(true);
+    expect(
+      titleIncludesSearchQuery("Universal Emacs Keybindings", "Emacs Key"),
+    ).toBe(true);
+    expect(
+      titleIncludesSearchQuery("Universal Emacs Keybindings", "Emacs Mouse"),
+    ).toBe(false);
   });
 });
 
@@ -94,5 +109,18 @@ describe("searchIndex", () => {
     expect(
       searchIndex(substringIndex, "キー").map((result) => result.ref),
     ).toEqual(["japanese"]);
+  });
+
+  it("does not stem fuzzy search terms", () => {
+    const stemmingIndex = lunr(function () {
+      this.ref("id");
+      this.field("text");
+      this.add({ id: "emacs", text: "Emacs" });
+      this.add({ id: "macos", text: "macOS" });
+    });
+
+    expect(
+      searchIndex(stemmingIndex, "Emacs").map((result) => result.ref),
+    ).toEqual(["emacs"]);
   });
 });
