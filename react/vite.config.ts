@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 import sirv from "sirv";
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
@@ -11,12 +10,14 @@ const __dirname = dirname(__filename);
 const dist = resolve(__dirname, "../../dist");
 
 export default defineConfig({
+  resolve: {
+    tsconfigPaths: true,
+  },
   server: {
     fs: { allow: [__dirname, resolve(__dirname, "../../dist")] },
   },
   plugins: [
     react(),
-    tsconfigPaths(),
     {
       name: "static-mounts",
       configureServer(server) {
