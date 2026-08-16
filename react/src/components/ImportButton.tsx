@@ -19,13 +19,11 @@ import {
   ArrowDropDown as ArrowDropDownIcon,
   Code as CodeIcon,
   ContentCopy as ContentCopyIcon,
-  Launch as LaunchIcon,
   OpenInNew as OpenInNewIcon,
 } from "@mui/icons-material";
 import { useJsonModal, useSnackbar } from "../contexts";
 import type { KarabinerJsonFile } from "../models";
 import { toAbsoluteUrl, toKarabinerImportUrl } from "../utils/url";
-import { Base64 } from "js-base64";
 import { ruleHeaderLineHeight } from "./ruleHeaderLayout";
 
 export const ImportButton = ({
@@ -118,32 +116,6 @@ export const ImportButton = ({
     } catch (error) {
       console.error(error);
       setSnackbarText(`ERROR: Failed to copy: ${absoluteUrl}`);
-    }
-  };
-
-  const openEditor = async () => {
-    const editorWindow = window.open("about:blank", "_blank");
-    if (editorWindow === null) {
-      setSnackbarText("ERROR: The editor window was blocked");
-      return;
-    }
-    editorWindow.opener = null;
-
-    try {
-      const response = await fetch(jsonFile.jsonUrl);
-      if (!response.ok) {
-        throw new Error(
-          `Fetch failed: ${response.status} ${response.statusText}`,
-        );
-      }
-      const json: unknown = await response.json();
-      const base64string = Base64.encode(JSON.stringify(json));
-      const url = `https://genesy.github.io/karabiner-complex-rules-generator/#${base64string}`;
-      editorWindow.location.replace(url);
-    } catch (error) {
-      editorWindow.close();
-      console.error(error);
-      setSnackbarText("ERROR: Failed to open editor");
     }
   };
 
@@ -271,17 +243,6 @@ export const ImportButton = ({
                   >
                     <ContentCopyIcon sx={{ marginRight: 1 }} />
                     Copy JSON URL
-                  </MenuItem>
-
-                  <MenuItem
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      void openEditor();
-                      closeMenu(true);
-                    }}
-                  >
-                    <LaunchIcon sx={{ marginRight: 1 }} />
-                    Edit JSON (Open external site)
                   </MenuItem>
                 </MenuList>
               </ClickAwayListener>
