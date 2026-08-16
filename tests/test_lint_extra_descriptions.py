@@ -10,6 +10,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / 'scripts'))
 
 from lint_extra_descriptions import (  # pylint: disable=wrong-import-position
     lint_extra_descriptions,
+    resolve_safe_path,
 )
 
 
@@ -36,6 +37,32 @@ class LintExtraDescriptionsTest(unittest.TestCase):
 
             with self.assertRaises(UnicodeDecodeError):
                 lint_extra_descriptions(public_directory)
+
+    def test_rejects_path_outside_public_directory(self):
+        '''A relative path must not escape public_directory.'''
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            public_directory = root / 'public'
+            public_directory.mkdir()
+            outside = root / 'outside.html'
+            outside.write_text('<p>outside</p>', encoding='utf-8')
+
+            with self.assertRaises(PermissionError):
+                resolve_safe_path(public_directory, '../outside.html')
+
+    def test_rejects_symlink_outside_public_directory(self):
+        '''A symlink must not escape public_directory.'''
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            public_directory = root / 'public'
+            public_directory.mkdir()
+            outside = root / 'outside.html'
+            outside.write_text('<p>outside</p>', encoding='utf-8')
+            link = public_directory / 'outside.html'
+            link.symlink_to(outside)
+
+            with self.assertRaises(PermissionError):
+                resolve_safe_path(public_directory, 'outside.html')
 
 
 if __name__ == '__main__':

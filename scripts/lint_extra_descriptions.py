@@ -9,6 +9,15 @@ import re
 import sys
 
 
+def resolve_safe_path(public_directory, relative_path):
+    '''Resolve a path only if it is under public_directory'''
+    public_path = pathlib.Path(public_directory).resolve()
+    path = (public_path / relative_path).resolve()
+    if os.path.commonpath((public_path, path)) != str(public_path):
+        raise PermissionError(f"cannot access {relative_path}")
+    return path
+
+
 def lint_extra_descriptions(public_directory):
     '''Lint public/extra_descriptions'''
 
@@ -22,7 +31,8 @@ def lint_extra_descriptions(public_directory):
             for category in groups_json[group_name]:
                 for file in category['files']:
                     if 'extra_description_path' in file:
-                        path = f"{public_directory}/{file['extra_description_path']}"
+                        path = resolve_safe_path(
+                            public_directory, file['extra_description_path'])
                         html = pathlib.Path(path).read_text(encoding='utf-8')
                         if html_pattern.search(html):
                             print('')
