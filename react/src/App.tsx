@@ -79,7 +79,7 @@ const App = () => {
         window.cancelAnimationFrame(animationFrame);
       }
     };
-  }, [sharedRulePath]);
+  }, [fetching, sharedRulePath]);
 
   //
   // Fetch dist.json
@@ -275,10 +275,6 @@ const App = () => {
             </Typography>
           </Link>
 
-          {fetching && (
-            <CircularProgress color="inherit" sx={{ marginLeft: 4 }} />
-          )}
-
           <Box sx={{ marginLeft: "auto", textAlign: "right" }}>
             <Link
               href="https://github.com/pqrs-org/KE-complex_modifications"
@@ -321,80 +317,102 @@ const App = () => {
               alignItems: "start",
             }}
           >
-            <Box
-              ref={tableOfContentsNavRef}
-              component="nav"
-              aria-label="Table of contents"
-              sx={{
-                mt: 2,
-                py: 2,
-                position: { md: "sticky" },
-                top: { md: 0 },
-                height: {
-                  md: "var(--toc-available-height, 100vh)",
-                },
-                boxSizing: "border-box",
-                display: "flex",
-                flexDirection: "column",
-                order: { xs: 2, md: 1 },
-              }}
-            >
-              <TableOfContents categories={categories} />
-            </Box>
-
-            <Box
-              sx={{
-                "--sticky-search-height": "88px",
-                order: { xs: 1, md: 2 },
-              }}
-            >
+            {fetching ? (
               <Box
+                role="status"
+                aria-label="Loading rules"
                 sx={{
-                  mt: 2,
-                  py: 2,
+                  gridColumn: "1 / -1",
+                  minHeight: "50vh",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 2,
                   textAlign: "center",
-                  position: { md: "sticky" },
-                  top: { md: 0 },
-                  zIndex: 910,
-                  bgcolor: "background.default",
                 }}
               >
-                <SearchInput key={searchQuery} />
+                <CircularProgress size={64} />
+                <Typography color="text.secondary">Loading rules...</Typography>
               </Box>
-
-              {searchSuggestionCounts !== undefined && (
-                <Box sx={{ mb: 2 }}>
-                  <SearchSuggestions
-                    suggestions={searchSuggestions}
-                    counts={searchSuggestionCounts}
-                  />
+            ) : (
+              <>
+                <Box
+                  ref={tableOfContentsNavRef}
+                  component="nav"
+                  aria-label="Table of contents"
+                  sx={{
+                    mt: 2,
+                    py: 2,
+                    position: { md: "sticky" },
+                    top: { md: 0 },
+                    height: {
+                      md: "var(--toc-available-height, 100vh)",
+                    },
+                    boxSizing: "border-box",
+                    display: "flex",
+                    flexDirection: "column",
+                    order: { xs: 2, md: 1 },
+                  }}
+                >
+                  <TableOfContents categories={categories} />
                 </Box>
-              )}
 
-              {categories.map((category) => (
                 <Box
                   sx={{
-                    mb: 4,
-                    scrollMarginTop: {
-                      xs: "16px",
-                      md: "var(--sticky-search-height)",
-                    },
-                    '&[data-hash-highlighted="true"]': {
-                      "--category-highlight-color": "#3DFC69",
-                      "--category-highlight-text-color": "black",
-                    },
+                    "--sticky-search-height": "88px",
+                    order: { xs: 1, md: 2 },
                   }}
-                  id={
-                    category.object.id === SEARCH_RESULT_CATEGORY_ID
-                      ? undefined
-                      : category.object.id
-                  }
-                  key={category.object.id}
                 >
-                  <CategoryBox category={category} />
+                  <Box
+                    sx={{
+                      mt: 2,
+                      py: 2,
+                      textAlign: "center",
+                      position: { md: "sticky" },
+                      top: { md: 0 },
+                      zIndex: 910,
+                      bgcolor: "background.default",
+                    }}
+                  >
+                    <SearchInput key={searchQuery} />
+                  </Box>
+
+                  {searchSuggestionCounts !== undefined && (
+                    <Box sx={{ mb: 2 }}>
+                      <SearchSuggestions
+                        suggestions={searchSuggestions}
+                        counts={searchSuggestionCounts}
+                      />
+                    </Box>
+                  )}
+
+                  {categories.map((category) => (
+                    <Box
+                      sx={{
+                        mb: 4,
+                        scrollMarginTop: {
+                          xs: "16px",
+                          md: "var(--sticky-search-height)",
+                        },
+                        '&[data-hash-highlighted="true"]': {
+                          "--category-highlight-color": "#3DFC69",
+                          "--category-highlight-text-color": "black",
+                        },
+                      }}
+                      id={
+                        category.object.id === SEARCH_RESULT_CATEGORY_ID
+                          ? undefined
+                          : category.object.id
+                      }
+                      key={category.object.id}
+                    >
+                      <CategoryBox category={category} />
+                    </Box>
+                  ))}
                 </Box>
-              ))}
-            </Box>
+              </>
+            )}
           </Box>
         ) : (
           <>
@@ -424,7 +442,13 @@ const App = () => {
                     &rdquo;.
                   </>
                 ) : fetching ? (
-                  "Loading the rule specified by this URL..."
+                  <Box
+                    component="span"
+                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
+                    <CircularProgress size={20} />
+                    Loading the rule specified by this URL...
+                  </Box>
                 ) : (
                   "The rule was not found."
                 )}

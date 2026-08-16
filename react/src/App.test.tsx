@@ -6,6 +6,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
@@ -61,6 +62,34 @@ afterEach(() => {
 });
 
 describe("App", () => {
+  it("shows the dist.json loading indicator in the content area", () => {
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => {})));
+
+    renderApp();
+
+    expect(
+      screen.getByRole("status", { name: "Loading rules" }),
+    ).not.toBeNull();
+    expect(screen.getByText("Loading rules...")).not.toBeNull();
+    expect(
+      within(screen.getByRole("banner")).queryByRole("progressbar"),
+    ).toBeNull();
+  });
+
+  it("shows shared-rule loading progress in the content alert", () => {
+    window.history.replaceState(null, "", "/?rule=json%2Fexample.json");
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => {})));
+
+    renderApp();
+
+    expect(
+      within(screen.getByRole("alert")).getByRole("progressbar"),
+    ).not.toBeNull();
+    expect(
+      within(screen.getByRole("banner")).queryByRole("progressbar"),
+    ).toBeNull();
+  });
+
   it("fits the table of contents into the visible viewport", async () => {
     vi.stubGlobal(
       "fetch",
