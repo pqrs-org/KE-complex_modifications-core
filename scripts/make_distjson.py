@@ -9,6 +9,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 
 
 @contextlib.contextmanager
@@ -43,7 +44,7 @@ def extract_text_from_html(source):
     return source.strip()
 
 
-def make_distjson():
+def make_distjson(output_file_path='../dist/dist.json'):
     '''Update dist/dist.json'''
 
     with remember_cwd():
@@ -134,10 +135,11 @@ def make_distjson():
                                  capture_output=True, check=False, encoding='utf-8')
             groups_json['updatedAt'] = int(git.stdout.strip())
 
-            with open('../dist/dist.json', 'w', encoding='utf-8') as build_groups_json_file:
+            with open(output_file_path, 'w', encoding='utf-8') as build_groups_json_file:
                 json.dump(groups_json, build_groups_json_file,
                           ensure_ascii=False, indent=2)
 
 
 if __name__ == "__main__":
-    make_distjson()
+    OUTPUT_FILE_PATH = sys.argv[1] if len(sys.argv) > 1 else '../dist/dist.json'
+    make_distjson(OUTPUT_FILE_PATH)
