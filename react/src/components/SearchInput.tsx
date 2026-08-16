@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Box,
   FormControl,
   IconButton,
   InputAdornment,
@@ -29,47 +28,45 @@ export const SearchInput = () => {
   };
 
   return (
-    <Box>
-      <FormControl sx={{ width: "100%" }} variant="outlined">
-        <OutlinedInput
-          value={value}
-          placeholder="Search..."
-          slotProps={{ input: { "aria-label": "Search rules" } }}
-          startAdornment={
-            <InputAdornment position="start">
-              <SearchIcon />
+    <FormControl sx={{ width: "100%" }} variant="outlined">
+      <OutlinedInput
+        value={value}
+        placeholder="Search..."
+        slotProps={{ input: { "aria-label": "Search rules" } }}
+        startAdornment={
+          <InputAdornment position="start">
+            <SearchIcon />
+          </InputAdornment>
+        }
+        endAdornment={
+          value === "" ? undefined : (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="Clear search"
+                edge="end"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  setValue("");
+                  submit("");
+                }}
+              >
+                <ClearIcon />
+              </IconButton>
             </InputAdornment>
-          }
-          endAdornment={
-            value === "" ? undefined : (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="Clear search"
-                  edge="end"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => {
-                    setValue("");
-                    submit("");
-                  }}
-                >
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            )
-          }
-          onChange={(event) => {
-            setValue(event.target.value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              submit();
-            }
-          }}
-          onBlur={() => {
+          )
+        }
+        onChange={(event) => {
+          setValue(event.target.value);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
             submit();
-          }}
-        />
-      </FormControl>
-    </Box>
+          }
+        }}
+        onBlur={() => {
+          submit();
+        }}
+      />
+    </FormControl>
   );
 };

@@ -56,7 +56,7 @@ export const JsonModal = () => {
               justifyContent: "space-between",
             }}
           >
-            <Box> {jsonModalContext.title}</Box>
+            <Box>{jsonModalContext.title}</Box>
             <IconButton aria-label="Close JSON viewer" onClick={handleClose}>
               <CloseIcon />
             </IconButton>

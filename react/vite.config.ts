@@ -1,15 +1,12 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import sirv from "sirv";
-import { resolve } from "path";
+import { resolve } from "node:path";
 import { readFile } from "node:fs/promises";
 
 const dist = resolve(import.meta.dirname, "../../dist");
 
 export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
   server: {
     fs: { allow: [import.meta.dirname, dist] },
   },

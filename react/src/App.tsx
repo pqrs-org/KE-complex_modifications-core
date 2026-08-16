@@ -322,7 +322,6 @@ const App = () => {
               {categories.map((category) => (
                 <Box
                   sx={{
-                    mt: 0,
                     mb: 4,
                     scrollMarginTop: {
                       xs: "16px",
