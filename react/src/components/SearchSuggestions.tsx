@@ -10,6 +10,14 @@ export const SearchSuggestions = ({
   counts: ReadonlyMap<string, number>;
 }) => {
   const { query, setQuery } = useSearchQuery();
+  const sortedSuggestions = suggestions
+    .map((suggestion, index) => ({ suggestion, index }))
+    .sort(
+      (a, b) =>
+        (counts.get(b.suggestion) ?? 0) - (counts.get(a.suggestion) ?? 0) ||
+        a.index - b.index,
+    )
+    .map(({ suggestion }) => suggestion);
 
   return (
     <Box
@@ -22,7 +30,7 @@ export const SearchSuggestions = ({
         gap: 1,
       }}
     >
-      {suggestions.map((suggestion) => {
+      {sortedSuggestions.map((suggestion) => {
         const selected = query === suggestion;
         const count = counts.get(suggestion) ?? 0;
 

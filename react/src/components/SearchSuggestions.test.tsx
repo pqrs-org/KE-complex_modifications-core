@@ -30,14 +30,12 @@ afterEach(() => {
 });
 
 describe("SearchSuggestions", () => {
-  it("renders the configured suggestions", () => {
+  it("sorts suggestions by hit count", () => {
     renderSearchSuggestions();
 
     expect(
       screen.getAllByRole("button").map((button) => button.textContent),
-    ).toEqual(
-      suggestions.map((suggestion, index) => `${suggestion}${index + 1}`),
-    );
+    ).toEqual(["Hyper Key3", "Mouse2", "Caps Lock1"]);
   });
 
   it("searches for the selected suggestion", () => {
