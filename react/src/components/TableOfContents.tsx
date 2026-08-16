@@ -1,5 +1,5 @@
 import { Box, Chip, Divider, Link } from "@mui/material";
-import type { Category } from "../models";
+import { SEARCH_RESULT_CATEGORY_ID, type Category } from "../models";
 import { highlightElementById } from "../utils/hashTarget";
 
 export const TableOfContents = ({ categories }: { categories: Category[] }) => {
@@ -40,23 +40,27 @@ export const TableOfContents = ({ categories }: { categories: Category[] }) => {
                   my: 1,
                 }}
               >
-                <Link
-                  href={`#${encodeURIComponent(c.object.id)}`}
-                  sx={{ overflowWrap: "anywhere" }}
-                  onClick={(event) => {
-                    if (
-                      event.button === 0 &&
-                      !event.altKey &&
-                      !event.ctrlKey &&
-                      !event.metaKey &&
-                      !event.shiftKey
-                    ) {
-                      highlightElementById(c.object.id);
-                    }
-                  }}
-                >
-                  {c.object.name}
-                </Link>
+                {c.object.id === SEARCH_RESULT_CATEGORY_ID ? (
+                  <Box sx={{ overflowWrap: "anywhere" }}>{c.object.name}</Box>
+                ) : (
+                  <Link
+                    href={`#${encodeURIComponent(c.object.id)}`}
+                    sx={{ overflowWrap: "anywhere" }}
+                    onClick={(event) => {
+                      if (
+                        event.button === 0 &&
+                        !event.altKey &&
+                        !event.ctrlKey &&
+                        !event.metaKey &&
+                        !event.shiftKey
+                      ) {
+                        highlightElementById(c.object.id);
+                      }
+                    }}
+                  >
+                    {c.object.name}
+                  </Link>
+                )}
                 <Box>
                   <Chip label={c.files.length} />
                 </Box>

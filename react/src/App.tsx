@@ -13,7 +13,7 @@ import {
 import { OpenInNew as OpenInNewIcon } from "@mui/icons-material";
 import lunr from "lunr";
 import { useSearchQuery } from "./contexts";
-import { Category } from "./models";
+import { Category, SEARCH_RESULT_CATEGORY_ID } from "./models";
 import { isDistResult } from "./utils/distResult";
 import {
   clearHashTargetHighlight,
@@ -220,7 +220,7 @@ const App = () => {
 
     return [
       new Category({
-        id: "__search_result__",
+        id: SEARCH_RESULT_CATEGORY_ID,
         name: "Search Result",
         files,
       }),
@@ -338,7 +338,11 @@ const App = () => {
                       "--category-highlight-text-color": "black",
                     },
                   }}
-                  id={category.object.id}
+                  id={
+                    category.object.id === SEARCH_RESULT_CATEGORY_ID
+                      ? undefined
+                      : category.object.id
+                  }
                   key={category.object.id}
                 >
                   <CategoryBox category={category} />

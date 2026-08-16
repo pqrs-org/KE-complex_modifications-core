@@ -2,7 +2,7 @@
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { Category } from "../models";
+import { Category, SEARCH_RESULT_CATEGORY_ID } from "../models";
 import { TableOfContents } from "./TableOfContents";
 
 afterEach(() => {
@@ -29,6 +29,23 @@ describe("TableOfContents", () => {
         .getByRole("link", { name: "Examples: Others" })
         .getAttribute("href"),
     ).toBe("#Examples%3A%20Others");
+  });
+
+  it("does not link the search result category", () => {
+    render(
+      <TableOfContents
+        categories={[
+          new Category({
+            id: SEARCH_RESULT_CATEGORY_ID,
+            name: "Search Result",
+            files: [],
+          }),
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("Search Result")).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "Search Result" })).toBeNull();
   });
 
   it("moves the hash highlight before following a link", () => {

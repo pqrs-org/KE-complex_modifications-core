@@ -14,6 +14,7 @@ import {
   SearchQueryContextProvider,
   SnackbarContextProvider,
 } from "./contexts";
+import { SEARCH_RESULT_CATEGORY_ID } from "./models";
 
 const renderApp = () =>
   render(
@@ -119,6 +120,7 @@ describe("App", () => {
       await screen.findByRole("button", { name: "Needle rule" }),
     ).not.toBeNull();
     expect(screen.queryByRole("button", { name: "Unrelated rule" })).toBeNull();
+    expect(document.getElementById(SEARCH_RESULT_CATEGORY_ID)).toBeNull();
   });
 
   it("filters files by author", async () => {
