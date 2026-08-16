@@ -24,6 +24,7 @@ const validResult = {
     },
   ],
   example: [],
+  search_suggestions: ["Caps Lock", "Mouse"],
   revision: "revision",
   updatedAt: 1_700_000_000,
 };
@@ -42,6 +43,15 @@ describe("isDistResult", () => {
     expect(isDistResult({ ...validResult, updatedAt: 8_640_000_000_001 })).toBe(
       false,
     );
+  });
+
+  it("rejects invalid search suggestions", () => {
+    expect(
+      isDistResult({ ...validResult, search_suggestions: undefined }),
+    ).toBe(false);
+    expect(
+      isDistResult({ ...validResult, search_suggestions: ["Mouse", 1] }),
+    ).toBe(false);
   });
 
   it("rejects invalid nested category data", () => {

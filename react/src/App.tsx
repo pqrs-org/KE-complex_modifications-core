@@ -15,6 +15,7 @@ import lunr from "lunr";
 import { useSearchQuery } from "./contexts";
 import { Category, SEARCH_RESULT_CATEGORY_ID } from "./models";
 import { isDistResult } from "./utils/distResult";
+import { configureUnicodeTrimmer, searchIndex } from "./utils/search";
 import {
   clearHashTargetHighlight,
   highlightLocationHashTarget,
@@ -23,6 +24,7 @@ import {
   CategoryBox,
   JsonModal,
   SearchInput,
+  SearchSuggestions,
   SharedRuleView,
   Snackbar,
   TableOfContents,
@@ -37,6 +39,7 @@ const App = () => {
 
   const [fetching, setFetching] = useState(true);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [revision, setRevision] = useState("");
   const [updatedAt, setUpdatedAt] = useState(0);
   const [fetchError, setFetchError] = useState("");
@@ -100,6 +103,7 @@ const App = () => {
             .map((category) => new Category(category))
             .concat(result.example.map((category) => new Category(category))),
         );
+        setSearchSuggestions(result.search_suggestions);
         setRevision(result.revision);
         setUpdatedAt(result.updatedAt);
       } catch (error) {
@@ -150,6 +154,7 @@ const App = () => {
     }
 
     return lunr((l) => {
+      configureUnicodeTrimmer(l);
       l.ref("fileId");
       l.field("title", { boost: 2 });
       l.field("text");
@@ -223,21 +228,7 @@ const App = () => {
       return [];
     }
 
-    const results = lunrIndex.query((q) => {
-      lunr.tokenizer(searchQuery.toLowerCase()).forEach((token) => {
-        const queryString = token.toString();
-        q.term(queryString, {
-          boost: 100,
-        });
-        q.term(queryString, {
-          wildcard: lunr.Query.wildcard.LEADING | lunr.Query.wildcard.TRAILING,
-          boost: 10,
-        });
-        q.term(queryString, {
-          editDistance: 2,
-        });
-      });
-    });
+    const results = searchIndex(lunrIndex, searchQuery);
 
     const filesById = new Map(
       allCategories.flatMap((category) =>
@@ -257,6 +248,17 @@ const App = () => {
       }),
     ];
   }, [searchQuery, sharedRulePath, allCategories, lunrIndex]);
+
+  const searchSuggestionCounts = useMemo(() => {
+    if (lunrIndex === undefined) return undefined;
+
+    return new Map(
+      searchSuggestions.map((suggestion) => [
+        suggestion,
+        searchIndex(lunrIndex, suggestion).length,
+      ]),
+    );
+  }, [lunrIndex, searchSuggestions]);
 
   const sharedRule =
     sharedRulePath === null ? undefined : categories[0]?.files[0];
@@ -357,6 +359,15 @@ const App = () => {
               >
                 <SearchInput key={searchQuery} />
               </Box>
+
+              {searchSuggestionCounts !== undefined && (
+                <Box sx={{ mb: 2 }}>
+                  <SearchSuggestions
+                    suggestions={searchSuggestions}
+                    counts={searchSuggestionCounts}
+                  />
+                </Box>
+              )}
 
               {categories.map((category) => (
                 <Box

@@ -8,7 +8,11 @@ import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / 'scripts'))
 
-from make_distjson import check_safe_path, extract_text_from_html  # pylint: disable=wrong-import-position
+from make_distjson import (  # pylint: disable=wrong-import-position
+    check_safe_path,
+    extract_text_from_html,
+    load_search_suggestions,
+)
 
 
 class MakeDistjsonTest(unittest.TestCase):
@@ -38,6 +42,24 @@ class MakeDistjsonTest(unittest.TestCase):
             '<STYLE media="all">b</STYLE><p>after &amp;</p>'
         )
         self.assertEqual('before after &', extract_text_from_html(source))
+
+    def test_load_search_suggestions(self):
+        '''Search suggestions are loaded from a JSON file.'''
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / 'search_suggestions.json'
+            path.write_text('["Caps Lock", "Mouse"]', encoding='utf-8')
+
+            self.assertEqual(
+                ['Caps Lock', 'Mouse'], load_search_suggestions(path))
+
+    def test_load_search_suggestions_rejects_invalid_values(self):
+        '''Every search suggestion must be a non-empty string.'''
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / 'search_suggestions.json'
+            path.write_text('["Caps Lock", ""]', encoding='utf-8')
+
+            with self.assertRaisesRegex(ValueError, 'non-empty strings'):
+                load_search_suggestions(path)
 
 
 if __name__ == '__main__':

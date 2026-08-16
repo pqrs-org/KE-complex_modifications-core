@@ -44,6 +44,20 @@ def extract_text_from_html(source):
     return source.strip()
 
 
+def load_search_suggestions(file_path):
+    '''Load search suggestions'''
+    with open(file_path, encoding='utf-8') as search_suggestions_file:
+        search_suggestions = json.load(search_suggestions_file)
+
+    if (not isinstance(search_suggestions, list) or
+            not all(isinstance(suggestion, str) and suggestion
+                    for suggestion in search_suggestions)):
+        raise ValueError(
+            'search_suggestions.json must be an array of non-empty strings')
+
+    return search_suggestions
+
+
 def make_distjson(output_file_path='../dist/dist.json'):
     '''Update dist/dist.json'''
 
@@ -122,6 +136,13 @@ def make_distjson(output_file_path='../dist/dist.json'):
                                     extra_description_file.read())
 
                         file['extra_description_text'] = extra_description_text
+
+            #
+            # Append search suggestions
+            #
+
+            groups_json['search_suggestions'] = load_search_suggestions(
+                'search_suggestions.json')
 
             #
             # Append git info

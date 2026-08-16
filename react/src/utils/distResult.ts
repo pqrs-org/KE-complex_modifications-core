@@ -3,6 +3,7 @@ import type { CategoryObject, KarabinerJsonFileObject } from "../types";
 export type DistResult = {
   index: CategoryObject[];
   example: CategoryObject[];
+  search_suggestions: string[];
   revision: string;
   updatedAt: number;
 };
@@ -59,5 +60,9 @@ export const isDistResult = (value: unknown): value is DistResult =>
   value.index.every(isCategory) &&
   Array.isArray(value.example) &&
   value.example.every(isCategory) &&
+  Array.isArray(value.search_suggestions) &&
+  value.search_suggestions.every(
+    (suggestion) => typeof suggestion === "string",
+  ) &&
   typeof value.revision === "string" &&
   isUnixTimestamp(value.updatedAt);

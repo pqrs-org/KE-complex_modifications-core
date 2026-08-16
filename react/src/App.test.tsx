@@ -30,7 +30,13 @@ const renderApp = () =>
 const response = (json: unknown) =>
   ({
     ok: true,
-    json: vi.fn().mockResolvedValue(json),
+    json: vi
+      .fn()
+      .mockResolvedValue(
+        typeof json === "object" && json !== null && !Array.isArray(json)
+          ? { search_suggestions: [], ...json }
+          : json,
+      ),
   }) as unknown as Response;
 
 const scrollIntoViewDescriptor = Object.getOwnPropertyDescriptor(
@@ -99,6 +105,7 @@ describe("App", () => {
         response({
           index: [{ id: "category", name: "Category", files: [] }],
           example: [],
+          search_suggestions: ["Mouse"],
           revision: "revision",
           updatedAt: 1_700_000_000,
         }),
@@ -108,6 +115,9 @@ describe("App", () => {
     renderApp();
 
     expect((await screen.findAllByText("Category")).length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("button", { name: "Search for Mouse (0 results)" }),
+    ).not.toBeNull();
     expect(screen.getByText(/revision: revision/)).not.toBeNull();
   });
 
