@@ -129,7 +129,7 @@ const App = () => {
       allCategories.forEach((c) => {
         c.files.forEach((f) => {
           const { json } = f.object;
-          let text = "";
+          let text = json.author ?? "";
           if (json.maintainers !== undefined) {
             json.maintainers.forEach((m) => {
               text = `${text} ${m ?? ""}`;

@@ -121,6 +121,47 @@ describe("App", () => {
     expect(screen.queryByRole("button", { name: "Unrelated rule" })).toBeNull();
   });
 
+  it("filters files by author", async () => {
+    window.history.replaceState(null, "", "/?q=example-author");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        response({
+          index: [
+            {
+              id: "category",
+              name: "Category",
+              files: [
+                {
+                  path: "json/authored.json",
+                  json: {
+                    title: "Authored rule",
+                    author: "example-author",
+                    rules: [],
+                  },
+                },
+                {
+                  path: "json/unrelated.json",
+                  json: { title: "Unrelated rule", rules: [] },
+                },
+              ],
+            },
+          ],
+          example: [],
+          revision: "revision",
+          updatedAt: 1_700_000_000,
+        }),
+      ),
+    );
+
+    renderApp();
+
+    expect(
+      await screen.findByRole("button", { name: "Authored rule" }),
+    ).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "Unrelated rule" })).toBeNull();
+  });
+
   it("does not filter files using the location hash", async () => {
     window.history.replaceState(null, "", "/#second");
     const scrollIntoView = vi.fn();
