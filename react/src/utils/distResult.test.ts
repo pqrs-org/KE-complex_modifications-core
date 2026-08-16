@@ -106,4 +106,31 @@ describe("isDistResult", () => {
       }),
     ).toBe(false);
   });
+
+  it("rejects available_since", () => {
+    expect(
+      isDistResult({
+        ...validResult,
+        index: [
+          {
+            ...validResult.index[0],
+            files: [
+              {
+                ...validResult.index[0].files[0],
+                json: {
+                  ...validResult.index[0].files[0].json,
+                  rules: [
+                    {
+                      description: "Rule",
+                      available_since: "15.0.0",
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    ).toBe(false);
+  });
 });

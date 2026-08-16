@@ -67,6 +67,12 @@ def lint_public_json(public_json_directory):
                 if not isinstance(j['rules'], list):
                     raise ValueError('`rules` is not array')
 
+                for rule in j['rules']:
+                    if isinstance(rule, dict) and 'available_since' in rule:
+                        raise ValueError(
+                            '`available_since` is no longer supported. '
+                            'Please use `description_notes` instead')
+
             except (json.JSONDecodeError, ValueError) as ex:
                 print('')
                 print('----------------------------------------')

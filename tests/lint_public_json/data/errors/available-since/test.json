@@ -1,0 +1,9 @@
+{
+  "title": "example",
+  "rules": [
+    {
+      "description": "example",
+      "available_since": "15.0.0"
+    }
+  ]
+}

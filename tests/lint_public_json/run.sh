@@ -33,6 +33,7 @@ check_failure data/errors/filename-check "Please rename"
 check_failure data/errors/extra-directory "An extra directory is found"
 check_failure data/errors/lint-json-rules 'rules` is not array'
 check_failure data/errors/lint-json-title 'title` is not string'
+check_failure data/errors/available-since 'Please use `description_notes` instead'
 check_failure data/errors/validate-json "error:"
 
 echo data/success

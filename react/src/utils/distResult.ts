@@ -21,7 +21,7 @@ const isRule = (value: unknown) =>
   isRecord(value) &&
   isOptionalString(value.description) &&
   isOptionalStringArray(value.description_notes) &&
-  isOptionalString(value.available_since);
+  !("available_since" in value);
 
 const isJsonFile = (value: unknown): value is KarabinerJsonFileObject => {
   if (!isRecord(value) || typeof value.path !== "string") return false;

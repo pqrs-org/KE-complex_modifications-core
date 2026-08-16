@@ -175,12 +175,7 @@ export const RuleDetails = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => (
     <GroupBox label="Rules">
       <List disablePadding>
         {jsonFile.object.json.rules?.map((rule, index) => {
-          const secondaryLines = [
-            ...(rule.description_notes ?? []),
-            ...(rule.available_since
-              ? [`Karabiner-Elements ${rule.available_since} or later`]
-              : []),
-          ];
+          const secondaryLines = rule.description_notes ?? [];
 
           return (
             <ListItem
