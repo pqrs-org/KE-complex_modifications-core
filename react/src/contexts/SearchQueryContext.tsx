@@ -1,16 +1,15 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
-  type Dispatch,
   type ReactNode,
-  type SetStateAction,
 } from "react";
 
 type SearchQueryContextValue = {
   query: string;
-  setQuery: Dispatch<SetStateAction<string>>;
+  setQuery: (query: string) => void;
 };
 
 const SearchQueryContext = createContext<SearchQueryContextValue | undefined>(
@@ -25,10 +24,22 @@ export const SearchQueryContextProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [query, setQuery] = useState(getSearchQuery);
+  const [query, setQueryState] = useState(getSearchQuery);
+
+  const setQuery = useCallback((nextQuery: string) => {
+    setQueryState(nextQuery);
+    window.history.pushState(
+      { q: nextQuery },
+      "",
+      nextQuery === ""
+        ? window.location.pathname
+        : "?q=" + encodeURIComponent(nextQuery),
+    );
+    window.scrollTo({ top: 0, left: 0 });
+  }, []);
 
   useEffect(() => {
-    const handlePopState = () => setQuery(getSearchQuery());
+    const handlePopState = () => setQueryState(getSearchQuery());
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);

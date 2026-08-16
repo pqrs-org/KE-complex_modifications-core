@@ -55,6 +55,43 @@ afterEach(() => {
 });
 
 describe("App", () => {
+  it("fits the table of contents into the visible viewport", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        response({
+          index: [],
+          example: [],
+          revision: "revision",
+          updatedAt: 1_700_000_000,
+        }),
+      ),
+    );
+    vi.spyOn(window, "innerHeight", "get").mockReturnValue(800);
+    const getBoundingClientRect = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({ top: 120 } as DOMRect);
+
+    renderApp();
+
+    const tableOfContents = await screen.findByRole("navigation", {
+      name: "Table of contents",
+    });
+    await waitFor(() => {
+      expect(
+        tableOfContents.style.getPropertyValue("--toc-available-height"),
+      ).toBe("680px");
+    });
+
+    getBoundingClientRect.mockReturnValue({ top: 0 } as DOMRect);
+    fireEvent.scroll(window);
+    await waitFor(() => {
+      expect(
+        tableOfContents.style.getPropertyValue("--toc-available-height"),
+      ).toBe("800px");
+    });
+  });
+
   it("renders categories from dist.json", async () => {
     vi.stubGlobal(
       "fetch",

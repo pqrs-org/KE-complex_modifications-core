@@ -15,15 +15,6 @@ export const SearchInput = () => {
   const submit = (nextValue = value) => {
     if (query !== nextValue) {
       setQuery(nextValue);
-
-      window.history.pushState(
-        { q: nextValue },
-        "",
-        nextValue === ""
-          ? window.location.pathname
-          : "?q=" + encodeURIComponent(nextValue),
-      );
-      window.scrollTo({ top: 0, left: 0 });
     }
   };
 

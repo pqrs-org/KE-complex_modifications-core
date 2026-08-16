@@ -1,9 +1,11 @@
-import { Box, Chip, Divider, Link } from "@mui/material";
+import { Box, Button, Chip, Divider, Link } from "@mui/material";
+import { useSearchQuery } from "../contexts";
 import { SEARCH_RESULT_CATEGORY_ID, type Category } from "../models";
 import { highlightElementById } from "../utils/hashTarget";
 
 export const TableOfContents = ({ categories }: { categories: Category[] }) => {
   const color = "black";
+  const { setQuery } = useSearchQuery();
 
   return (
     <Box
@@ -11,7 +13,6 @@ export const TableOfContents = ({ categories }: { categories: Category[] }) => {
         border: `1px solid ${color}`,
         display: "flex",
         flexDirection: "column",
-        flex: { md: 1 },
         minHeight: 0,
       }}
     >
@@ -28,6 +29,8 @@ export const TableOfContents = ({ categories }: { categories: Category[] }) => {
 
       <Box sx={{ flex: 1, minHeight: 0, overflowY: { md: "auto" } }}>
         {categories.map((c) => {
+          const isSearchResult = c.object.id === SEARCH_RESULT_CATEGORY_ID;
+
           return (
             <Box key={c.object.id}>
               <Box
@@ -40,7 +43,7 @@ export const TableOfContents = ({ categories }: { categories: Category[] }) => {
                   my: 1,
                 }}
               >
-                {c.object.id === SEARCH_RESULT_CATEGORY_ID ? (
+                {isSearchResult ? (
                   <Box sx={{ overflowWrap: "anywhere" }}>{c.object.name}</Box>
                 ) : (
                   <Link
@@ -64,6 +67,21 @@ export const TableOfContents = ({ categories }: { categories: Category[] }) => {
                 <Box>
                   <Chip label={c.files.length} />
                 </Box>
+                {isSearchResult && (
+                  <Button
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    aria-label="Clear search"
+                    sx={{
+                      gridColumn: "1 / -1",
+                      textTransform: "none",
+                    }}
+                    onClick={() => setQuery("")}
+                  >
+                    Clear
+                  </Button>
+                )}
               </Box>
 
               <Divider />

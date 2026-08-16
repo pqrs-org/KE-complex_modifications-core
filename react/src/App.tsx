@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   AppBar,
@@ -30,6 +30,7 @@ import {
 
 const App = () => {
   const { query: searchQuery } = useSearchQuery();
+  const tableOfContentsNavRef = useRef<HTMLElement>(null);
   const sharedRulePath = new URLSearchParams(window.location.search).get(
     "rule",
   );
@@ -39,6 +40,38 @@ const App = () => {
   const [revision, setRevision] = useState("");
   const [updatedAt, setUpdatedAt] = useState(0);
   const [fetchError, setFetchError] = useState("");
+
+  useLayoutEffect(() => {
+    const element = tableOfContentsNavRef.current;
+    if (!element) return;
+
+    let animationFrame: number | undefined;
+    const updateAvailableHeight = () => {
+      animationFrame = undefined;
+      const top = Math.max(0, element.getBoundingClientRect().top);
+      element.style.setProperty(
+        "--toc-available-height",
+        `${Math.max(0, window.innerHeight - top)}px`,
+      );
+    };
+    const scheduleUpdate = () => {
+      if (animationFrame === undefined) {
+        animationFrame = window.requestAnimationFrame(updateAvailableHeight);
+      }
+    };
+
+    updateAvailableHeight();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      if (animationFrame !== undefined) {
+        window.cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [sharedRulePath]);
 
   //
   // Fetch dist.json
@@ -282,6 +315,7 @@ const App = () => {
             }}
           >
             <Box
+              ref={tableOfContentsNavRef}
               component="nav"
               aria-label="Table of contents"
               sx={{
@@ -289,7 +323,9 @@ const App = () => {
                 py: 2,
                 position: { md: "sticky" },
                 top: { md: 0 },
-                height: { md: "100vh" },
+                height: {
+                  md: "var(--toc-available-height, 100vh)",
+                },
                 boxSizing: "border-box",
                 display: "flex",
                 flexDirection: "column",
