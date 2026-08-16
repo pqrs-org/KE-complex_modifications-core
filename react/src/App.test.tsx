@@ -226,6 +226,83 @@ describe("App", () => {
     expect(screen.queryByRole("button", { name: "Unrelated rule" })).toBeNull();
   });
 
+  it("prioritizes maintained and documented files in search results", async () => {
+    window.history.replaceState(null, "", "/?q=needle");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        response({
+          index: [
+            {
+              id: "category",
+              name: "Category",
+              files: [
+                {
+                  path: "json/plain.json",
+                  json: {
+                    title: "Needle plain priority",
+                    maintainers: [],
+                    rules: [],
+                  },
+                },
+                {
+                  path: "json/documented.json",
+                  extra_description_path: "extra_descriptions/example.html",
+                  extra_description_text: "",
+                  json: {
+                    title: "Documented priority",
+                    rules: [{ description: "needle" }],
+                  },
+                },
+                {
+                  path: "json/maintained.json",
+                  json: {
+                    title: "Maintained priority",
+                    maintainers: ["maintainer"],
+                    rules: [{ description: "needle" }],
+                  },
+                },
+                {
+                  path: "json/authored.json",
+                  json: {
+                    title: "Authored priority",
+                    author: "author",
+                    rules: [{ description: "needle" }],
+                  },
+                },
+                {
+                  path: "json/both.json",
+                  extra_description_path: "extra_descriptions/example.html",
+                  extra_description_text: "",
+                  json: {
+                    title: "Both priority",
+                    author: "author",
+                    rules: [{ description: "needle" }],
+                  },
+                },
+              ],
+            },
+          ],
+          example: [],
+          revision: "revision",
+          updatedAt: 1_700_000_000,
+        }),
+      ),
+    );
+
+    renderApp();
+
+    const names = (
+      await screen.findAllByRole("button", { name: / priority$/ })
+    ).map((button) => button.getAttribute("aria-label"));
+    expect(names[0]).toBe("Both priority");
+    expect(new Set(names.slice(1, 3))).toEqual(
+      new Set(["Maintained priority", "Authored priority"]),
+    );
+    expect(names[3]).toBe("Documented priority");
+    expect(names[4]).toBe("Needle plain priority");
+  });
+
   it("does not filter files using the location hash", async () => {
     window.history.replaceState(null, "", "/#second");
     const scrollIntoView = vi.fn();

@@ -7,6 +7,24 @@ const unicodeTrimmer = (token: lunr.Token) =>
 
 lunr.Pipeline.registerFunction(unicodeTrimmer, "unicodeTrimmer");
 
+export const getDocumentPriority = ({
+  author,
+  maintainers,
+  extraDescriptionPath,
+}: {
+  author?: string;
+  maintainers?: readonly string[];
+  extraDescriptionPath?: string;
+}) => {
+  const attributed = Boolean(author) || (maintainers?.length ?? 0) > 0;
+  const documented = Boolean(extraDescriptionPath);
+
+  if (attributed && documented) return 3;
+  if (attributed) return 2;
+  if (documented) return 1;
+  return 0;
+};
+
 export const configureUnicodeTrimmer = (builder: lunr.Builder) => {
   builder.pipeline.before(lunr.stopWordFilter, unicodeTrimmer);
   builder.pipeline.remove(lunr.trimmer);

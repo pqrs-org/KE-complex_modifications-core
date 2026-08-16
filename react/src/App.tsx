@@ -15,7 +15,11 @@ import lunr from "lunr";
 import { useSearchQuery } from "./contexts";
 import { Category, SEARCH_RESULT_CATEGORY_ID } from "./models";
 import { isDistResult } from "./utils/distResult";
-import { configureUnicodeTrimmer, searchIndex } from "./utils/search";
+import {
+  configureUnicodeTrimmer,
+  getDocumentPriority,
+  searchIndex,
+} from "./utils/search";
 import {
   clearHashTargetHighlight,
   highlightLocationHashTarget,
@@ -176,21 +180,11 @@ const App = () => {
           });
           text = `${text} ${f.object.extra_description_text ?? ""}`;
 
-          let boost = 1;
-          if (json.maintainers || json.author) {
-            boost *= 2;
-          }
-
-          l.add(
-            {
-              fileId: f.id,
-              title: json.title ?? "",
-              text: text.toLowerCase(),
-            },
-            {
-              boost,
-            },
-          );
+          l.add({
+            fileId: f.id,
+            title: json.title ?? "",
+            text: text.toLowerCase(),
+          });
         });
       });
     });
@@ -235,7 +229,23 @@ const App = () => {
         category.files.map((file) => [file.id, file.object] as const),
       ),
     );
-    const files = results.flatMap((result) => {
+    const prioritiesById = new Map(
+      Array.from(filesById, ([fileId, file]) => [
+        fileId,
+        getDocumentPriority({
+          author: file.json.author,
+          maintainers: file.json.maintainers,
+          extraDescriptionPath: file.extra_description_path,
+        }),
+      ]),
+    );
+
+    const sortedResults = results.toSorted(
+      (a, b) =>
+        (prioritiesById.get(b.ref) ?? 0) - (prioritiesById.get(a.ref) ?? 0) ||
+        b.score - a.score,
+    );
+    const files = sortedResults.flatMap((result) => {
       const file = filesById.get(result.ref);
       return file === undefined ? [] : [file];
     });

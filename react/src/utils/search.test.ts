@@ -2,9 +2,35 @@ import { describe, expect, it } from "vitest";
 import lunr from "lunr";
 import {
   configureUnicodeTrimmer,
+  getDocumentPriority,
   getEditDistance,
   searchIndex,
 } from "./search";
+
+describe("getDocumentPriority", () => {
+  it("gives author and maintainers the same priority", () => {
+    expect(getDocumentPriority({ author: "author" })).toBe(2);
+    expect(getDocumentPriority({ maintainers: ["maintainer"] })).toBe(2);
+    expect(
+      getDocumentPriority({
+        author: "author",
+        maintainers: ["maintainer"],
+      }),
+    ).toBe(2);
+  });
+
+  it("prioritizes extra descriptions within attributed rules", () => {
+    expect(
+      getDocumentPriority({ extraDescriptionPath: "description.html" }),
+    ).toBe(1);
+    expect(
+      getDocumentPriority({
+        author: "author",
+        extraDescriptionPath: "description.html",
+      }),
+    ).toBe(3);
+  });
+});
 
 describe("getEditDistance", () => {
   it.each([
