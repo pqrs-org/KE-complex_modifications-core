@@ -19,6 +19,19 @@ def lint_public_json(public_json_directory):
     file_paths = glob.glob(f"{public_json_directory}/*")
     for file_path in file_paths:
         #
+        # Check there are no any extra directories
+        #
+
+        if os.path.isdir(file_path):
+            print('')
+            print('----------------------------------------')
+            print('ERROR:')
+            print(f"An extra directory is found: {file_path}")
+            print('----------------------------------------')
+            print('')
+            sys.exit(1)
+
+        #
         # Check file extension
         #
 
@@ -62,19 +75,6 @@ def lint_public_json(public_json_directory):
                 print('----------------------------------------')
                 print('')
                 sys.exit(1)
-
-        #
-        # Check there are no any extra directories
-        #
-
-        if os.path.isdir(file_path):
-            print('')
-            print('----------------------------------------')
-            print('ERROR:')
-            print(f"An extra directory is found: {file_path}")
-            print('----------------------------------------')
-            print('')
-            sys.exit(1)
 
 
 if __name__ == "__main__":
