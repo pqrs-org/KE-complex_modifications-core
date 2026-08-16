@@ -34,7 +34,7 @@ describe("JsonModalContextProvider", () => {
     expect(result.current.open).toBe(true);
     expect(result.current.fetching).toBe(false);
     expect(result.current.title).toBe("Example");
-    expect(result.current.jsonString).toBe(JSON.stringify({ key: 1 }, null, 2));
+    expect(result.current.jsonString).toBe('{ "key": 1 }');
   });
 
   it("shows an error when the response is not successful", async () => {
@@ -72,9 +72,7 @@ describe("JsonModalContextProvider", () => {
       await Promise.all([firstRequest, latestRequest]);
     });
 
-    expect(result.current.jsonString).toBe(
-      JSON.stringify({ request: "latest" }, null, 2),
-    );
+    expect(result.current.jsonString).toBe('{ "request": "latest" }');
     expect(result.current.title).toBe("Latest");
   });
 

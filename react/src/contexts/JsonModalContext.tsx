@@ -10,6 +10,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
+import { formatJson } from "../utils/jsonFormatter";
 
 type JsonModalContextValue = {
   open: boolean;
@@ -57,7 +58,7 @@ export const JsonModalContextProvider = ({
       }
       const json: unknown = await response.json();
       if (requestId === requestIdRef.current) {
-        setJsonString(JSON.stringify(json, null, 2));
+        setJsonString(formatJson(json));
       }
     } catch (error) {
       if (controller.signal.aborted) return;
