@@ -12,6 +12,7 @@ export type KarabinerJsonFileObject = {
     readonly author?: string;
     readonly rules?: readonly {
       readonly description?: string;
+      readonly description_notes?: readonly string[];
       readonly available_since?: string;
     }[];
   };

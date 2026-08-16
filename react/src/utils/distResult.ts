@@ -13,9 +13,14 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isOptionalString = (value: unknown) =>
   value === undefined || typeof value === "string";
 
+const isOptionalStringArray = (value: unknown) =>
+  value === undefined ||
+  (Array.isArray(value) && value.every((item) => typeof item === "string"));
+
 const isRule = (value: unknown) =>
   isRecord(value) &&
   isOptionalString(value.description) &&
+  isOptionalStringArray(value.description_notes) &&
   isOptionalString(value.available_since);
 
 const isJsonFile = (value: unknown): value is KarabinerJsonFileObject => {
@@ -27,11 +32,7 @@ const isJsonFile = (value: unknown): value is KarabinerJsonFileObject => {
   return (
     isOptionalString(json.title) &&
     isOptionalString(json.author) &&
-    (json.maintainers === undefined ||
-      (Array.isArray(json.maintainers) &&
-        json.maintainers.every(
-          (maintainer) => typeof maintainer === "string",
-        ))) &&
+    isOptionalStringArray(json.maintainers) &&
     (json.rules === undefined ||
       (Array.isArray(json.rules) && json.rules.every(isRule))) &&
     isOptionalString(value.extra_description_path) &&

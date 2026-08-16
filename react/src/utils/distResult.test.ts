@@ -12,7 +12,12 @@ const validResult = {
           json: {
             title: "Example",
             maintainers: ["maintainer"],
-            rules: [{ description: "Rule" }],
+            rules: [
+              {
+                description: "Rule",
+                description_notes: ["First note", "Second note"],
+              },
+            ],
           },
         },
       ],
@@ -69,6 +74,33 @@ describe("isDistResult", () => {
           {
             ...validResult.index[0],
             files: [{ path: "json/example.json", json: [] }],
+          },
+        ],
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects non-string rule description notes", () => {
+    expect(
+      isDistResult({
+        ...validResult,
+        index: [
+          {
+            ...validResult.index[0],
+            files: [
+              {
+                ...validResult.index[0].files[0],
+                json: {
+                  ...validResult.index[0].files[0].json,
+                  rules: [
+                    {
+                      description: "Rule",
+                      description_notes: ["Note", 1],
+                    },
+                  ],
+                },
+              },
+            ],
           },
         ],
       }),

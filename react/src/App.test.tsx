@@ -122,8 +122,23 @@ describe("App", () => {
     ).not.toBeNull();
   });
 
-  it("filters files using the search query", async () => {
-    window.history.replaceState(null, "", "/?q=needle");
+  it.each([
+    ["title", "needle", { title: "Needle rule", rules: [] }],
+    [
+      "rule description notes",
+      "needle-note",
+      {
+        title: "Matching rule",
+        rules: [
+          {
+            description: "Rule",
+            description_notes: ["Contains needle-note"],
+          },
+        ],
+      },
+    ],
+  ])("filters files using the %s", async (_source, query, matchingJson) => {
+    window.history.replaceState(null, "", `/?q=${query}`);
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -135,7 +150,7 @@ describe("App", () => {
               files: [
                 {
                   path: "json/matching.json",
-                  json: { title: "Needle rule", rules: [] },
+                  json: matchingJson,
                 },
                 {
                   path: "json/unrelated.json",
@@ -154,7 +169,7 @@ describe("App", () => {
     renderApp();
 
     expect(
-      await screen.findByRole("button", { name: "Needle rule" }),
+      await screen.findByRole("button", { name: matchingJson.title }),
     ).not.toBeNull();
     expect(screen.queryByRole("button", { name: "Unrelated rule" })).toBeNull();
     expect(document.getElementById(SEARCH_RESULT_CATEGORY_ID)).toBeNull();

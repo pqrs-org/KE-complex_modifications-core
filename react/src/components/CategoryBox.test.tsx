@@ -19,7 +19,12 @@ describe("CategoryBox", () => {
           json: {
             title: "Example",
             maintainers: ["example-maintainer"],
-            rules: [],
+            rules: [
+              {
+                description: "New Rule",
+                description_notes: ["First note", "Second note"],
+              },
+            ],
           },
         },
       ],
@@ -61,5 +66,7 @@ describe("CategoryBox", () => {
     const region = regionId === null ? null : document.getElementById(regionId);
     expect(region).not.toBeNull();
     expect(region?.getAttribute("aria-labelledby")).toBe(summary.id);
+    expect(screen.getByText("First note").tagName).toBe("SPAN");
+    expect(screen.getByText("Second note").tagName).toBe("SPAN");
   });
 });

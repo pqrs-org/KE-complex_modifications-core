@@ -174,20 +174,42 @@ export const RuleDetails = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => (
   <>
     <GroupBox label="Rules">
       <List disablePadding>
-        {jsonFile.object.json.rules?.map((rule, index) => (
-          <ListItem key={`${jsonFile.id}-rules-${index}`} disablePadding>
-            <ListItemIcon sx={{ minWidth: 0, mr: 0.5 }}>
-              <StarIcon sx={{ color }} />
-            </ListItemIcon>
-            <ListItemText
-              primary={rule.description}
-              secondary={
-                rule.available_since &&
-                `Karabiner-Elements ${rule.available_since} or later`
-              }
-            />
-          </ListItem>
-        ))}
+        {jsonFile.object.json.rules?.map((rule, index) => {
+          const secondaryLines = [
+            ...(rule.description_notes ?? []),
+            ...(rule.available_since
+              ? [`Karabiner-Elements ${rule.available_since} or later`]
+              : []),
+          ];
+
+          return (
+            <ListItem
+              key={`${jsonFile.id}-rules-${index}`}
+              disablePadding
+              alignItems="flex-start"
+            >
+              <ListItemIcon sx={{ minWidth: 0, mt: 0.5, mr: 0.5 }}>
+                <StarIcon sx={{ color }} />
+              </ListItemIcon>
+              <ListItemText
+                primary={rule.description}
+                secondary={
+                  secondaryLines.length === 0
+                    ? undefined
+                    : secondaryLines.map((line, lineIndex) => (
+                        <Box
+                          component="span"
+                          sx={{ display: "block" }}
+                          key={`${lineIndex}-${line}`}
+                        >
+                          {line}
+                        </Box>
+                      ))
+                }
+              />
+            </ListItem>
+          );
+        })}
       </List>
     </GroupBox>
     {jsonFile.object.extra_description_path && (

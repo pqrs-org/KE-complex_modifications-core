@@ -165,6 +165,9 @@ const App = () => {
           }
           json.rules?.forEach((r) => {
             text = `${text} ${r.description ?? ""}`;
+            r.description_notes?.forEach((note) => {
+              text = `${text} ${note}`;
+            });
           });
           text = `${text} ${f.object.extra_description_text ?? ""}`;
 
