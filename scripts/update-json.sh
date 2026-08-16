@@ -3,21 +3,21 @@
 set -u # forbid undefined variables
 set -e # forbid command failure
 
-topdir="$(dirname $0)/.."
+topdir="$(dirname "$0")/.."
 karabiner_cli="${topdir}/bin/karabiner_cli"
 
 for srcfile in ../src/json/*.json.*; do
   extension="${srcfile##*.}"
 
-  dstfile="../public/json/$(basename $srcfile .$extension)"
+  dstfile="../public/json/$(basename "$srcfile" ".$extension")"
   if [[ "$srcfile" -nt "$dstfile" ]]; then
     failed=0
 
     if [[ $extension = 'js' ]]; then
       echo "$karabiner_cli --eval-js $srcfile"
 
-      if $karabiner_cli --eval-js "$srcfile" >"$dstfile"; then
-        if scripts/apply-lint.sh "$dstfile"; then
+      if "$karabiner_cli" --eval-js "$srcfile" >"$dstfile"; then
+        if "${topdir}/scripts/apply-lint.sh" "$dstfile"; then
           echo "Updated: $dstfile"
           failed=1
         fi

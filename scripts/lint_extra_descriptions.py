@@ -23,7 +23,7 @@ def lint_extra_descriptions(public_directory):
                 for file in category['files']:
                     if 'extra_description_path' in file:
                         path = f"{public_directory}/{file['extra_description_path']}"
-                        html = pathlib.Path(path).read_text("utf-8", "ignore")
+                        html = pathlib.Path(path).read_text(encoding='utf-8')
                         if html_pattern.search(html):
                             print('')
                             print('----------------------------------------')

@@ -3,7 +3,7 @@
 set -u # forbid undefined variables
 set -e # forbid command failure
 
-cd $(dirname "$0")/../..
+cd "$(dirname "$0")/../.."
 
 rm -fr dist
 mkdir dist
