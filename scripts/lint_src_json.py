@@ -21,6 +21,19 @@ def lint_src_json(src_json_directory):
         basename = os.path.basename(file_path)
 
         #
+        # Check there are no any extra directories
+        #
+
+        if os.path.isdir(file_path):
+            print('')
+            print('----------------------------------------')
+            print('ERROR:')
+            print(f"An extra directory is found: {file_path}")
+            print('----------------------------------------')
+            print('')
+            sys.exit(1)
+
+        #
         # Check file extension
         #
 
@@ -51,19 +64,6 @@ def lint_src_json(src_json_directory):
             print('ERROR:')
             print(
                 f"Unsupported file type src/json/{basename}")
-            print('----------------------------------------')
-            print('')
-            sys.exit(1)
-
-        #
-        # Check there are no any extra directories
-        #
-
-        if os.path.isdir(file_path):
-            print('')
-            print('----------------------------------------')
-            print('ERROR:')
-            print(f"An extra directory is found: {file_path}")
             print('----------------------------------------')
             print('')
             sys.exit(1)
