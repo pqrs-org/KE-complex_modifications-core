@@ -330,7 +330,7 @@ describe("App", () => {
     expect(screen.queryByRole("button", { name: "Unrelated rule" })).toBeNull();
   });
 
-  it("prioritizes maintained and documented files in search results", async () => {
+  it("prioritizes attribution, title matches, and documentation in search results", async () => {
     window.history.replaceState(null, "", "/?q=needle");
     vi.stubGlobal(
       "fetch",
@@ -403,8 +403,8 @@ describe("App", () => {
     expect(new Set(names.slice(1, 3))).toEqual(
       new Set(["Maintained priority", "Authored priority"]),
     );
-    expect(names[3]).toBe("Documented priority");
-    expect(names[4]).toBe("Needle plain priority");
+    expect(names[3]).toBe("Needle plain priority");
+    expect(names[4]).toBe("Documented priority");
   });
 
   it("prioritizes title matches over extra description length", async () => {

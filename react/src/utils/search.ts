@@ -38,20 +38,25 @@ export const titleIncludesSearchQuery = (
   );
 };
 
-const getFileRanking = (
-  file: KarabinerJsonFileObject,
-  searchQuery: string,
-) => ({
-  priority: getDocumentPriority({
-    author: file.json.author,
-    maintainers: file.json.maintainers,
-    extraDescriptionPath: file.extra_description_path,
-  }),
-  titleMatches: titleIncludesSearchQuery(file.json.title ?? "", searchQuery),
-  extraDescriptionLength: file.extra_description_path
-    ? (file.extra_description_text?.length ?? 0)
-    : 0,
-});
+const getFileRanking = (file: KarabinerJsonFileObject, searchQuery: string) => {
+  const attributed =
+    Boolean(file.json.author) || (file.json.maintainers?.length ?? 0) > 0;
+  const documented = Boolean(file.extra_description_path);
+
+  return {
+    attributed,
+    documented,
+    priority: getDocumentPriority({
+      author: file.json.author,
+      maintainers: file.json.maintainers,
+      extraDescriptionPath: file.extra_description_path,
+    }),
+    titleMatches: titleIncludesSearchQuery(file.json.title ?? "", searchQuery),
+    extraDescriptionLength: documented
+      ? (file.extra_description_text?.length ?? 0)
+      : 0,
+  };
+};
 
 export const sortCategoryFiles = (files: readonly KarabinerJsonFileObject[]) =>
   files.toSorted((a, b) => {
@@ -81,26 +86,31 @@ export const sortSearchResults = (
   );
 
   // Search result order (highest priority first):
-  // 1. Metadata tier: author/maintainers + extra description,
-  //    author/maintainers, extra description, neither.
+  // 1. The rule has an author or at least one maintainer.
   // 2. The title contains every search token.
-  // 3. The extra description is longer.
-  // 4. The Lunr relevance score is higher.
+  // 3. The rule has an extra description.
+  // 4. The extra description is longer.
+  // 5. The Lunr relevance score is higher.
   return results.toSorted((a, b) => {
     const aRanking = rankingsById.get(a.ref) ?? {
+      attributed: false,
+      documented: false,
       priority: 0,
       titleMatches: false,
       extraDescriptionLength: 0,
     };
     const bRanking = rankingsById.get(b.ref) ?? {
+      attributed: false,
+      documented: false,
       priority: 0,
       titleMatches: false,
       extraDescriptionLength: 0,
     };
 
     return (
-      bRanking.priority - aRanking.priority ||
+      Number(bRanking.attributed) - Number(aRanking.attributed) ||
       Number(bRanking.titleMatches) - Number(aRanking.titleMatches) ||
+      Number(bRanking.documented) - Number(aRanking.documented) ||
       bRanking.extraDescriptionLength - aRanking.extraDescriptionLength ||
       b.score - a.score
     );
