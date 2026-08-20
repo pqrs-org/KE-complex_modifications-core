@@ -195,6 +195,18 @@ const App = () => {
   // Update categories
   //
 
+  const sortedAllCategories = useMemo(
+    () =>
+      allCategories.map(
+        (category) =>
+          new Category({
+            ...category.object,
+            files: sortCategoryFiles(category.object.files),
+          }),
+      ),
+    [allCategories],
+  );
+
   const categories = useMemo(() => {
     if (allCategories.length === 0) {
       return [];
@@ -212,13 +224,7 @@ const App = () => {
     }
 
     if (searchQuery === "") {
-      return allCategories.map(
-        (category) =>
-          new Category({
-            ...category.object,
-            files: sortCategoryFiles(category.object.files),
-          }),
-      );
+      return sortedAllCategories;
     }
 
     //
@@ -249,7 +255,13 @@ const App = () => {
         files,
       }),
     ];
-  }, [searchQuery, sharedRulePath, allCategories, lunrIndex]);
+  }, [
+    searchQuery,
+    sharedRulePath,
+    allCategories,
+    sortedAllCategories,
+    lunrIndex,
+  ]);
 
   const searchSuggestionCounts = useMemo(() => {
     if (lunrIndex === undefined) return undefined;
@@ -391,6 +403,11 @@ const App = () => {
                     <Box
                       sx={{
                         mb: 4,
+                        contentVisibility:
+                          category.object.id === SEARCH_RESULT_CATEGORY_ID
+                            ? "visible"
+                            : "auto",
+                        containIntrinsicSize: "auto 500px",
                         scrollMarginTop: {
                           xs: "16px",
                           md: "var(--sticky-search-height)",
