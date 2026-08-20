@@ -7,7 +7,7 @@ import {
   type AccordionProps,
 } from "@mui/material";
 import { ArrowForwardIosSharp as ArrowForwardIosSharpIcon } from "@mui/icons-material";
-import type { Category } from "../models";
+import { SEARCH_RESULT_CATEGORY_ID, type Category } from "../models";
 import { RuleDetails, RuleHeader, RuleHeaderContent } from "./RuleView";
 
 const color = "#28A745";
@@ -84,6 +84,13 @@ export const CategoryBox = ({ category }: { category: Category }) => {
       >
         {category.object.name}
       </Box>
+
+      {category.object.id === SEARCH_RESULT_CATEGORY_ID &&
+        category.files.length === 0 && (
+          <Box role="status" sx={{ p: 2, color: "text.secondary" }}>
+            No matching rules found.
+          </Box>
+        )}
 
       {category.files.map((f) => {
         const elementIdPrefix = [category.object.id, f.id]

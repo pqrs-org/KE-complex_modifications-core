@@ -76,6 +76,10 @@ describe("searchIndex", () => {
     ).toEqual(["windows-keyboard"]);
   });
 
+  it("ignores tokens that are empty after trimming", () => {
+    expect(searchIndex(index, "...")).toEqual([]);
+  });
+
   it("combines match data from every query token", () => {
     const fieldIndex = lunr(function () {
       this.ref("id");

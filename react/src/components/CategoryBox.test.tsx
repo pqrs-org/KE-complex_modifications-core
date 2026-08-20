@@ -3,12 +3,32 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { JsonModalContextProvider, SnackbarContextProvider } from "../contexts";
-import { Category } from "../models";
+import { Category, SEARCH_RESULT_CATEGORY_ID } from "../models";
 import { CategoryBox } from "./CategoryBox";
 
 afterEach(cleanup);
 
 describe("CategoryBox", () => {
+  it("shows a message when a search has no results", () => {
+    const category = new Category({
+      id: SEARCH_RESULT_CATEGORY_ID,
+      name: "Search Result",
+      files: [],
+    });
+
+    render(
+      <JsonModalContextProvider>
+        <SnackbarContextProvider>
+          <CategoryBox category={category} />
+        </SnackbarContextProvider>
+      </JsonModalContextProvider>,
+    );
+
+    expect(screen.getByRole("status").textContent).toBe(
+      "No matching rules found.",
+    );
+  });
+
   it("keeps file actions outside the accordion summary and heading", () => {
     const category = new Category({
       id: "category",

@@ -147,9 +147,11 @@ const resultMatchesField = (result: lunr.Index.Result, field: string) =>
 type SearchResult = lunr.Index.Result & { titleMatches: boolean };
 
 export const searchIndex = (index: lunr.Index, searchQuery: string) => {
-  const tokens = tokenizeSearchQuery(searchQuery).map((token) =>
-    token.toString(),
-  );
+  const tokens = tokenizeSearchQuery(searchQuery)
+    .map((token) => token.toString())
+    // Punctuation-only tokens can become empty after trimming; an empty
+    // trailing-wildcard query would match every term in the index.
+    .filter((token) => token !== "");
   if (tokens.length === 0) return [];
 
   const [firstToken, ...remainingTokens] = tokens;
