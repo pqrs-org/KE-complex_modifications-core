@@ -74,6 +74,23 @@ describe("searchIndex", () => {
     );
   });
 
+  it("ignores stop words removed from the index", () => {
+    const stopWordIndex = lunr(function () {
+      this.ref("id");
+      this.field("text");
+      this.add({
+        id: "windows-keyboard",
+        text: "Windows Keyboard for Mac community edition",
+      });
+    });
+
+    expect(
+      searchIndex(stopWordIndex, "Windows Keyboard for").map(
+        (result) => result.ref,
+      ),
+    ).toEqual(["windows-keyboard"]);
+  });
+
   it("retains single-token search", () => {
     expect(searchIndex(index, "Hyper").map((result) => result.ref)).toEqual([
       "hyper-key",

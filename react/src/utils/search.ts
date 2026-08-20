@@ -8,6 +8,12 @@ const unicodeTrimmer = (token: lunr.Token) =>
 
 lunr.Pipeline.registerFunction(unicodeTrimmer, "unicodeTrimmer");
 
+const searchQueryPipeline = new lunr.Pipeline();
+searchQueryPipeline.add(unicodeTrimmer, lunr.stopWordFilter);
+
+const tokenizeSearchQuery = (searchQuery: string) =>
+  searchQueryPipeline.run(lunr.tokenizer(searchQuery.toLowerCase()));
+
 export const getDocumentPriority = ({
   author,
   maintainers,
@@ -31,7 +37,7 @@ export const titleIncludesSearchQuery = (
   searchQuery: string,
 ) => {
   const normalizedTitle = title.toLowerCase();
-  const tokens = lunr.tokenizer(searchQuery.toLowerCase());
+  const tokens = tokenizeSearchQuery(searchQuery);
   return (
     tokens.length > 0 &&
     tokens.every((token) => normalizedTitle.includes(token.toString()))
@@ -153,9 +159,9 @@ const searchToken = (index: lunr.Index, queryString: string) =>
   });
 
 export const searchIndex = (index: lunr.Index, searchQuery: string) => {
-  const tokens = lunr
-    .tokenizer(searchQuery.toLowerCase())
-    .map((token) => token.toString());
+  const tokens = tokenizeSearchQuery(searchQuery).map((token) =>
+    token.toString(),
+  );
   if (tokens.length === 0) return [];
 
   const [firstToken, ...remainingTokens] = tokens;
