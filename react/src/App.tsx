@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   AppBar,
+  Backdrop,
   Box,
   Button,
   CircularProgress,
@@ -36,7 +37,7 @@ import {
 } from "./components";
 
 const App = () => {
-  const { query: searchQuery } = useSearchQuery();
+  const { isReturningToList, query: searchQuery } = useSearchQuery();
   const tableOfContentsNavRef = useRef<HTMLElement>(null);
   const sharedRulePath = new URLSearchParams(window.location.search).get(
     "rule",
@@ -279,6 +280,19 @@ const App = () => {
 
   return (
     <>
+      <Backdrop
+        open={isReturningToList}
+        sx={(theme) => ({
+          zIndex: theme.zIndex.modal + 1,
+          color: "common.white",
+          flexDirection: "column",
+          gap: 2,
+        })}
+      >
+        <CircularProgress color="inherit" aria-label="Updating results" />
+        <Typography>Updating results...</Typography>
+      </Backdrop>
+
       <AppBar position="static">
         <Toolbar>
           <Link href="./" color="inherit" underline="none">
@@ -403,11 +417,6 @@ const App = () => {
                     <Box
                       sx={{
                         mb: 4,
-                        contentVisibility:
-                          category.object.id === SEARCH_RESULT_CATEGORY_ID
-                            ? "visible"
-                            : "auto",
-                        containIntrinsicSize: "auto 500px",
                         scrollMarginTop: {
                           xs: "16px",
                           md: "var(--sticky-search-height)",
