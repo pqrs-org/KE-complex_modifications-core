@@ -236,7 +236,7 @@ const App = () => {
         category.files.map((file) => [file.id, file.object] as const),
       ),
     );
-    const sortedResults = sortSearchResults(results, filesById, searchQuery);
+    const sortedResults = sortSearchResults(results, filesById);
     const files = sortedResults.flatMap((result) => {
       const file = filesById.get(result.ref);
       return file === undefined ? [] : [file];

@@ -32,19 +32,7 @@ export const getDocumentPriority = ({
   return 0;
 };
 
-export const titleIncludesSearchQuery = (
-  title: string,
-  searchQuery: string,
-) => {
-  const normalizedTitle = title.toLowerCase();
-  const tokens = tokenizeSearchQuery(searchQuery);
-  return (
-    tokens.length > 0 &&
-    tokens.every((token) => normalizedTitle.includes(token.toString()))
-  );
-};
-
-const getFileRanking = (file: KarabinerJsonFileObject, searchQuery: string) => {
+const getFileRanking = (file: KarabinerJsonFileObject) => {
   const attributed =
     Boolean(file.json.author) || (file.json.maintainers?.length ?? 0) > 0;
   const documented = Boolean(file.extra_description_path);
@@ -57,7 +45,6 @@ const getFileRanking = (file: KarabinerJsonFileObject, searchQuery: string) => {
       maintainers: file.json.maintainers,
       extraDescriptionPath: file.extra_description_path,
     }),
-    titleMatches: titleIncludesSearchQuery(file.json.title ?? "", searchQuery),
     extraDescriptionLength: documented
       ? (file.extra_description_text?.length ?? 0)
       : 0,
@@ -66,8 +53,8 @@ const getFileRanking = (file: KarabinerJsonFileObject, searchQuery: string) => {
 
 export const sortCategoryFiles = (files: readonly KarabinerJsonFileObject[]) =>
   files.toSorted((a, b) => {
-    const aRanking = getFileRanking(a, "");
-    const bRanking = getFileRanking(b, "");
+    const aRanking = getFileRanking(a);
+    const bRanking = getFileRanking(b);
 
     // Regular category order (highest priority first):
     // 1. Metadata tier: author/maintainers + extra description,
@@ -80,20 +67,16 @@ export const sortCategoryFiles = (files: readonly KarabinerJsonFileObject[]) =>
   });
 
 export const sortSearchResults = (
-  results: readonly lunr.Index.Result[],
+  results: readonly SearchResult[],
   filesById: ReadonlyMap<string, KarabinerJsonFileObject>,
-  searchQuery: string,
 ) => {
   const rankingsById = new Map(
-    Array.from(filesById, ([id, file]) => [
-      id,
-      getFileRanking(file, searchQuery),
-    ]),
+    Array.from(filesById, ([id, file]) => [id, getFileRanking(file)]),
   );
 
   // Search result order (highest priority first):
   // 1. The rule has an author or at least one maintainer.
-  // 2. The title contains every search token.
+  // 2. Every search token matched the title.
   // 3. The rule has an extra description.
   // 4. The extra description is longer.
   // 5. The Lunr relevance score is higher.
@@ -102,20 +85,18 @@ export const sortSearchResults = (
       attributed: false,
       documented: false,
       priority: 0,
-      titleMatches: false,
       extraDescriptionLength: 0,
     };
     const bRanking = rankingsById.get(b.ref) ?? {
       attributed: false,
       documented: false,
       priority: 0,
-      titleMatches: false,
       extraDescriptionLength: 0,
     };
 
     return (
       Number(bRanking.attributed) - Number(aRanking.attributed) ||
-      Number(bRanking.titleMatches) - Number(aRanking.titleMatches) ||
+      Number(b.titleMatches) - Number(a.titleMatches) ||
       Number(bRanking.documented) - Number(aRanking.documented) ||
       bRanking.extraDescriptionLength - aRanking.extraDescriptionLength ||
       b.score - a.score
@@ -158,6 +139,13 @@ const searchToken = (index: lunr.Index, queryString: string) =>
     }
   });
 
+const resultMatchesField = (result: lunr.Index.Result, field: string) =>
+  Object.values(
+    result.matchData.metadata as Record<string, Record<string, unknown>>,
+  ).some((fields) => Object.hasOwn(fields, field));
+
+type SearchResult = lunr.Index.Result & { titleMatches: boolean };
+
 export const searchIndex = (index: lunr.Index, searchQuery: string) => {
   const tokens = tokenizeSearchQuery(searchQuery).map((token) =>
     token.toString(),
@@ -166,7 +154,13 @@ export const searchIndex = (index: lunr.Index, searchQuery: string) => {
 
   const [firstToken, ...remainingTokens] = tokens;
   const matches = new Map(
-    searchToken(index, firstToken).map((result) => [result.ref, { ...result }]),
+    searchToken(index, firstToken).map((result) => [
+      result.ref,
+      {
+        ...result,
+        titleMatches: resultMatchesField(result, "title"),
+      } satisfies SearchResult,
+    ]),
   );
 
   remainingTokens.forEach((token) => {
@@ -180,6 +174,8 @@ export const searchIndex = (index: lunr.Index, searchQuery: string) => {
         matches.delete(ref);
       } else {
         result.score += tokenMatch.score;
+        result.titleMatches &&= resultMatchesField(tokenMatch, "title");
+        result.matchData.combine(tokenMatch.matchData);
       }
     });
   });

@@ -5,7 +5,6 @@ import {
   getDocumentPriority,
   getEditDistance,
   searchIndex,
-  titleIncludesSearchQuery,
 } from "./search";
 
 describe("getDocumentPriority", () => {
@@ -30,20 +29,6 @@ describe("getDocumentPriority", () => {
         extraDescriptionPath: "description.html",
       }),
     ).toBe(3);
-  });
-});
-
-describe("titleIncludesSearchQuery", () => {
-  it("requires every query token in the title", () => {
-    expect(
-      titleIncludesSearchQuery("Universal Emacs Keybindings", "emacs"),
-    ).toBe(true);
-    expect(
-      titleIncludesSearchQuery("Universal Emacs Keybindings", "Emacs Key"),
-    ).toBe(true);
-    expect(
-      titleIncludesSearchQuery("Universal Emacs Keybindings", "Emacs Mouse"),
-    ).toBe(false);
   });
 });
 
@@ -89,6 +74,54 @@ describe("searchIndex", () => {
         (result) => result.ref,
       ),
     ).toEqual(["windows-keyboard"]);
+  });
+
+  it("combines match data from every query token", () => {
+    const fieldIndex = lunr(function () {
+      this.ref("id");
+      this.field("title");
+      this.field("text");
+      this.add({
+        id: "windows-keyboard",
+        title: "Windows Keyboard for Mac",
+        text: "community edition",
+      });
+    });
+
+    const [result] = searchIndex(
+      fieldIndex,
+      "windows keybaord for mac community",
+    );
+    const metadata = result.matchData.metadata as Record<
+      string,
+      Record<string, unknown>
+    >;
+
+    expect(result.titleMatches).toBe(false);
+    expect(Object.values(metadata).every((fields) => "title" in fields)).toBe(
+      false,
+    );
+    expect(
+      Object.values(metadata).filter((fields) => "title" in fields).length,
+    ).toBeGreaterThanOrEqual(3);
+    expect(Object.values(metadata).some((fields) => "text" in fields)).toBe(
+      true,
+    );
+  });
+
+  it("recognizes fuzzy matches for every title token", () => {
+    const titleIndex = lunr(function () {
+      this.ref("id");
+      this.field("title");
+      this.add({
+        id: "windows-keyboard",
+        title: "Windows Keyboard for Mac community edition",
+      });
+    });
+
+    const [result] = searchIndex(titleIndex, "windows keybaord for mac");
+
+    expect(result.titleMatches).toBe(true);
   });
 
   it("retains single-token search", () => {

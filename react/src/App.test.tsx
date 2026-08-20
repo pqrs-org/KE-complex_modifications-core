@@ -407,8 +407,8 @@ describe("App", () => {
     expect(names[4]).toBe("Documented priority");
   });
 
-  it("prioritizes title matches over extra description length", async () => {
-    window.history.replaceState(null, "", "/?q=needle");
+  it("prioritizes fuzzy title matches over extra description length", async () => {
+    window.history.replaceState(null, "", "/?q=needlf");
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
