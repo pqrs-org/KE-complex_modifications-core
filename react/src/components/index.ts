@@ -1,6 +1,6 @@
 export { CategoryBox } from "./CategoryBox";
 export { ImportButton } from "./ImportButton";
-export { JsonModal } from "./JsonModal";
+export { CodeModal } from "./CodeModal";
 export { SharedRuleView } from "./RuleView";
 export { SearchInput } from "./SearchInput";
 export { SearchSuggestions } from "./SearchSuggestions";

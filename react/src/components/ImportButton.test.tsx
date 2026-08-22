@@ -18,7 +18,7 @@ const contextMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("../contexts", () => ({
-  useJsonModal: () => ({ openModal: contextMocks.openModal }),
+  useCodeModal: () => ({ openModal: contextMocks.openModal }),
   useSnackbar: () => ({ setText: contextMocks.setSnackbarText }),
 }));
 
@@ -45,6 +45,18 @@ const renderImportButton = () =>
       />
       <button>After import controls</button>
     </>,
+  );
+
+const renderJavaScriptImportButton = () =>
+  render(
+    <ImportButton
+      jsonFile={
+        new KarabinerJsonFile({
+          path: "js/example.js",
+          json: { title: "Example JavaScript" },
+        })
+      }
+    />,
   );
 
 const openMenu = async () => {
@@ -106,6 +118,23 @@ describe("ImportButton", () => {
       "Example",
       "json/example.json",
     );
+  });
+
+  it("opens the selected JavaScript in the modal", async () => {
+    renderJavaScriptImportButton();
+    const menu = await openMenu();
+
+    fireEvent.click(
+      within(menu).getByRole("menuitem", { name: "Show JavaScript" }),
+    );
+
+    expect(contextMocks.openModal).toHaveBeenCalledWith(
+      "Example JavaScript",
+      "js/example.js",
+    );
+    expect(
+      within(menu).getByRole("menuitem", { name: "Copy JavaScript URL" }),
+    ).not.toBeNull();
   });
 
   it.each([

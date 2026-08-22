@@ -3,13 +3,13 @@
 import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { JsonModalContextProvider, useJsonModal } from ".";
+import { CodeModalContextProvider, useCodeModal } from ".";
 
 const wrapper = ({ children }: { children: ReactNode }) => (
-  <JsonModalContextProvider>{children}</JsonModalContextProvider>
+  <CodeModalContextProvider>{children}</CodeModalContextProvider>
 );
 
-const renderJsonModalHook = () => renderHook(() => useJsonModal(), { wrapper });
+const renderCodeModalHook = () => renderHook(() => useCodeModal(), { wrapper });
 
 const jsonResponse = (json: unknown, ok = true) =>
   ({
@@ -19,34 +19,56 @@ const jsonResponse = (json: unknown, ok = true) =>
     json: vi.fn().mockResolvedValue(json),
   }) as unknown as Response;
 
+const textResponse = (source: string) =>
+  ({
+    ok: true,
+    status: 200,
+    statusText: "OK",
+    text: vi.fn().mockResolvedValue(source),
+  }) as unknown as Response;
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 
-describe("JsonModalContextProvider", () => {
+describe("CodeModalContextProvider", () => {
   it("loads and formats JSON before opening the modal", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ key: 1 })));
-    const { result } = renderJsonModalHook();
+    const { result } = renderCodeModalHook();
 
     await act(() => result.current.openModal("Example", "example.json"));
 
     expect(result.current.open).toBe(true);
     expect(result.current.fetching).toBe(false);
     expect(result.current.title).toBe("Example");
-    expect(result.current.jsonString).toBe('{ "key": 1 }');
+    expect(result.current.source).toBe('{ "key": 1 }');
+    expect(result.current.language).toBe("json");
+  });
+
+  it("loads JavaScript without JSON parsing", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(textResponse("function main() {}\nmain()\n")),
+    );
+    const { result } = renderCodeModalHook();
+
+    await act(() => result.current.openModal("Example", "js/example.js"));
+
+    expect(result.current.source).toBe("function main() {}\nmain()\n");
+    expect(result.current.language).toBe("javascript");
   });
 
   it("shows an error when the response is not successful", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({}, false)));
     vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const { result } = renderJsonModalHook();
+    const { result } = renderCodeModalHook();
 
     await act(() => result.current.openModal("Broken", "broken.json"));
 
     expect(result.current.open).toBe(true);
     expect(result.current.fetching).toBe(false);
-    expect(result.current.jsonString).toBe(
+    expect(result.current.source).toBe(
       "ERROR: Failed to fetch: broken.json",
     );
   });
@@ -64,7 +86,7 @@ describe("JsonModalContextProvider", () => {
       )
       .mockResolvedValueOnce(jsonResponse({ request: "latest" }));
     vi.stubGlobal("fetch", fetchMock);
-    const { result } = renderJsonModalHook();
+    const { result } = renderCodeModalHook();
 
     await act(async () => {
       const firstRequest = result.current.openModal("First", "first.json");
@@ -72,7 +94,7 @@ describe("JsonModalContextProvider", () => {
       await Promise.all([firstRequest, latestRequest]);
     });
 
-    expect(result.current.jsonString).toBe('{ "request": "latest" }');
+    expect(result.current.source).toBe('{ "request": "latest" }');
     expect(result.current.title).toBe("Latest");
   });
 
@@ -93,7 +115,7 @@ describe("JsonModalContextProvider", () => {
           },
         ),
     );
-    const { result, unmount } = renderJsonModalHook();
+    const { result, unmount } = renderCodeModalHook();
 
     let request: Promise<void> | undefined;
     act(() => {

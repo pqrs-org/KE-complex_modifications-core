@@ -2,21 +2,22 @@
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { useJsonModal } from "../contexts";
-import { JsonModal } from "./JsonModal";
+import { useCodeModal } from "../contexts";
+import { CodeModal } from "./CodeModal";
 
-vi.mock("../contexts", () => ({ useJsonModal: vi.fn() }));
-vi.mock("./JsonSyntaxHighlighter", () => ({
+vi.mock("../contexts", () => ({ useCodeModal: vi.fn() }));
+vi.mock("./CodeSyntaxHighlighter", () => ({
   default: ({ children }: { children: string }) => <pre>{children}</pre>,
 }));
 
 const setOpen = vi.fn();
-const mockJsonModal = (overrides = {}) => {
-  vi.mocked(useJsonModal).mockReturnValue({
+const mockCodeModal = (overrides = {}) => {
+  vi.mocked(useCodeModal).mockReturnValue({
     open: false,
     title: "",
     fetching: false,
-    jsonString: "",
+    source: "",
+    language: "json",
     setOpen,
     openModal: vi.fn(),
     ...overrides,
@@ -28,30 +29,30 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe("JsonModal", () => {
-  it("shows a progress indicator while JSON is being fetched", () => {
-    mockJsonModal({ fetching: true });
+describe("CodeModal", () => {
+  it("shows a progress indicator while code is being fetched", () => {
+    mockCodeModal({ fetching: true });
 
-    render(<JsonModal />);
+    render(<CodeModal />);
 
     const progressbar = screen.getByRole("progressbar", { hidden: true });
     expect(progressbar.parentElement?.style.visibility).not.toBe("hidden");
   });
 
   it("shows the title and JSON and closes from the close button", async () => {
-    mockJsonModal({
+    mockCodeModal({
       open: true,
       title: "Example",
-      jsonString: '{\n  "key": 1\n}',
+      source: '{\n  "key": 1\n}',
     });
 
-    render(<JsonModal />);
+    render(<CodeModal />);
 
     expect(screen.getByRole("heading", { name: "Example" })).not.toBeNull();
     const json = await screen.findByText(/"key": 1/);
     expect(json.textContent).toBe('{\n  "key": 1\n}');
 
-    fireEvent.click(screen.getByRole("button", { name: "Close JSON viewer" }));
+    fireEvent.click(screen.getByRole("button", { name: "Close code viewer" }));
     expect(setOpen).toHaveBeenCalledWith(false);
   });
 });

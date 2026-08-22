@@ -11,7 +11,7 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 import {
-  JsonModalContextProvider,
+  CodeModalContextProvider,
   SearchQueryContextProvider,
   SnackbarContextProvider,
 } from "./contexts";
@@ -19,13 +19,13 @@ import { SEARCH_RESULT_CATEGORY_ID } from "./models";
 
 const renderApp = () =>
   render(
-    <JsonModalContextProvider>
+    <CodeModalContextProvider>
       <SearchQueryContextProvider>
         <SnackbarContextProvider>
           <App />
         </SnackbarContextProvider>
       </SearchQueryContextProvider>
-    </JsonModalContextProvider>,
+    </CodeModalContextProvider>,
   );
 
 const response = (json: unknown) =>

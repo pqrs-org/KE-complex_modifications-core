@@ -1,12 +1,20 @@
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import jsonLanguage from "react-syntax-highlighter/dist/esm/languages/hljs/json";
+import javascriptLanguage from "react-syntax-highlighter/dist/esm/languages/hljs/javascript";
 import githubStyle from "react-syntax-highlighter/dist/esm/styles/hljs/github";
 
 SyntaxHighlighter.registerLanguage("json", jsonLanguage);
+SyntaxHighlighter.registerLanguage("javascript", javascriptLanguage);
 
-const JsonSyntaxHighlighter = ({ children }: { children: string }) => (
+const CodeSyntaxHighlighter = ({
+  children,
+  language = "json",
+}: {
+  children: string;
+  language?: "json" | "javascript";
+}) => (
   <SyntaxHighlighter
-    language="json"
+    language={language}
     style={githubStyle}
     customStyle={{
       minHeight: "100px",
@@ -18,4 +26,4 @@ const JsonSyntaxHighlighter = ({ children }: { children: string }) => (
   </SyntaxHighlighter>
 );
 
-export default JsonSyntaxHighlighter;
+export default CodeSyntaxHighlighter;

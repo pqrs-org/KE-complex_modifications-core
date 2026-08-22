@@ -5,6 +5,7 @@ export class KarabinerJsonFile {
   readonly id: string;
   readonly jsonUrl: string;
   readonly shareUrl: string;
+  readonly isJavaScript: boolean;
 
   constructor(object: KarabinerJsonFileObject) {
     this.object = object;
@@ -16,5 +17,6 @@ export class KarabinerJsonFile {
     this.id = id;
     this.jsonUrl = object.path;
     this.shareUrl = `?rule=${encodeURIComponent(object.path)}`;
+    this.isJavaScript = object.path.endsWith(".js");
   }
 }

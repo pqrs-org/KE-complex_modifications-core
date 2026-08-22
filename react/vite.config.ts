@@ -20,6 +20,10 @@ export default defineConfig({
           sirv(resolve(dist, "json"), { dev: true }),
         );
         server.middlewares.use(
+          "/js",
+          sirv(resolve(dist, "js"), { dev: true }),
+        );
+        server.middlewares.use(
           "/extra_descriptions",
           sirv(resolve(dist, "extra_descriptions"), { dev: true }),
         );

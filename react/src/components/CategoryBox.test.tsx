@@ -2,7 +2,7 @@
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { JsonModalContextProvider, SnackbarContextProvider } from "../contexts";
+import { CodeModalContextProvider, SnackbarContextProvider } from "../contexts";
 import { Category, SEARCH_RESULT_CATEGORY_ID } from "../models";
 import { CategoryBox } from "./CategoryBox";
 
@@ -17,11 +17,11 @@ describe("CategoryBox", () => {
     });
 
     render(
-      <JsonModalContextProvider>
+      <CodeModalContextProvider>
         <SnackbarContextProvider>
           <CategoryBox category={category} />
         </SnackbarContextProvider>
-      </JsonModalContextProvider>,
+      </CodeModalContextProvider>,
     );
 
     expect(screen.getByRole("status").textContent).toBe(
@@ -50,11 +50,11 @@ describe("CategoryBox", () => {
       ],
     });
     render(
-      <JsonModalContextProvider>
+      <CodeModalContextProvider>
         <SnackbarContextProvider>
           <CategoryBox category={category} />
         </SnackbarContextProvider>
-      </JsonModalContextProvider>,
+      </CodeModalContextProvider>,
     );
 
     const summary = screen.getByRole("button", { name: "Example" });

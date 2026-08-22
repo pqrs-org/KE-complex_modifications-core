@@ -12,20 +12,21 @@ import {
 } from "react";
 import { formatJson } from "../utils/jsonFormatter";
 
-type JsonModalContextValue = {
+type CodeModalContextValue = {
   open: boolean;
   title: string;
   fetching: boolean;
-  jsonString: string;
+  source: string;
+  language: "json" | "javascript";
   setOpen: Dispatch<SetStateAction<boolean>>;
-  openModal: (title: string, jsonUrl: string) => Promise<void>;
+  openModal: (title: string, sourceUrl: string) => Promise<void>;
 };
 
-const JsonModalContext = createContext<JsonModalContextValue | undefined>(
+const CodeModalContext = createContext<CodeModalContextValue | undefined>(
   undefined,
 );
 
-export const JsonModalContextProvider = ({
+export const CodeModalContextProvider = ({
   children,
 }: {
   children: ReactNode;
@@ -33,13 +34,14 @@ export const JsonModalContextProvider = ({
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [fetching, setFetching] = useState(false);
-  const [jsonString, setJsonString] = useState("");
+  const [source, setSource] = useState("");
+  const [language, setLanguage] = useState<"json" | "javascript">("json");
   const requestIdRef = useRef(0);
   const abortControllerRef = useRef<AbortController>(null);
 
   useEffect(() => () => abortControllerRef.current?.abort(), []);
 
-  const openModal = useCallback(async (title: string, jsonUrl: string) => {
+  const openModal = useCallback(async (title: string, sourceUrl: string) => {
     const requestId = ++requestIdRef.current;
     abortControllerRef.current?.abort();
     const controller = new AbortController();
@@ -47,24 +49,29 @@ export const JsonModalContextProvider = ({
 
     setTitle(title);
     setFetching(true);
-    setJsonString("");
+    setSource("");
+    const sourceLanguage = sourceUrl.endsWith(".js") ? "javascript" : "json";
+    setLanguage(sourceLanguage);
 
     try {
-      const response = await fetch(jsonUrl, { signal: controller.signal });
+      const response = await fetch(sourceUrl, { signal: controller.signal });
       if (!response.ok) {
         throw new Error(
           `Fetch failed: ${response.status} ${response.statusText}`,
         );
       }
-      const json: unknown = await response.json();
+      const source =
+        sourceLanguage === "javascript"
+          ? await response.text()
+          : formatJson((await response.json()) as unknown);
       if (requestId === requestIdRef.current) {
-        setJsonString(formatJson(json));
+        setSource(source);
       }
     } catch (error) {
       if (controller.signal.aborted) return;
       console.error(error);
       if (requestId === requestIdRef.current) {
-        setJsonString(`ERROR: Failed to fetch: ${jsonUrl}`);
+        setSource(`ERROR: Failed to fetch: ${sourceUrl}`);
       }
     } finally {
       if (!controller.signal.aborted && requestId === requestIdRef.current) {
@@ -75,18 +82,18 @@ export const JsonModalContextProvider = ({
   }, []);
 
   const value = useMemo(
-    () => ({ open, title, fetching, jsonString, setOpen, openModal }),
-    [open, title, fetching, jsonString, openModal],
+    () => ({ open, title, fetching, source, language, setOpen, openModal }),
+    [open, title, fetching, source, language, openModal],
   );
 
-  return <JsonModalContext value={value}>{children}</JsonModalContext>;
+  return <CodeModalContext value={value}>{children}</CodeModalContext>;
 };
 
-export const useJsonModal = () => {
-  const context = useContext(JsonModalContext);
+export const useCodeModal = () => {
+  const context = useContext(CodeModalContext);
   if (context === undefined) {
     throw new Error(
-      "useJsonModal must be used within JsonModalContextProvider",
+      "useCodeModal must be used within CodeModalContextProvider",
     );
   }
   return context;

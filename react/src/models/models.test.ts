@@ -11,6 +11,16 @@ describe("KarabinerJsonFile", () => {
     expect(file.id).toBe("example.rule");
     expect(file.jsonUrl).toBe("json/example.rule.json");
     expect(file.shareUrl).toBe("?rule=json%2Fexample.rule.json");
+    expect(file.isJavaScript).toBe(false);
+  });
+
+  it("recognizes JavaScript distribution paths", () => {
+    const file = new KarabinerJsonFile({
+      path: "js/example.js",
+      json: {},
+    });
+
+    expect(file.isJavaScript).toBe(true);
   });
 });
 

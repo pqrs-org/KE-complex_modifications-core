@@ -8,9 +8,9 @@ import {
   Typography,
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { useJsonModal } from "../contexts";
+import { useCodeModal } from "../contexts";
 
-const JsonSyntaxHighlighter = lazy(() => import("./JsonSyntaxHighlighter"));
+const CodeSyntaxHighlighter = lazy(() => import("./CodeSyntaxHighlighter"));
 
 const style = {
   position: "absolute",
@@ -24,24 +24,24 @@ const style = {
   p: 4,
 } as const;
 
-export const JsonModal = () => {
-  const jsonModalContext = useJsonModal();
+export const CodeModal = () => {
+  const codeModalContext = useCodeModal();
 
   const handleClose = () => {
-    jsonModalContext.setOpen(false);
+    codeModalContext.setOpen(false);
   };
 
   return (
     <>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={jsonModalContext.fetching}
+        open={codeModalContext.fetching}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
 
       <Modal
-        open={jsonModalContext.open}
+        open={codeModalContext.open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
       >
@@ -56,15 +56,15 @@ export const JsonModal = () => {
               justifyContent: "space-between",
             }}
           >
-            <Box>{jsonModalContext.title}</Box>
-            <IconButton aria-label="Close JSON viewer" onClick={handleClose}>
+            <Box>{codeModalContext.title}</Box>
+            <IconButton aria-label="Close code viewer" onClick={handleClose}>
               <CloseIcon />
             </IconButton>
           </Typography>
           <Suspense fallback={<CircularProgress />}>
-            <JsonSyntaxHighlighter>
-              {jsonModalContext.jsonString}
-            </JsonSyntaxHighlighter>
+            <CodeSyntaxHighlighter language={codeModalContext.language}>
+              {codeModalContext.source}
+            </CodeSyntaxHighlighter>
           </Suspense>
         </Box>
       </Modal>

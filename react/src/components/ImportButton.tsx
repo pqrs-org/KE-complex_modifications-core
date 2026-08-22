@@ -20,7 +20,7 @@ import {
   ContentCopy as ContentCopyIcon,
   OpenInNew as OpenInNewIcon,
 } from "@mui/icons-material";
-import { useJsonModal, useSnackbar } from "../contexts";
+import { useCodeModal, useSnackbar } from "../contexts";
 import type { KarabinerJsonFile } from "../models";
 import { toAbsoluteUrl, toKarabinerImportUrl } from "../utils/url";
 import { ruleHeaderLineHeight } from "./ruleHeaderLayout";
@@ -32,7 +32,7 @@ export const ImportButton = ({
   jsonFile: KarabinerJsonFile;
   showOpenRule?: boolean;
 }) => {
-  const jsonModal = useJsonModal();
+  const codeModal = useCodeModal();
   const { setText: setSnackbarText } = useSnackbar();
   const menuId = useId();
 
@@ -200,7 +200,7 @@ export const ImportButton = ({
                   <MenuItem
                     onClick={(event) => {
                       event.stopPropagation();
-                      void jsonModal.openModal(
+                      void codeModal.openModal(
                         jsonFile.object.json.title ?? "",
                         jsonFile.jsonUrl,
                       );
@@ -208,7 +208,7 @@ export const ImportButton = ({
                     }}
                   >
                     <CodeIcon sx={{ marginRight: 1 }} />
-                    Show JSON
+                    {jsonFile.isJavaScript ? "Show JavaScript" : "Show JSON"}
                   </MenuItem>
 
                   <MenuItem
@@ -230,7 +230,9 @@ export const ImportButton = ({
                     }}
                   >
                     <ContentCopyIcon sx={{ marginRight: 1 }} />
-                    Copy JSON URL
+                    {jsonFile.isJavaScript
+                      ? "Copy JavaScript URL"
+                      : "Copy JSON URL"}
                   </MenuItem>
                 </MenuList>
               </ClickAwayListener>

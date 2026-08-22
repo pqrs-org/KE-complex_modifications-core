@@ -28,7 +28,7 @@ import {
 } from "./utils/hashTarget";
 import {
   CategoryBox,
-  JsonModal,
+  CodeModal,
   SearchInput,
   SearchSuggestions,
   SharedRuleView,
@@ -489,7 +489,7 @@ const App = () => {
         )}
       </Container>
 
-      <JsonModal />
+      <CodeModal />
       <Snackbar />
     </>
   );

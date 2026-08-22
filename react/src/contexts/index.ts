@@ -1,4 +1,4 @@
-export { JsonModalContextProvider, useJsonModal } from "./JsonModalContext";
+export { CodeModalContextProvider, useCodeModal } from "./CodeModalContext";
 export {
   SearchQueryContextProvider,
   useSearchQuery,

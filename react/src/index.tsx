@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { CssBaseline } from "@mui/material";
 import App from "./App";
 import {
-  JsonModalContextProvider,
+  CodeModalContextProvider,
   SearchQueryContextProvider,
   SnackbarContextProvider,
 } from "./contexts";
@@ -14,13 +14,13 @@ if (!container) throw new Error("#root not found");
 const root = createRoot(container);
 root.render(
   <StrictMode>
-    <JsonModalContextProvider>
+    <CodeModalContextProvider>
       <SearchQueryContextProvider>
         <SnackbarContextProvider>
           <CssBaseline />
           <App />
         </SnackbarContextProvider>
       </SearchQueryContextProvider>
-    </JsonModalContextProvider>
+    </CodeModalContextProvider>
   </StrictMode>,
 );
