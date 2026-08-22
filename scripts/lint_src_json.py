@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-'''Lint src/json'''
+"""Lint src/json"""
 
 import glob
 import pathlib
@@ -10,7 +10,7 @@ import sys
 
 
 def lint_src_json(src_json_directory):
-    '''Lint src/json'''
+    """Lint src/json"""
 
     #
     # Check files
@@ -25,47 +25,44 @@ def lint_src_json(src_json_directory):
         #
 
         if os.path.isdir(file_path):
-            print('')
-            print('----------------------------------------')
-            print('ERROR:')
+            print("")
+            print("----------------------------------------")
+            print("ERROR:")
             print(f"An extra directory is found: {file_path}")
-            print('----------------------------------------')
-            print('')
+            print("----------------------------------------")
+            print("")
             sys.exit(1)
 
         #
         # Check file extension
         #
 
-        if file_path.endswith('.json'):
-            print('')
-            print('----------------------------------------')
-            print('ERROR:')
-            print(
-                f"Please move src/json/{basename} to public/json/{basename}")
-            print('----------------------------------------')
-            print('')
+        if file_path.endswith(".json"):
+            print("")
+            print("----------------------------------------")
+            print("ERROR:")
+            print(f"Please move src/json/{basename} to public/json/{basename}")
+            print("----------------------------------------")
+            print("")
             sys.exit(1)
 
-        elif file_path.endswith('.js'):
-            if not file_path.endswith('.json.js'):
-                print('')
-                print('----------------------------------------')
-                print('ERROR:')
-                print(
-                    f"The file name must end with .json.js. src/json/{basename}")
-                print('----------------------------------------')
-                print('')
+        elif file_path.endswith(".js"):
+            if not file_path.endswith(".json.js"):
+                print("")
+                print("----------------------------------------")
+                print("ERROR:")
+                print(f"The file name must end with .json.js. src/json/{basename}")
+                print("----------------------------------------")
+                print("")
                 sys.exit(1)
 
         else:
-            print('')
-            print('----------------------------------------')
-            print('ERROR:')
-            print(
-                f"Unsupported file type src/json/{basename}")
-            print('----------------------------------------')
-            print('')
+            print("")
+            print("----------------------------------------")
+            print("ERROR:")
+            print(f"Unsupported file type src/json/{basename}")
+            print("----------------------------------------")
+            print("")
             sys.exit(1)
 
 
