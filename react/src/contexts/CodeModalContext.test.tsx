@@ -68,9 +68,7 @@ describe("CodeModalContextProvider", () => {
 
     expect(result.current.open).toBe(true);
     expect(result.current.fetching).toBe(false);
-    expect(result.current.source).toBe(
-      "ERROR: Failed to fetch: broken.json",
-    );
+    expect(result.current.source).toBe("ERROR: Failed to fetch: broken.json");
   });
 
   it("keeps the latest result when a previous request is aborted", async () => {
