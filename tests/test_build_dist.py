@@ -1,22 +1,24 @@
-"""Tests for scripts/make_distjson.py"""
+"""Tests for dist building helpers."""
 
 import os
 import pathlib
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "scripts"))
 
-from make_distjson import (  # pylint: disable=wrong-import-position
+from lib.build_dist import (  # pylint: disable=wrong-import-position
+    build_dist_atomically,
     check_safe_path,
     extract_text_from_html,
     load_search_suggestions,
 )
 
 
-class MakeDistjsonTest(unittest.TestCase):
-    """Tests for dist.json helpers"""
+class BuildDistTest(unittest.TestCase):
+    """Tests for distribution building helpers."""
 
     def test_check_safe_path_rejects_similarly_named_sibling(self):
         """A common path prefix does not make a sibling safe."""
@@ -59,6 +61,48 @@ class MakeDistjsonTest(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "non-empty strings"):
                 load_search_suggestions(path)
+
+    @mock.patch("lib.build_dist.build_dist_contents")
+    def test_build_failure_preserves_previous_dist(self, build_contents):
+        """A failed build leaves the previous dist untouched."""
+        build_contents.side_effect = ValueError("build failed")
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            output = root / "dist"
+            output.mkdir()
+            marker = output / "previous"
+            marker.write_text("previous dist\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "build failed"):
+                build_dist_atomically(output, "public", "react", "cli")
+
+            self.assertEqual("previous dist\n", marker.read_text("utf-8"))
+            self.assertEqual([], list(root.glob("dist.tmp.*")))
+
+    @mock.patch("lib.build_dist.build_dist_contents")
+    def test_success_replaces_previous_dist(self, build_contents):
+        """A successful build atomically replaces the previous dist."""
+
+        def populate(output, *_args):
+            pathlib.Path(output, "dist.json").write_text(
+                "new dist json\n", encoding="utf-8"
+            )
+
+        build_contents.side_effect = populate
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            output = root / "dist"
+            output.mkdir()
+            (output / "previous").write_text("previous dist\n", encoding="utf-8")
+
+            build_dist_atomically(output, "public", "react", "cli")
+
+            self.assertFalse((output / "previous").exists())
+            self.assertEqual(
+                "new dist json\n", (output / "dist.json").read_text("utf-8")
+            )
+            self.assertEqual([], list(root.glob("dist.tmp.*")))
+            self.assertEqual([], list(root.glob("dist.backup.*")))
 
 
 if __name__ == "__main__":

@@ -5,18 +5,17 @@
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from functools import partial
 import pathlib
-import subprocess
 from urllib.parse import urlparse
 
+from lib.build_dist import build_dist_atomically
+
 CORE_DIRECTORY = pathlib.Path(__file__).resolve().parent.parent
-DIST_DIRECTORY = CORE_DIRECTORY.parent / "dist"
-UPDATE_DIST_SCRIPT = CORE_DIRECTORY / "scripts/update-dist.sh"
-
-
-def run_update_dist():
-    """Update dist and raise an exception on failure."""
-    print("update-dist.sh")
-    subprocess.run(["bash", str(UPDATE_DIST_SCRIPT)], cwd=CORE_DIRECTORY, check=True)
+REPOSITORY_DIRECTORY = CORE_DIRECTORY.parent
+DIST_DIRECTORY = REPOSITORY_DIRECTORY / "dist"
+PUBLIC_DIRECTORY = REPOSITORY_DIRECTORY / "public"
+REACT_DIST_DIRECTORY = CORE_DIRECTORY / "react/dist"
+KARABINER_CLI = CORE_DIRECTORY / "bin/karabiner_cli"
+SANDBOX_PROFILE = CORE_DIRECTORY / "files/generator.sb"
 
 
 class RequestHandler(SimpleHTTPRequestHandler):
@@ -33,12 +32,19 @@ class RequestHandler(SimpleHTTPRequestHandler):
     def update_dist(self):
         path = urlparse(self.path).path
         if path == "/" or path == "/index.html":
-            run_update_dist()
+            print("build_dist.py")
+            build_dist_atomically(
+                DIST_DIRECTORY,
+                PUBLIC_DIRECTORY,
+                REACT_DIST_DIRECTORY,
+                KARABINER_CLI,
+                SANDBOX_PROFILE,
+            )
 
     def do_GET(self):
         try:
             self.update_dist()
-        except subprocess.CalledProcessError:
+        except (OSError, ValueError):
             self.send_error(500, "Failed to update dist")
             return
         super().do_GET()
