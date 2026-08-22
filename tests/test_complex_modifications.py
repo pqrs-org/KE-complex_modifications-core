@@ -9,12 +9,15 @@ import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "scripts"))
 
-from lib.build_dist import build_rule_files  # pylint: disable=wrong-import-position
+from lib.build_dist import (  # pylint: disable=wrong-import-position
+    build_rule_files,
+    ruleset_json_path,
+)
 from lib.complex_modifications import (  # pylint: disable=wrong-import-position
     collect_public_sources,
     collect_sources,
-    distributed_file_name,
     evaluate_javascript,
+    json_output_file_name,
     normalize_complex_modifications,
 )
 
@@ -22,10 +25,10 @@ from lib.complex_modifications import (  # pylint: disable=wrong-import-position
 class ComplexModificationsTest(unittest.TestCase):
     """Tests for source normalization."""
 
-    def test_package_is_preserved(self):
+    def test_ruleset_is_preserved(self):
         """The established title/rules format remains supported."""
-        package = {"title": "Package", "rules": []}
-        self.assertIs(package, normalize_complex_modifications(package))
+        ruleset = {"title": "Ruleset", "rules": []}
+        self.assertIs(ruleset, normalize_complex_modifications(ruleset))
 
     def test_single_rule_is_wrapped(self):
         """A single rule gets a title from its description."""
@@ -35,7 +38,7 @@ class ComplexModificationsTest(unittest.TestCase):
             normalize_complex_modifications(rule),
         )
 
-    def test_single_rule_metadata_is_moved_to_package(self):
+    def test_single_rule_metadata_is_moved_to_ruleset(self):
         """Attribution metadata remains visible after wrapping a rule."""
         rule = {
             "description": "Rule",
@@ -62,11 +65,15 @@ class ComplexModificationsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "`manipulators` is not found"):
             normalize_complex_modifications({"description": "Rule"})
 
-    def test_distributed_file_names(self):
-        """JSON and JavaScript sources produce JSON names."""
-        self.assertEqual("a.json", distributed_file_name("a.json"))
-        self.assertEqual("a.json", distributed_file_name("a.js"))
-        self.assertEqual("a.json.json", distributed_file_name("a.json.js"))
+    def test_json_output_file_names(self):
+        """JSON and JavaScript sources produce normalized JSON names."""
+        self.assertEqual("a.json", json_output_file_name("a.json"))
+        self.assertEqual("a.json", json_output_file_name("a.js"))
+        self.assertEqual("a.json.json", json_output_file_name("a.json.js"))
+
+    def test_javascript_ruleset_json_path_uses_a_descriptive_suffix(self):
+        """JavaScript ruleset output remains beside its source."""
+        self.assertEqual("js/a.ruleset.json", ruleset_json_path("js/a.js"))
 
     def test_output_collision_is_rejected(self):
         """Two source files may not produce the same public URL."""
@@ -107,6 +114,18 @@ class ComplexModificationsTest(unittest.TestCase):
             javascript_directory.mkdir()
             (json_directory / "misplaced.js").write_text("main()", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "public/json directory"):
+                collect_public_sources(json_directory, javascript_directory)
+
+    def test_public_javascript_directory_rejects_json(self):
+        """The public JavaScript directory accepts only .js files."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            json_directory = root / "json"
+            javascript_directory = root / "js"
+            json_directory.mkdir()
+            javascript_directory.mkdir()
+            (javascript_directory / "misplaced.json").write_text("{}", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "public/js directory"):
                 collect_public_sources(json_directory, javascript_directory)
 
     def test_javascript_uses_json_output_option(self):
@@ -183,7 +202,7 @@ main();
             self.assertEqual(karabiner_cli_value, node_value)
 
     def test_build_evaluates_javascript_and_normalizes_result(self):
-        """JavaScript output is converted to an importable JSON package."""
+        """JavaScript output is converted to an importable JSON ruleset."""
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
             json_directory = root / "json"
@@ -201,7 +220,7 @@ main();
             )
             cli.chmod(cli.stat().st_mode | stat.S_IXUSR)
 
-            javascript_packages = build_rule_files(
+            javascript_rulesets = build_rule_files(
                 json_directory, javascript_directory, output, cli
             )
 
@@ -212,12 +231,41 @@ main();
                         {"description": "JS rule", "manipulators": []},
                     ],
                 },
-                javascript_packages["js/example.js"],
+                javascript_rulesets["js/example.js"],
             )
             self.assertEqual("main()", (output / "js/example.js").read_text("utf-8"))
+            self.assertEqual(
+                javascript_rulesets["js/example.js"],
+                json.loads((output / "js/example.ruleset.json").read_text("utf-8")),
+            )
 
-    def test_build_rejects_javascript_package(self):
-        """Public JavaScript must produce a single rule, not a package."""
+    def test_build_replaces_single_json_with_ruleset_json(self):
+        """A single JSON rule is distributed in ruleset form at the same path."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            json_directory = root / "json"
+            javascript_directory = root / "js"
+            output = root / "output"
+            json_directory.mkdir()
+            javascript_directory.mkdir()
+            source = '{"description":"Single rule","manipulators":[]}'
+            (json_directory / "example.json").write_text(source, encoding="utf-8")
+
+            build_rule_files(json_directory, javascript_directory, output, None)
+
+            self.assertEqual(
+                {
+                    "title": "Single rule",
+                    "rules": [
+                        {"description": "Single rule", "manipulators": []},
+                    ],
+                },
+                json.loads((output / "json/example.json").read_text("utf-8")),
+            )
+            self.assertFalse((output / "json/example.ruleset.json").exists())
+
+    def test_build_rejects_javascript_ruleset(self):
+        """Public JavaScript must produce a single rule, not a ruleset."""
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
             json_directory = root / "json"
@@ -228,7 +276,7 @@ main();
             (javascript_directory / "example.js").write_text("main()", encoding="utf-8")
             cli = root / "karabiner_cli"
             cli.write_text(
-                '#!/bin/sh\nprintf \'%s\\n\' \'{"title":"JS package","rules":[]}\'\n',
+                '#!/bin/sh\nprintf \'%s\\n\' \'{"title":"JS ruleset","rules":[]}\'\n',
                 encoding="utf-8",
             )
             cli.chmod(cli.stat().st_mode | stat.S_IXUSR)

@@ -17,6 +17,12 @@ from .complex_modifications import (
 )
 
 
+def ruleset_json_path(distributed_path):
+    """Return the ruleset JSON path generated for a JavaScript source."""
+    path = pathlib.PurePosixPath(distributed_path)
+    return str(path.with_name(f"{path.stem}.ruleset.json"))
+
+
 def parallel_worker_count(task_count):
     """Return a conservative worker count for independent build tasks."""
     configured_jobs = os.environ.get("BUILD_DIST_JOBS")
@@ -106,11 +112,11 @@ def build_rule_files(
     karabiner_cli,
     sandbox_profile=None,
 ):
-    """Build dist/json and dist/js, returning evaluated JavaScript packages."""
+    """Build rule files, returning evaluated JavaScript rulesets."""
     output_directory = pathlib.Path(output_directory)
     (output_directory / "json").mkdir(parents=True, exist_ok=True)
     (output_directory / "js").mkdir(parents=True, exist_ok=True)
-    javascript_packages = {}
+    javascript_rulesets = {}
     sources = collect_public_sources(json_directory, javascript_directory)
     javascript_sources = [
         source for source in sources if source[0].name.endswith(".js")
@@ -119,8 +125,8 @@ def build_rule_files(
         javascript_sources, karabiner_cli, sandbox_profile
     )
 
-    with tempfile.TemporaryDirectory() as metadata_directory:
-        metadata_directory = pathlib.Path(metadata_directory)
+    with tempfile.TemporaryDirectory() as lint_directory:
+        lint_directory = pathlib.Path(lint_directory)
         for source_path, output_path_string in sources:
             output_path = output_directory / output_path_string
             output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -128,9 +134,17 @@ def build_rule_files(
             if source_path.name.endswith(".js"):
                 value = javascript_values[source_path]
                 shutil.copy2(source_path, output_path)
-                javascript_packages[output_path_string] = value
-                metadata_path = metadata_directory / f"{source_path.name}.json"
-                metadata_path.write_text(
+                ruleset_output_path = output_directory / ruleset_json_path(
+                    output_path_string
+                )
+                ruleset_output_path.parent.mkdir(parents=True, exist_ok=True)
+                ruleset_output_path.write_text(
+                    f"{json.dumps(value, ensure_ascii=False, indent=2)}\n",
+                    encoding="utf-8",
+                )
+                javascript_rulesets[output_path_string] = value
+                lint_json_path = lint_directory / f"{source_path.name}.json"
+                lint_json_path.write_text(
                     f"{json.dumps(value, ensure_ascii=False, indent=2)}\n",
                     encoding="utf-8",
                 )
@@ -157,11 +171,11 @@ def build_rule_files(
         if karabiner_cli is not None:
             lint_rule_files(
                 list((output_directory / "json").glob("*.json"))
-                + list(metadata_directory.glob("*.json")),
+                + list(lint_directory.glob("*.json")),
                 karabiner_cli,
             )
 
-    return javascript_packages
+    return javascript_rulesets
 
 
 def check_safe_path(path, root_directory=None):
@@ -208,7 +222,7 @@ def build_dist_json(
     output_file_path,
     public_directory,
     json_directory,
-    javascript_packages,
+    javascript_rulesets,
 ):
     """Build the searchable dist.json index."""
     public_directory = pathlib.Path(public_directory).resolve()
@@ -217,7 +231,7 @@ def build_dist_json(
         f"json/{path.name}": json.loads(path.read_text(encoding="utf-8"))
         for path in json_directory.glob("*.json")
     }
-    source_values.update(javascript_packages)
+    source_values.update(javascript_rulesets)
 
     groups_json = json.loads(
         (public_directory / "groups.json").read_text(encoding="utf-8")
@@ -246,13 +260,17 @@ def build_dist_json(
                     ):
                         raise PermissionError(f"cannot access {distributed_path}")
 
-                    value = source_values.get(distributed_path)
-                    if value is None:
+                    source_value = source_values.get(distributed_path)
+                    if source_value is None:
                         raise FileNotFoundError(distributed_path)
+
+                    value = normalize_complex_modifications(source_value)
+                    if distributed_path.startswith("js/"):
+                        file["ruleset_json_path"] = ruleset_json_path(distributed_path)
 
                     for rule in value["rules"]:
                         del rule["manipulators"]
-                    file["json"] = value
+                    file["metadata"] = value
 
                 extra_description_text = ""
                 if "extra_description_path" in file:
@@ -312,7 +330,7 @@ def build_dist_contents(
     react_dist_directory = pathlib.Path(react_dist_directory).resolve()
 
     output_directory.mkdir(parents=True, exist_ok=True)
-    javascript_packages = build_rule_files(
+    javascript_rulesets = build_rule_files(
         public_directory / "json",
         public_directory / "js",
         output_directory,
@@ -323,7 +341,7 @@ def build_dist_contents(
         output_directory / "dist.json",
         public_directory,
         output_directory / "json",
-        javascript_packages,
+        javascript_rulesets,
     )
 
     shutil.copytree(

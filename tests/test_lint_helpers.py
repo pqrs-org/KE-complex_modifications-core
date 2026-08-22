@@ -53,7 +53,7 @@ class LintPublicJsonTest(unittest.TestCase):
     """Tests for public JSON validation without invoking the command."""
 
     def test_valid_source_is_accepted(self):
-        """A valid package completes without an exception."""
+        """A valid ruleset completes without an exception."""
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
             (root / "example.json").write_text(

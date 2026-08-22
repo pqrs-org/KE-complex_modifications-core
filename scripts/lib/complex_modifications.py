@@ -14,8 +14,8 @@ process.stdout.write(JSON.stringify(value));
 """
 
 
-def distributed_file_name(source_path):
-    """Return the JSON output name for a source after normalization."""
+def json_output_file_name(source_path):
+    """Return the normalized JSON output name for a source."""
     name = pathlib.Path(source_path).name
     if name.endswith(".js"):
         return f"{name[:-3]}.json"
@@ -25,10 +25,10 @@ def distributed_file_name(source_path):
 
 
 # A JSON source or the result of evaluating a JavaScript source may contain a
-# single rule. Wrap such values in the packaged JSON format used for
-# distribution, while preserving values that are already packages.
+# single rule. Wrap such values in the title/rules JSON format used for
+# rulesets, while preserving values that are already rulesets.
 def normalize_complex_modifications(value):
-    """Validate and return a value in packaged JSON format."""
+    """Validate and return a value in ruleset JSON format."""
     if not isinstance(value, dict):
         raise ValueError("top-level value must be an object")
 
@@ -90,7 +90,7 @@ def load_source(
         and ("title" in value or "rules" in value)
     ):
         raise ValueError(
-            "JavaScript files under public/js must return a single rule "
+            "JavaScript files under public/js must return a single rule, not a ruleset, "
             "containing `description` and `manipulators`"
         )
 
@@ -130,7 +130,7 @@ def collect_sources(source_directory):
         if source_path.is_dir():
             raise ValueError(f"An extra directory is found: {source_path}")
         try:
-            output_name = distributed_file_name(source_path)
+            output_name = json_output_file_name(source_path)
         except ValueError as error:
             path = os.fspath(source_path)
             raise ValueError(
@@ -154,12 +154,14 @@ def collect_public_sources(json_directory, javascript_directory):
     ):
         if extension == ".js" and not pathlib.Path(source_directory).is_dir():
             continue
-        for source_path, json_output_name in collect_sources(source_directory):
+        for source_path, generated_json_name in collect_sources(source_directory):
             if not source_path.name.endswith(extension):
                 raise ValueError(
                     f"{source_path} must be placed in the "
                     f"public/{directory_name} directory"
                 )
-            output_name = json_output_name if extension == ".json" else source_path.name
+            output_name = (
+                generated_json_name if extension == ".json" else source_path.name
+            )
             sources.append((source_path, f"{directory_name}/{output_name}"))
     return sources
