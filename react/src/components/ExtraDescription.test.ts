@@ -79,6 +79,28 @@ describe("removeExecutableContent", () => {
 });
 
 describe("ExtraDescription", () => {
+  it("uses a subtle style for keyboard keys", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        text: vi.fn().mockResolvedValue("<kbd>command</kbd>"),
+      }),
+    );
+
+    const view = render(
+      createElement(ExtraDescription, { src: "description.html" }),
+    );
+    const shadowHost = view.container.firstElementChild as HTMLElement;
+
+    await waitFor(() =>
+      expect(shadowHost.shadowRoot?.querySelector("kbd")).not.toBeNull(),
+    );
+    expect(
+      shadowHost.shadowRoot?.querySelector("style")?.textContent,
+    ).toContain("background-color: rgba(0, 0, 0, 0.06)");
+  });
+
   it("resolves relative image and link URLs against the description URL", async () => {
     vi.stubGlobal(
       "fetch",

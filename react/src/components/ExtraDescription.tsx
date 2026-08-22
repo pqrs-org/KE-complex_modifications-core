@@ -6,6 +6,15 @@ type Props = {
   src: string;
 };
 
+const extraDescriptionCss = `
+kbd {
+  padding: 0.05rem 0.3rem;
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.06);
+  border-radius: 0.2rem;
+}
+`;
+
 /**
  * Removes elements and attributes that can execute code from an extra
  * description. Regular markup and styles are intentionally preserved because
@@ -103,7 +112,11 @@ export const ExtraDescription = ({ src }: Props) => {
         const link = document.createElement("link");
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("href", "vendor/bootstrap.min.css");
-        shadow.replaceChildren(link, wrapper);
+
+        const style = document.createElement("style");
+        style.textContent = extraDescriptionCss;
+
+        shadow.replaceChildren(link, style, wrapper);
       } catch (e) {
         if (!controller.signal.aborted) setErr(e);
       }
