@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-'''Lint public/extra_descriptions'''
+"""Lint public/extra_descriptions"""
 
 import json
 import os
@@ -10,7 +10,7 @@ import sys
 
 
 def resolve_safe_path(public_directory, relative_path):
-    '''Resolve a path only if it is under public_directory'''
+    """Resolve a path only if it is under public_directory"""
     public_path = pathlib.Path(public_directory).resolve()
     path = (public_path / relative_path).resolve()
     if os.path.commonpath((public_path, path)) != str(public_path):
@@ -19,39 +19,42 @@ def resolve_safe_path(public_directory, relative_path):
 
 
 def lint_extra_descriptions(public_directory):
-    '''Lint public/extra_descriptions'''
+    """Lint public/extra_descriptions"""
 
-    html_pattern = re.compile(r'<\s*/?\s*(html|body)', re.I)
-    data_image_pattern = re.compile(r'data:image/', re.I)
+    html_pattern = re.compile(r"<\s*/?\s*(html|body)", re.I)
+    data_image_pattern = re.compile(r"data:image/", re.I)
 
-    with open(f"{public_directory}/groups.json", encoding='utf-8') as groups_json_file:
+    with open(f"{public_directory}/groups.json", encoding="utf-8") as groups_json_file:
         groups_json = json.load(groups_json_file)
 
         for group_name in groups_json:
             for category in groups_json[group_name]:
-                for file in category['files']:
-                    if 'extra_description_path' in file:
+                for file in category["files"]:
+                    if "extra_description_path" in file:
                         path = resolve_safe_path(
-                            public_directory, file['extra_description_path'])
-                        html = pathlib.Path(path).read_text(encoding='utf-8')
+                            public_directory, file["extra_description_path"]
+                        )
+                        html = pathlib.Path(path).read_text(encoding="utf-8")
                         if html_pattern.search(html):
-                            print('')
-                            print('----------------------------------------')
-                            print('ERROR:')
+                            print("")
+                            print("----------------------------------------")
+                            print("ERROR:")
                             print(
-                                f"Do not include <html> or <body> in {file['extra_description_path']}")
-                            print('----------------------------------------')
-                            print('')
+                                f"Do not include <html> or <body> in {file['extra_description_path']}"
+                            )
+                            print("----------------------------------------")
+                            print("")
                             sys.exit(1)
 
                         if data_image_pattern.search(html):
-                            print('')
-                            print('----------------------------------------')
-                            print('ERROR:')
+                            print("")
+                            print("----------------------------------------")
+                            print("ERROR:")
                             print(
-                                f"Do not include data:image/* in {file['extra_description_path']}")
-                            print('----------------------------------------')
-                            print('')
+                                f"Do not include data:image/* in {file['extra_description_path']}"
+                            )
+                            print("----------------------------------------")
+                            print("")
                             sys.exit(1)
 
 
