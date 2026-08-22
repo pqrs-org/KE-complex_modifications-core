@@ -10,6 +10,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { KarabinerFile } from "../models";
+import { toKarabinerImportUrl } from "../utils/url";
 import { ImportButton } from "./ImportButton";
 
 const contextMocks = vi.hoisted(() => ({
@@ -18,7 +19,9 @@ const contextMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("../contexts", () => ({
-  useCodeModal: () => ({ openModal: contextMocks.openModal }),
+  useCodeModal: () => ({
+    openModal: contextMocks.openModal,
+  }),
   useSnackbar: () => ({ setText: contextMocks.setSnackbarText }),
 }));
 
@@ -39,7 +42,7 @@ const renderImportButton = () =>
         file={
           new KarabinerFile({
             path: "json/example.json",
-            json: { title: "Example" },
+            metadata: { title: "Example" },
           })
         }
       />
@@ -53,7 +56,11 @@ const renderJavaScriptImportButton = () =>
       file={
         new KarabinerFile({
           path: "js/example.js",
-          json: { title: "Example JavaScript" },
+          ruleset_json_path: "js/example.ruleset.json",
+          metadata: {
+            title: "Example JavaScript",
+            rules: [{ description: "Converted rule" }],
+          },
         })
       }
     />,
@@ -137,6 +144,43 @@ describe("ImportButton", () => {
     ).not.toBeNull();
   });
 
+  it("opens compatible JSON for a JavaScript file in the modal", async () => {
+    renderJavaScriptImportButton();
+    const menu = await openMenu();
+
+    fireEvent.click(
+      within(menu).getByRole("menuitem", { name: "Show compatible JSON" }),
+    );
+
+    expect(contextMocks.openModal).toHaveBeenCalledWith(
+      "Example JavaScript",
+      "js/example.ruleset.json",
+    );
+  });
+
+  it("links to the ruleset JSON import for older versions", async () => {
+    renderJavaScriptImportButton();
+    const menu = await openMenu();
+
+    const link = within(menu).getByRole("menuitem", {
+      name: "Import JSON compatible with Karabiner-Elements 16.1.0 or earlier",
+    });
+    const javascriptLink = within(menu).getByRole("menuitem", {
+      name: "Import JavaScript code",
+    });
+    const divider = within(menu).getByRole("separator");
+
+    expect(javascriptLink.getAttribute("href")).toBe(
+      toKarabinerImportUrl("js/example.js"),
+    );
+    expect(link.getAttribute("href")).toBe(
+      toKarabinerImportUrl("js/example.ruleset.json"),
+    );
+    expect(within(menu).getAllByRole("menuitem")[0]).toBe(javascriptLink);
+    expect(javascriptLink.nextElementSibling).toBe(link);
+    expect(link.nextElementSibling).toBe(divider);
+  });
+
   it.each([
     ["Copy URL", "?rule=json%2Fexample.json"],
     ["Copy JSON URL", "json/example.json"],
@@ -149,6 +193,26 @@ describe("ImportButton", () => {
     fireEvent.click(within(menu).getByRole("menuitem", { name: menuItemName }));
 
     const absoluteUrl = new URL(url, document.baseURI).href;
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(absoluteUrl));
+    expect(contextMocks.setSnackbarText).toHaveBeenCalledWith(
+      `You just copied: ${absoluteUrl}`,
+    );
+  });
+
+  it("copies the compatible JSON URL for a JavaScript file", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    setClipboard({ writeText });
+    renderJavaScriptImportButton();
+    const menu = await openMenu();
+
+    fireEvent.click(
+      within(menu).getByRole("menuitem", {
+        name: "Copy compatible JSON URL",
+      }),
+    );
+
+    const absoluteUrl = new URL("js/example.ruleset.json", document.baseURI)
+      .href;
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(absoluteUrl));
     expect(contextMocks.setSnackbarText).toHaveBeenCalledWith(
       `You just copied: ${absoluteUrl}`,

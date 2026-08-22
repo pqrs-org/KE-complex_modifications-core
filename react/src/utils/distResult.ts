@@ -27,15 +27,16 @@ const isRule = (value: unknown) =>
 const isKarabinerFile = (value: unknown): value is KarabinerFileObject => {
   if (!isRecord(value) || typeof value.path !== "string") return false;
 
-  const json = value.json;
-  if (!isRecord(json)) return false;
+  const metadata = value.metadata;
+  if (!isRecord(metadata)) return false;
 
   return (
-    isOptionalString(json.title) &&
-    isOptionalString(json.author) &&
-    isOptionalStringArray(json.maintainers) &&
-    (json.rules === undefined ||
-      (Array.isArray(json.rules) && json.rules.every(isRule))) &&
+    isOptionalString(value.ruleset_json_path) &&
+    isOptionalString(metadata.title) &&
+    isOptionalString(metadata.author) &&
+    isOptionalStringArray(metadata.maintainers) &&
+    (metadata.rules === undefined ||
+      (Array.isArray(metadata.rules) && metadata.rules.every(isRule))) &&
     isOptionalString(value.extra_description_path) &&
     isOptionalString(value.extra_description_text)
   );

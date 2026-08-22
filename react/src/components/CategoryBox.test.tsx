@@ -36,7 +36,7 @@ describe("CategoryBox", () => {
       files: [
         {
           path: "json/example.json",
-          json: {
+          metadata: {
             title: "Example",
             maintainers: ["example-maintainer"],
             rules: [

@@ -162,13 +162,13 @@ describe("App", () => {
               files: [
                 {
                   path: "json/plain.json",
-                  json: { title: "Plain regular priority", rules: [] },
+                  metadata: { title: "Plain regular priority", rules: [] },
                 },
                 {
                   path: "json/short-documented.json",
                   extra_description_path: "extra_descriptions/short.html",
                   extra_description_text: "Short.",
-                  json: {
+                  metadata: {
                     title: "Short documented regular priority",
                     rules: [],
                   },
@@ -177,14 +177,14 @@ describe("App", () => {
                   path: "json/long-documented.json",
                   extra_description_path: "extra_descriptions/long.html",
                   extra_description_text: "Detailed documentation.",
-                  json: {
+                  metadata: {
                     title: "Long documented regular priority",
                     rules: [],
                   },
                 },
                 {
                   path: "json/maintained.json",
-                  json: {
+                  metadata: {
                     title: "Maintained regular priority",
                     maintainers: ["maintainer"],
                     rules: [],
@@ -194,7 +194,7 @@ describe("App", () => {
                   path: "json/both.json",
                   extra_description_path: "extra_descriptions/both.html",
                   extra_description_text: "Description.",
-                  json: {
+                  metadata: {
                     title: "Both regular priority",
                     author: "author",
                     rules: [],
@@ -264,11 +264,11 @@ describe("App", () => {
               files: [
                 {
                   path: "json/matching.json",
-                  json: matchingJson,
+                  metadata: matchingJson,
                 },
                 {
                   path: "json/unrelated.json",
-                  json: { title: "Unrelated rule", rules: [] },
+                  metadata: { title: "Unrelated rule", rules: [] },
                 },
               ],
             },
@@ -302,7 +302,7 @@ describe("App", () => {
               files: [
                 {
                   path: "json/authored.json",
-                  json: {
+                  metadata: {
                     title: "Authored rule",
                     author: "example-author",
                     rules: [],
@@ -310,7 +310,7 @@ describe("App", () => {
                 },
                 {
                   path: "json/unrelated.json",
-                  json: { title: "Unrelated rule", rules: [] },
+                  metadata: { title: "Unrelated rule", rules: [] },
                 },
               ],
             },
@@ -343,7 +343,7 @@ describe("App", () => {
               files: [
                 {
                   path: "json/plain.json",
-                  json: {
+                  metadata: {
                     title: "Needle plain priority",
                     maintainers: [],
                     rules: [],
@@ -353,14 +353,14 @@ describe("App", () => {
                   path: "json/documented.json",
                   extra_description_path: "extra_descriptions/example.html",
                   extra_description_text: "",
-                  json: {
+                  metadata: {
                     title: "Documented priority",
                     rules: [{ description: "needle" }],
                   },
                 },
                 {
                   path: "json/maintained.json",
-                  json: {
+                  metadata: {
                     title: "Maintained priority",
                     maintainers: ["maintainer"],
                     rules: [{ description: "needle" }],
@@ -368,7 +368,7 @@ describe("App", () => {
                 },
                 {
                   path: "json/authored.json",
-                  json: {
+                  metadata: {
                     title: "Authored priority",
                     author: "author",
                     rules: [{ description: "needle" }],
@@ -378,7 +378,7 @@ describe("App", () => {
                   path: "json/both.json",
                   extra_description_path: "extra_descriptions/example.html",
                   extra_description_text: "",
-                  json: {
+                  metadata: {
                     title: "Both priority",
                     author: "author",
                     rules: [{ description: "needle" }],
@@ -422,7 +422,7 @@ describe("App", () => {
                   path: "json/short.json",
                   extra_description_path: "extra_descriptions/short.html",
                   extra_description_text: "Short.",
-                  json: {
+                  metadata: {
                     title: "Needle short description priority",
                     author: "author",
                     rules: [],
@@ -434,7 +434,7 @@ describe("App", () => {
                   extra_description_text: "Detailed documentation. ".repeat(
                     100,
                   ),
-                  json: {
+                  metadata: {
                     title: "Long description priority",
                     author: "author",
                     rules: [{ description: "needle" }],
@@ -482,11 +482,11 @@ describe("App", () => {
               files: [
                 {
                   path: "json/first.json",
-                  json: { title: "First rule", rules: [] },
+                  metadata: { title: "First rule", rules: [] },
                 },
                 {
                   path: "json/second.json",
-                  json: { title: "Second rule", rules: [] },
+                  metadata: { title: "Second rule", rules: [] },
                 },
               ],
             },
@@ -521,11 +521,11 @@ describe("App", () => {
               files: [
                 {
                   path: "json/first.json",
-                  json: { title: "First rule", rules: [] },
+                  metadata: { title: "First rule", rules: [] },
                 },
                 {
                   path: "json/second.json",
-                  json: {
+                  metadata: {
                     title: "Second rule",
                     rules: [{ description: "Second rule description" }],
                   },
@@ -578,7 +578,7 @@ describe("App", () => {
               files: [
                 {
                   path: "json/example_halt.json",
-                  json: { title: "Example rule", rules: [] },
+                  metadata: { title: "Example rule", rules: [] },
                 },
               ],
             },
@@ -588,7 +588,7 @@ describe("App", () => {
               files: [
                 {
                   path: "json/other.json",
-                  json: { title: "Other rule", rules: [] },
+                  metadata: { title: "Other rule", rules: [] },
                 },
               ],
             },

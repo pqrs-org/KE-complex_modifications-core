@@ -4,6 +4,7 @@ export class KarabinerFile {
   readonly object: KarabinerFileObject;
   readonly id: string;
   readonly sourceUrl: string;
+  readonly rulesetJsonUrl: string | undefined;
   readonly shareUrl: string;
   readonly isJavaScript: boolean;
 
@@ -16,7 +17,8 @@ export class KarabinerFile {
     }
     this.id = id;
     this.sourceUrl = object.path;
-    this.shareUrl = `?rule=${encodeURIComponent(object.path)}`;
+    this.rulesetJsonUrl = object.ruleset_json_path;
     this.isJavaScript = object.path.endsWith(".js");
+    this.shareUrl = `?rule=${encodeURIComponent(object.path)}`;
   }
 }

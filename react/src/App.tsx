@@ -167,14 +167,14 @@ const App = () => {
 
       allCategories.forEach((c) => {
         c.files.forEach((f) => {
-          const { json } = f.object;
-          let text = json.author ?? "";
-          if (json.maintainers !== undefined) {
-            json.maintainers.forEach((m) => {
+          const { metadata } = f.object;
+          let text = metadata.author ?? "";
+          if (metadata.maintainers !== undefined) {
+            metadata.maintainers.forEach((m) => {
               text = `${text} ${m ?? ""}`;
             });
           }
-          json.rules?.forEach((r) => {
+          metadata.rules?.forEach((r) => {
             text = `${text} ${r.description ?? ""}`;
             r.description_notes?.forEach((note) => {
               text = `${text} ${note}`;
@@ -184,7 +184,7 @@ const App = () => {
 
           l.add({
             fileId: f.id,
-            title: json.title ?? "",
+            title: metadata.title ?? "",
             text: text.toLowerCase(),
           });
         });
@@ -463,7 +463,7 @@ const App = () => {
                   <>
                     Showing only the rule specified by this URL: &ldquo;
                     <strong>
-                      {sharedRule.object.json.title ?? sharedRule.id}
+                      {sharedRule.object.metadata.title ?? sharedRule.id}
                     </strong>
                     &rdquo;.
                   </>

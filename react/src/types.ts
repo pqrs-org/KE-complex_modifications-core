@@ -6,7 +6,8 @@ export type CategoryObject = {
 
 export type KarabinerFileObject = {
   readonly path: string;
-  readonly json: {
+  readonly ruleset_json_path?: string;
+  readonly metadata: {
     readonly title?: string;
     readonly maintainers?: readonly string[];
     readonly author?: string;

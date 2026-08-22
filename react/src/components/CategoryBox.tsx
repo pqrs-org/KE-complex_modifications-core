@@ -114,7 +114,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
                 <CategoryBoxAccordionSummary
                   id={summaryId}
                   aria-controls={regionId}
-                  aria-label={f.object.json.title}
+                  aria-label={f.object.metadata.title}
                 />
               }
             >

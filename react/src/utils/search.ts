@@ -34,15 +34,16 @@ export const getDocumentPriority = ({
 
 const getFileRanking = (file: KarabinerFileObject) => {
   const attributed =
-    Boolean(file.json.author) || (file.json.maintainers?.length ?? 0) > 0;
+    Boolean(file.metadata.author) ||
+    (file.metadata.maintainers?.length ?? 0) > 0;
   const documented = Boolean(file.extra_description_path);
 
   return {
     attributed,
     documented,
     priority: getDocumentPriority({
-      author: file.json.author,
-      maintainers: file.json.maintainers,
+      author: file.metadata.author,
+      maintainers: file.metadata.maintainers,
       extraDescriptionPath: file.extra_description_path,
     }),
     extraDescriptionLength: documented

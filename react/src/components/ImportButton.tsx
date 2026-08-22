@@ -8,6 +8,7 @@ import {
   Button,
   ButtonGroup,
   ClickAwayListener,
+  Divider,
   Grow,
   Paper,
   MenuList,
@@ -35,6 +36,7 @@ export const ImportButton = ({
   const codeModal = useCodeModal();
   const { setText: setSnackbarText } = useSnackbar();
   const menuId = useId();
+  const rulesetJsonUrl = file.rulesetJsonUrl;
 
   //
   // Menu
@@ -181,6 +183,33 @@ export const ImportButton = ({
                   autoFocusItem={menuOpen}
                   onKeyDown={handleMenuKeyDown}
                 >
+                  {file.isJavaScript && rulesetJsonUrl !== undefined && (
+                    <>
+                      <MenuItem
+                        component="a"
+                        href={toKarabinerImportUrl(file.sourceUrl)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          closeMenu(true);
+                        }}
+                      >
+                        Import JavaScript code
+                      </MenuItem>
+                      <MenuItem
+                        component="a"
+                        href={toKarabinerImportUrl(rulesetJsonUrl)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          closeMenu(true);
+                        }}
+                      >
+                        Import JSON compatible with Karabiner-Elements 16.1.0 or
+                        earlier
+                      </MenuItem>
+                      <Divider />
+                    </>
+                  )}
+
                   {showOpenRule && (
                     <MenuItem
                       component="a"
@@ -201,7 +230,7 @@ export const ImportButton = ({
                     onClick={(event) => {
                       event.stopPropagation();
                       void codeModal.openModal(
-                        file.object.json.title ?? "",
+                        file.object.metadata.title ?? "",
                         file.sourceUrl,
                       );
                       closeMenu(true);
@@ -210,6 +239,22 @@ export const ImportButton = ({
                     <CodeIcon sx={{ marginRight: 1 }} />
                     {file.isJavaScript ? "Show JavaScript" : "Show JSON"}
                   </MenuItem>
+
+                  {rulesetJsonUrl !== undefined && (
+                    <MenuItem
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void codeModal.openModal(
+                          file.object.metadata.title ?? "",
+                          rulesetJsonUrl,
+                        );
+                        closeMenu(true);
+                      }}
+                    >
+                      <CodeIcon sx={{ marginRight: 1 }} />
+                      Show compatible JSON
+                    </MenuItem>
+                  )}
 
                   <MenuItem
                     onClick={(event) => {
@@ -234,6 +279,19 @@ export const ImportButton = ({
                       ? "Copy JavaScript URL"
                       : "Copy JSON URL"}
                   </MenuItem>
+
+                  {rulesetJsonUrl !== undefined && (
+                    <MenuItem
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void copyUrl(rulesetJsonUrl);
+                        closeMenu(true);
+                      }}
+                    >
+                      <ContentCopyIcon sx={{ marginRight: 1 }} />
+                      Copy compatible JSON URL
+                    </MenuItem>
+                  )}
                 </MenuList>
               </ClickAwayListener>
             </Paper>

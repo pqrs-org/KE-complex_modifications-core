@@ -8,8 +8,9 @@ const validResult = {
       name: "Category",
       files: [
         {
-          path: "json/example.json",
-          json: {
+          path: "js/example.js",
+          ruleset_json_path: "js/example.ruleset.json",
+          metadata: {
             title: "Example",
             maintainers: ["maintainer"],
             rules: [
@@ -70,7 +71,7 @@ describe("isDistResult", () => {
             files: [
               {
                 ...validResult.index[0].files[0],
-                json: { maintainers: "maintainer" },
+                metadata: { maintainers: "maintainer" },
               },
             ],
           },
@@ -83,7 +84,26 @@ describe("isDistResult", () => {
         index: [
           {
             ...validResult.index[0],
-            files: [{ path: "json/example.json", json: [] }],
+            files: [{ path: "json/example.json", metadata: [] }],
+          },
+        ],
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects a non-string ruleset JSON path", () => {
+    expect(
+      isDistResult({
+        ...validResult,
+        index: [
+          {
+            ...validResult.index[0],
+            files: [
+              {
+                ...validResult.index[0].files[0],
+                ruleset_json_path: 1,
+              },
+            ],
           },
         ],
       }),
@@ -100,8 +120,8 @@ describe("isDistResult", () => {
             files: [
               {
                 ...validResult.index[0].files[0],
-                json: {
-                  ...validResult.index[0].files[0].json,
+                metadata: {
+                  ...validResult.index[0].files[0].metadata,
                   rules: [
                     {
                       description: "Rule",
@@ -127,8 +147,8 @@ describe("isDistResult", () => {
             files: [
               {
                 ...validResult.index[0].files[0],
-                json: {
-                  ...validResult.index[0].files[0].json,
+                metadata: {
+                  ...validResult.index[0].files[0].metadata,
                   rules: [
                     {
                       description: "Rule",

@@ -58,8 +58,8 @@ const GroupBox = ({
 );
 
 export const RuleMetadata = ({ file }: { file: KarabinerFile }) => {
-  const author = file.object.json.author;
-  const maintainers = file.object.json.maintainers ?? [];
+  const author = file.object.metadata.author;
+  const maintainers = file.object.metadata.maintainers ?? [];
 
   if (!author && maintainers.length === 0) return null;
 
@@ -164,7 +164,7 @@ export const RuleHeaderContent = ({
   >
     <Box component="span" aria-hidden={overlaidBySummary ? true : undefined}>
       {leading}
-      <Box component="span">{file.object.json.title}</Box>
+      <Box component="span">{file.object.metadata.title}</Box>
     </Box>
     <RuleMetadata file={file} />
   </Box>
@@ -174,7 +174,7 @@ export const RuleDetails = ({ file }: { file: KarabinerFile }) => (
   <>
     <GroupBox label="Rules">
       <List disablePadding>
-        {file.object.json.rules?.map((rule, index) => {
+        {file.object.metadata.rules?.map((rule, index) => {
           const secondaryLines = rule.description_notes ?? [];
 
           return (
