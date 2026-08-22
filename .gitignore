@@ -1,2 +1,5 @@
 .DS_Store
 browse.vc.*
+__pycache__/
+*.py[cod]
+.ruff_cache/
