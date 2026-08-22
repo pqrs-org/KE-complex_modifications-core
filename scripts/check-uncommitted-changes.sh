@@ -11,9 +11,13 @@ set -e # forbid command failure
     echo
     echo "------------------------------------------------------------"
     echo "make rebuild"
-    echo "git status"
+    echo "git status --short --untracked-files=all"
     echo
-    git status
+    git status --short --untracked-files=all
+    echo
+    echo "git -C core status --short --untracked-files=all"
+    echo
+    git -C core status --short --untracked-files=all
     echo "------------------------------------------------------------"
     exit 1
   )
