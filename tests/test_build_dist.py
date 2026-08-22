@@ -13,6 +13,7 @@ from lib.build_dist import (  # pylint: disable=wrong-import-position
     build_dist_atomically,
     check_safe_path,
     extract_text_from_html,
+    parallel_worker_count,
     load_search_suggestions,
 )
 
@@ -61,6 +62,18 @@ class BuildDistTest(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "non-empty strings"):
                 load_search_suggestions(path)
+
+    def test_parallel_worker_count_can_be_configured(self):
+        """BUILD_DIST_JOBS caps the workers without exceeding task count."""
+        with mock.patch.dict(os.environ, {"BUILD_DIST_JOBS": "3"}):
+            self.assertEqual(3, parallel_worker_count(10))
+            self.assertEqual(2, parallel_worker_count(2))
+
+    def test_parallel_worker_count_rejects_invalid_value(self):
+        """BUILD_DIST_JOBS must be a positive integer."""
+        with mock.patch.dict(os.environ, {"BUILD_DIST_JOBS": "0"}):
+            with self.assertRaisesRegex(ValueError, "positive integer"):
+                parallel_worker_count(10)
 
     @mock.patch("lib.build_dist.build_dist_contents")
     def test_build_failure_preserves_previous_dist(self, build_contents):

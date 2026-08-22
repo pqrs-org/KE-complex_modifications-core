@@ -1,5 +1,6 @@
 """Build the complete distribution from public rule sources."""
 
+import concurrent.futures
 import html
 import json
 import os
@@ -9,7 +10,93 @@ import shutil
 import subprocess
 import tempfile
 
-from .complex_modifications import collect_public_sources, load_source
+from .complex_modifications import (
+    collect_public_sources,
+    load_source,
+    normalize_complex_modifications,
+)
+
+
+def parallel_worker_count(task_count):
+    """Return a conservative worker count for independent build tasks."""
+    configured_jobs = os.environ.get("BUILD_DIST_JOBS")
+    if configured_jobs is not None:
+        try:
+            jobs = int(configured_jobs)
+        except ValueError as error:
+            raise ValueError(
+                f"BUILD_DIST_JOBS must be a positive integer: {configured_jobs}"
+            ) from error
+        if jobs < 1:
+            raise ValueError(
+                f"BUILD_DIST_JOBS must be a positive integer: {configured_jobs}"
+            )
+    else:
+        jobs = min(os.cpu_count() or 1, 8)
+
+    return min(task_count, jobs)
+
+
+def load_javascript_sources(sources, karabiner_cli, sandbox_profile):
+    """Evaluate independent JavaScript sources concurrently."""
+    if not sources:
+        return {}
+
+    worker_count = parallel_worker_count(len(sources))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=worker_count) as executor:
+        futures = {
+            source_path: executor.submit(
+                load_source,
+                source_path,
+                karabiner_cli,
+                sandbox_profile,
+                require_single_rule=True,
+            )
+            for source_path, _ in sources
+        }
+
+        values = {}
+        for source_path, _ in sources:
+            try:
+                values[source_path] = futures[source_path].result()
+            except (OSError, ValueError, json.JSONDecodeError) as error:
+                raise ValueError(f"{source_path} error: {error}") from error
+
+    return values
+
+
+def lint_rule_files(file_paths, karabiner_cli):
+    """Lint independent rule files concurrently in balanced chunks."""
+    file_paths = sorted(pathlib.Path(path) for path in file_paths)
+    if not file_paths:
+        return
+
+    worker_count = parallel_worker_count(len(file_paths))
+    chunks = [file_paths[index::worker_count] for index in range(worker_count)]
+
+    def run_lint(chunk):
+        return subprocess.run(
+            [
+                karabiner_cli,
+                "--lint-complex-modifications",
+                *chunk,
+                "--silent",
+            ],
+            capture_output=True,
+            check=False,
+            encoding="utf-8",
+        )
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=worker_count) as executor:
+        results = list(executor.map(run_lint, chunks))
+
+    errors = [
+        result.stderr.strip() or "Complex modifications lint failed"
+        for result in results
+        if result.returncode != 0
+    ]
+    if errors:
+        raise ValueError("\n".join(errors))
 
 
 def build_rule_files(
@@ -24,26 +111,22 @@ def build_rule_files(
     (output_directory / "json").mkdir(parents=True, exist_ok=True)
     (output_directory / "js").mkdir(parents=True, exist_ok=True)
     javascript_packages = {}
+    sources = collect_public_sources(json_directory, javascript_directory)
+    javascript_sources = [
+        source for source in sources if source[0].name.endswith(".js")
+    ]
+    javascript_values = load_javascript_sources(
+        javascript_sources, karabiner_cli, sandbox_profile
+    )
 
     with tempfile.TemporaryDirectory() as metadata_directory:
         metadata_directory = pathlib.Path(metadata_directory)
-        for source_path, output_path_string in collect_public_sources(
-            json_directory, javascript_directory
-        ):
-            try:
-                value = load_source(
-                    source_path,
-                    karabiner_cli,
-                    sandbox_profile,
-                    require_single_rule=source_path.name.endswith(".js"),
-                )
-            except (OSError, ValueError, json.JSONDecodeError) as error:
-                raise ValueError(f"{source_path} error: {error}") from error
-
+        for source_path, output_path_string in sources:
             output_path = output_directory / output_path_string
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
             if source_path.name.endswith(".js"):
+                value = javascript_values[source_path]
                 shutil.copy2(source_path, output_path)
                 javascript_packages[output_path_string] = value
                 metadata_path = metadata_directory / f"{source_path.name}.json"
@@ -53,7 +136,12 @@ def build_rule_files(
                 )
                 continue
 
-            source_value = json.loads(source_path.read_text(encoding="utf-8"))
+            try:
+                source_value = json.loads(source_path.read_text(encoding="utf-8"))
+                value = normalize_complex_modifications(source_value)
+            except (OSError, ValueError, json.JSONDecodeError) as error:
+                raise ValueError(f"{source_path} error: {error}") from error
+
             if "title" in source_value or "rules" in source_value:
                 shutil.copy2(source_path, output_path)
                 continue
@@ -67,21 +155,11 @@ def build_rule_files(
         # Linux builder cannot run the macOS binary. These files are still
         # linted from the same sources by the macOS GitHub Actions build.
         if karabiner_cli is not None:
-            result = subprocess.run(
-                [
-                    karabiner_cli,
-                    "--lint-complex-modifications",
-                    str(output_directory / "json/*.json"),
-                    str(metadata_directory / "*.json"),
-                    "--silent",
-                ],
-                capture_output=True,
-                check=False,
-                encoding="utf-8",
+            lint_rule_files(
+                list((output_directory / "json").glob("*.json"))
+                + list(metadata_directory.glob("*.json")),
+                karabiner_cli,
             )
-            if result.returncode != 0:
-                detail = result.stderr.strip() or "Complex modifications lint failed"
-                raise ValueError(detail)
 
     return javascript_packages
 

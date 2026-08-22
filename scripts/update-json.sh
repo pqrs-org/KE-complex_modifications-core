@@ -5,22 +5,23 @@ set -e # forbid command failure
 
 topdir="$(dirname "$0")/.."
 karabiner_cli="${topdir}/bin/karabiner_cli"
-tmpfile=""
 
-cleanup() {
-  if [[ -n "$tmpfile" ]]; then
-    rm -f "$tmpfile"
-  fi
-}
+update_file() {
+  local srcfile="$1"
+  local extension="${srcfile##*.}"
+  local dstfile="../public/json/$(basename "$srcfile" ".$extension")"
+  local tmpfile=""
 
-trap cleanup EXIT
+  cleanup() {
+    if [[ -n "$tmpfile" ]]; then
+      rm -f "$tmpfile"
+    fi
+  }
 
-for srcfile in ../src/json/*.json.*; do
-  extension="${srcfile##*.}"
+  trap cleanup EXIT
 
-  dstfile="../public/json/$(basename "$srcfile" ".$extension")"
   if [[ "$srcfile" -nt "$dstfile" ]]; then
-    succeeded=0
+    local succeeded=0
 
     if [[ $extension = 'js' ]]; then
       echo "$karabiner_cli --eval-js $srcfile"
@@ -47,6 +48,26 @@ for srcfile in ../src/json/*.json.*; do
       exit 1
     fi
   fi
-done
 
-trap - EXIT
+  trap - EXIT
+}
+
+export topdir karabiner_cli
+export -f update_file
+
+if [[ -n ${UPDATE_JSON_JOBS:-} ]]; then
+  jobs="$UPDATE_JSON_JOBS"
+else
+  jobs="$(sysctl -n hw.logicalcpu 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)"
+  if ((jobs > 8)); then
+    jobs=8
+  fi
+fi
+
+if ! [[ $jobs =~ ^[1-9][0-9]*$ ]]; then
+  echo "UPDATE_JSON_JOBS must be a positive integer: $jobs" >&2
+  exit 1
+fi
+
+find ../src/json -maxdepth 1 -type f -name '*.json.*' -print0 |
+  xargs -0 -n1 -P "$jobs" bash -c 'update_file "$1"' _
