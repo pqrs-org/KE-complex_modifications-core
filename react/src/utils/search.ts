@@ -1,5 +1,5 @@
 import lunr from "lunr";
-import type { KarabinerJsonFileObject } from "../types";
+import type { KarabinerFileObject } from "../types";
 
 const unicodeTrimmer = (token: lunr.Token) =>
   token.update((value) =>
@@ -32,7 +32,7 @@ export const getDocumentPriority = ({
   return 0;
 };
 
-const getFileRanking = (file: KarabinerJsonFileObject) => {
+const getFileRanking = (file: KarabinerFileObject) => {
   const attributed =
     Boolean(file.json.author) || (file.json.maintainers?.length ?? 0) > 0;
   const documented = Boolean(file.extra_description_path);
@@ -51,7 +51,7 @@ const getFileRanking = (file: KarabinerJsonFileObject) => {
   };
 };
 
-export const sortCategoryFiles = (files: readonly KarabinerJsonFileObject[]) =>
+export const sortCategoryFiles = (files: readonly KarabinerFileObject[]) =>
   files.toSorted((a, b) => {
     const aRanking = getFileRanking(a);
     const bRanking = getFileRanking(b);
@@ -68,7 +68,7 @@ export const sortCategoryFiles = (files: readonly KarabinerJsonFileObject[]) =>
 
 export const sortSearchResults = (
   results: readonly SearchResult[],
-  filesById: ReadonlyMap<string, KarabinerJsonFileObject>,
+  filesById: ReadonlyMap<string, KarabinerFileObject>,
 ) => {
   const rankingsById = new Map(
     Array.from(filesById, ([id, file]) => [id, getFileRanking(file)]),

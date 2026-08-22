@@ -1,10 +1,10 @@
 export type CategoryObject = {
   readonly id: string;
   readonly name: string;
-  readonly files: readonly KarabinerJsonFileObject[];
+  readonly files: readonly KarabinerFileObject[];
 };
 
-export type KarabinerJsonFileObject = {
+export type KarabinerFileObject = {
   readonly path: string;
   readonly json: {
     readonly title?: string;

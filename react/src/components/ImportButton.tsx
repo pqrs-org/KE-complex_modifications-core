@@ -21,15 +21,15 @@ import {
   OpenInNew as OpenInNewIcon,
 } from "@mui/icons-material";
 import { useCodeModal, useSnackbar } from "../contexts";
-import type { KarabinerJsonFile } from "../models";
+import type { KarabinerFile } from "../models";
 import { toAbsoluteUrl, toKarabinerImportUrl } from "../utils/url";
 import { ruleHeaderLineHeight } from "./ruleHeaderLayout";
 
 export const ImportButton = ({
-  jsonFile,
+  file,
   showOpenRule = true,
 }: {
-  jsonFile: KarabinerJsonFile;
+  file: KarabinerFile;
   showOpenRule?: boolean;
 }) => {
   const codeModal = useCodeModal();
@@ -99,8 +99,8 @@ export const ImportButton = ({
     }
   };
 
-  const importJson = () => {
-    window.location.href = toKarabinerImportUrl(jsonFile.jsonUrl);
+  const importRule = () => {
+    window.location.href = toKarabinerImportUrl(file.sourceUrl);
   };
 
   const copyUrl = async (url: string) => {
@@ -137,7 +137,7 @@ export const ImportButton = ({
           sx={{ px: { sm: 2 }, fontSize: "1rem", textTransform: "none" }}
           onClick={(event) => {
             event.stopPropagation();
-            importJson();
+            importRule();
           }}
         >
           Import
@@ -184,7 +184,7 @@ export const ImportButton = ({
                   {showOpenRule && (
                     <MenuItem
                       component="a"
-                      href={toAbsoluteUrl(jsonFile.shareUrl)}
+                      href={toAbsoluteUrl(file.shareUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(event) => {
@@ -201,20 +201,20 @@ export const ImportButton = ({
                     onClick={(event) => {
                       event.stopPropagation();
                       void codeModal.openModal(
-                        jsonFile.object.json.title ?? "",
-                        jsonFile.jsonUrl,
+                        file.object.json.title ?? "",
+                        file.sourceUrl,
                       );
                       closeMenu(true);
                     }}
                   >
                     <CodeIcon sx={{ marginRight: 1 }} />
-                    {jsonFile.isJavaScript ? "Show JavaScript" : "Show JSON"}
+                    {file.isJavaScript ? "Show JavaScript" : "Show JSON"}
                   </MenuItem>
 
                   <MenuItem
                     onClick={(event) => {
                       event.stopPropagation();
-                      void copyUrl(jsonFile.shareUrl);
+                      void copyUrl(file.shareUrl);
                       closeMenu(true);
                     }}
                   >
@@ -225,12 +225,12 @@ export const ImportButton = ({
                   <MenuItem
                     onClick={(event) => {
                       event.stopPropagation();
-                      void copyUrl(jsonFile.jsonUrl);
+                      void copyUrl(file.sourceUrl);
                       closeMenu(true);
                     }}
                   >
                     <ContentCopyIcon sx={{ marginRight: 1 }} />
-                    {jsonFile.isJavaScript
+                    {file.isJavaScript
                       ? "Copy JavaScript URL"
                       : "Copy JSON URL"}
                   </MenuItem>

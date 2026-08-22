@@ -9,8 +9,8 @@ export const toAbsoluteUrl = (
   }
 };
 
-export const toKarabinerImportUrl = (jsonUrl: string): string =>
-  `karabiner://karabiner/assets/complex_modifications/import?url=${encodeURIComponent(toAbsoluteUrl(jsonUrl))}`;
+export const toKarabinerImportUrl = (sourceUrl: string): string =>
+  `karabiner://karabiner/assets/complex_modifications/import?url=${encodeURIComponent(toAbsoluteUrl(sourceUrl))}`;
 
 export const decodeLocationHash = (hash: string): string => {
   const value = hash.startsWith("#") ? hash.slice(1) : hash;

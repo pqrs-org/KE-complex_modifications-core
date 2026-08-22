@@ -9,7 +9,7 @@ import {
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { KarabinerJsonFile } from "../models";
+import { KarabinerFile } from "../models";
 import { ImportButton } from "./ImportButton";
 
 const contextMocks = vi.hoisted(() => ({
@@ -36,8 +36,8 @@ const renderImportButton = () =>
     <>
       <button>Before import controls</button>
       <ImportButton
-        jsonFile={
-          new KarabinerJsonFile({
+        file={
+          new KarabinerFile({
             path: "json/example.json",
             json: { title: "Example" },
           })
@@ -50,8 +50,8 @@ const renderImportButton = () =>
 const renderJavaScriptImportButton = () =>
   render(
     <ImportButton
-      jsonFile={
-        new KarabinerJsonFile({
+      file={
+        new KarabinerFile({
           path: "js/example.js",
           json: { title: "Example JavaScript" },
         })

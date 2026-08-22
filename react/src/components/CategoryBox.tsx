@@ -109,7 +109,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
             key={f.id}
           >
             <RuleHeader
-              jsonFile={f}
+              file={f}
               control={
                 <CategoryBoxAccordionSummary
                   id={summaryId}
@@ -122,7 +122,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
                   around the floated import action. The summary is a separate
                   control layer because metadata links cannot be nested in it. */}
               <RuleHeaderContent
-                jsonFile={f}
+                file={f}
                 leading={
                   <ArrowForwardIosSharpIcon className="Rule-expandIcon" />
                 }
@@ -130,7 +130,7 @@ export const CategoryBox = ({ category }: { category: Category }) => {
               />
             </RuleHeader>
             <AccordionDetails sx={{ pt: 0 }}>
-              <RuleDetails jsonFile={f} />
+              <RuleDetails file={f} />
             </AccordionDetails>
           </CategoryBoxAccordion>
         );

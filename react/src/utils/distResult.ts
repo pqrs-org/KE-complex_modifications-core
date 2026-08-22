@@ -1,4 +1,4 @@
-import type { CategoryObject, KarabinerJsonFileObject } from "../types";
+import type { CategoryObject, KarabinerFileObject } from "../types";
 
 export type DistResult = {
   index: CategoryObject[];
@@ -24,7 +24,7 @@ const isRule = (value: unknown) =>
   isOptionalStringArray(value.description_notes) &&
   !("available_since" in value);
 
-const isJsonFile = (value: unknown): value is KarabinerJsonFileObject => {
+const isKarabinerFile = (value: unknown): value is KarabinerFileObject => {
   if (!isRecord(value) || typeof value.path !== "string") return false;
 
   const json = value.json;
@@ -46,7 +46,7 @@ const isCategory = (value: unknown): value is CategoryObject =>
   typeof value.id === "string" &&
   typeof value.name === "string" &&
   Array.isArray(value.files) &&
-  value.files.every(isJsonFile);
+  value.files.every(isKarabinerFile);
 
 const isUnixTimestamp = (value: unknown): value is number =>
   typeof value === "number" &&

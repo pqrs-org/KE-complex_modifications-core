@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Star as StarIcon } from "@mui/icons-material";
-import type { KarabinerJsonFile } from "../models";
+import type { KarabinerFile } from "../models";
 import { ExtraDescription } from "./ExtraDescription";
 import { ImportButton } from "./ImportButton";
 import { ruleHeaderLineHeight } from "./ruleHeaderLayout";
@@ -57,9 +57,9 @@ const GroupBox = ({
   </Box>
 );
 
-export const RuleMetadata = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
-  const author = jsonFile.object.json.author;
-  const maintainers = jsonFile.object.json.maintainers ?? [];
+export const RuleMetadata = ({ file }: { file: KarabinerFile }) => {
+  const author = file.object.json.author;
+  const maintainers = file.object.json.maintainers ?? [];
 
   if (!author && maintainers.length === 0) return null;
 
@@ -93,7 +93,7 @@ export const RuleMetadata = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
           }
           variant="outlined"
           sx={metadataChipSx}
-          key={`${jsonFile.id}-maintainers-${maintainer}`}
+          key={`${file.id}-maintainers-${maintainer}`}
         />
       ))}
     </Box>
@@ -101,24 +101,24 @@ export const RuleMetadata = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => {
 };
 
 const RuleImportAction = ({
-  jsonFile,
+  file,
   showOpenRule = true,
 }: {
-  jsonFile: KarabinerJsonFile;
+  file: KarabinerFile;
   showOpenRule?: boolean;
 }) => (
   <Box sx={{ px: { xs: 1, sm: 2 }, py: 1.5 }}>
-    <ImportButton jsonFile={jsonFile} showOpenRule={showOpenRule} />
+    <ImportButton file={file} showOpenRule={showOpenRule} />
   </Box>
 );
 
 export const RuleHeader = ({
-  jsonFile,
+  file,
   showOpenRule = true,
   control,
   children,
 }: {
-  jsonFile: KarabinerJsonFile;
+  file: KarabinerFile;
   showOpenRule?: boolean;
   control?: ReactNode;
   children: ReactNode;
@@ -132,18 +132,18 @@ export const RuleHeader = ({
   >
     {control}
     <Box sx={{ float: "right", position: "relative", zIndex: 1 }}>
-      <RuleImportAction jsonFile={jsonFile} showOpenRule={showOpenRule} />
+      <RuleImportAction file={file} showOpenRule={showOpenRule} />
     </Box>
     {children}
   </Box>
 );
 
 export const RuleHeaderContent = ({
-  jsonFile,
+  file,
   leading,
   overlaidBySummary = false,
 }: {
-  jsonFile: KarabinerJsonFile;
+  file: KarabinerFile;
   leading?: ReactNode;
   overlaidBySummary?: boolean;
 }) => (
@@ -164,22 +164,22 @@ export const RuleHeaderContent = ({
   >
     <Box component="span" aria-hidden={overlaidBySummary ? true : undefined}>
       {leading}
-      <Box component="span">{jsonFile.object.json.title}</Box>
+      <Box component="span">{file.object.json.title}</Box>
     </Box>
-    <RuleMetadata jsonFile={jsonFile} />
+    <RuleMetadata file={file} />
   </Box>
 );
 
-export const RuleDetails = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => (
+export const RuleDetails = ({ file }: { file: KarabinerFile }) => (
   <>
     <GroupBox label="Rules">
       <List disablePadding>
-        {jsonFile.object.json.rules?.map((rule, index) => {
+        {file.object.json.rules?.map((rule, index) => {
           const secondaryLines = rule.description_notes ?? [];
 
           return (
             <ListItem
-              key={`${jsonFile.id}-rules-${index}`}
+              key={`${file.id}-rules-${index}`}
               disablePadding
               alignItems="flex-start"
             >
@@ -207,25 +207,21 @@ export const RuleDetails = ({ jsonFile }: { jsonFile: KarabinerJsonFile }) => (
         })}
       </List>
     </GroupBox>
-    {jsonFile.object.extra_description_path && (
+    {file.object.extra_description_path && (
       <GroupBox label="Description">
-        <ExtraDescription src={jsonFile.object.extra_description_path} />
+        <ExtraDescription src={file.object.extra_description_path} />
       </GroupBox>
     )}
   </>
 );
 
-export const SharedRuleView = ({
-  jsonFile,
-}: {
-  jsonFile: KarabinerJsonFile;
-}) => (
+export const SharedRuleView = ({ file }: { file: KarabinerFile }) => (
   <Box sx={{ border: `1px solid ${color}` }}>
-    <RuleHeader jsonFile={jsonFile} showOpenRule={false}>
-      <RuleHeaderContent jsonFile={jsonFile} />
+    <RuleHeader file={file} showOpenRule={false}>
+      <RuleHeaderContent file={file} />
     </RuleHeader>
     <Box sx={{ px: 2, pb: 2 }}>
-      <RuleDetails jsonFile={jsonFile} />
+      <RuleDetails file={file} />
     </Box>
   </Box>
 );

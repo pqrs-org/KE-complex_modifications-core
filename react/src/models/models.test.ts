@@ -1,21 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { Category, KarabinerJsonFile } from ".";
+import { Category, KarabinerFile } from ".";
 
-describe("KarabinerJsonFile", () => {
+describe("KarabinerFile", () => {
   it("derives its id and URLs from the JSON path", () => {
-    const file = new KarabinerJsonFile({
+    const file = new KarabinerFile({
       path: "json/example.rule.json",
       json: {},
     });
 
     expect(file.id).toBe("example.rule");
-    expect(file.jsonUrl).toBe("json/example.rule.json");
+    expect(file.sourceUrl).toBe("json/example.rule.json");
     expect(file.shareUrl).toBe("?rule=json%2Fexample.rule.json");
     expect(file.isJavaScript).toBe(false);
   });
 
   it("recognizes JavaScript distribution paths", () => {
-    const file = new KarabinerJsonFile({
+    const file = new KarabinerFile({
       path: "js/example.js",
       json: {},
     });

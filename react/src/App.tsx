@@ -482,7 +482,7 @@ const App = () => {
             </Box>
             {sharedRule !== undefined && (
               <Box sx={{ mt: 2, mb: 4 }}>
-                <SharedRuleView jsonFile={sharedRule} />
+                <SharedRuleView file={sharedRule} />
               </Box>
             )}
           </>
