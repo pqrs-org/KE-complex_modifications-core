@@ -1,1 +1,1 @@
-/react/dist/assets/index-*.js -diff
+/react/dist/assets/*.js -diff
