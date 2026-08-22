@@ -63,21 +63,25 @@ def build_rule_files(
                 encoding="utf-8",
             )
 
-        result = subprocess.run(
-            [
-                karabiner_cli,
-                "--lint-complex-modifications",
-                str(output_directory / "json/*.json"),
-                str(metadata_directory / "*.json"),
-                "--silent",
-            ],
-            capture_output=True,
-            check=False,
-            encoding="utf-8",
-        )
-        if result.returncode != 0:
-            detail = result.stderr.strip() or "Complex modifications lint failed"
-            raise ValueError(detail)
+        # The Cloudflare Pages dist build passes no karabiner_cli because its
+        # Linux builder cannot run the macOS binary. These files are still
+        # linted from the same sources by the macOS GitHub Actions build.
+        if karabiner_cli is not None:
+            result = subprocess.run(
+                [
+                    karabiner_cli,
+                    "--lint-complex-modifications",
+                    str(output_directory / "json/*.json"),
+                    str(metadata_directory / "*.json"),
+                    "--silent",
+                ],
+                capture_output=True,
+                check=False,
+                encoding="utf-8",
+            )
+            if result.returncode != 0:
+                detail = result.stderr.strip() or "Complex modifications lint failed"
+                raise ValueError(detail)
 
     return javascript_packages
 

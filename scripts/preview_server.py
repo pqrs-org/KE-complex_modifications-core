@@ -5,6 +5,7 @@
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from functools import partial
 import pathlib
+import sys
 from urllib.parse import urlparse
 
 from lib.build_dist import build_dist_atomically
@@ -14,8 +15,13 @@ REPOSITORY_DIRECTORY = CORE_DIRECTORY.parent
 DIST_DIRECTORY = REPOSITORY_DIRECTORY / "dist"
 PUBLIC_DIRECTORY = REPOSITORY_DIRECTORY / "public"
 REACT_DIST_DIRECTORY = CORE_DIRECTORY / "react/dist"
-KARABINER_CLI = CORE_DIRECTORY / "bin/karabiner_cli"
-SANDBOX_PROFILE = CORE_DIRECTORY / "files/generator.sb"
+# Match the Cloudflare Pages dist build when previewing on Linux, where the
+# macOS-only karabiner_cli and sandbox-exec are unavailable.
+KARABINER_CLI = None
+SANDBOX_PROFILE = None
+if sys.platform == "darwin":
+    KARABINER_CLI = CORE_DIRECTORY / "bin/karabiner_cli"
+    SANDBOX_PROFILE = CORE_DIRECTORY / "files/generator.sb"
 
 
 class RequestHandler(SimpleHTTPRequestHandler):

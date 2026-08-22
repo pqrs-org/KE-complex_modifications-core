@@ -5,6 +5,14 @@ import os
 import pathlib
 import subprocess
 
+NODE_EVALUATOR = """
+const fs = require('fs');
+const vm = require('vm');
+const path = process.argv[1];
+const value = vm.runInNewContext(fs.readFileSync(path, 'utf8'), {}, { filename: path });
+process.stdout.write(JSON.stringify(value));
+"""
+
 
 def distributed_file_name(source_path):
     """Return the JSON output name for a source after normalization."""
@@ -71,8 +79,6 @@ def load_source(
     """Load JSON directly or evaluate JavaScript with karabiner_cli."""
     source_path = pathlib.Path(source_path)
     if source_path.name.endswith(".js"):
-        if karabiner_cli is None:
-            raise ValueError("karabiner_cli is required to evaluate JavaScript")
         source = evaluate_javascript(source_path, karabiner_cli, sandbox_profile)
     else:
         source = source_path.read_text(encoding="utf-8")
@@ -93,9 +99,15 @@ def load_source(
 
 def evaluate_javascript(source_path, karabiner_cli, sandbox_profile=None):
     """Evaluate JS and capture its completion value."""
-    command = [karabiner_cli, "--eval-js-to-json", source_path]
-    if sandbox_profile is not None:
-        command = ["sandbox-exec", "-f", sandbox_profile] + command
+    if karabiner_cli is None:
+        # Cloudflare Pages creates the published dist on Linux. Since
+        # karabiner_cli is a macOS binary, evaluate public/js with Node.js for
+        # that deployment build.
+        command = ["node", "-e", NODE_EVALUATOR, source_path]
+    else:
+        command = [karabiner_cli, "--eval-js-to-json", source_path]
+        if sandbox_profile is not None:
+            command = ["sandbox-exec", "-f", sandbox_profile] + command
 
     result = subprocess.run(command, capture_output=True, check=False, encoding="utf-8")
 
