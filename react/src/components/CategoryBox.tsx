@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, type SyntheticEvent } from "react";
 import {
   Accordion,
   AccordionDetails,
@@ -30,7 +31,7 @@ const CategoryBoxAccordion = styled(({ slots, ...props }: AccordionProps) => (
   />
 ))(({ theme }) => ({
   border: `1px solid ${categoryColor}`,
-  scrollMarginTop: theme.spacing(2),
+  scrollMarginTop: "var(--rule-heading-sticky-top, 56px)",
   "&:not(:last-child)": {
     borderBottom: 0,
   },
@@ -47,6 +48,9 @@ const CategoryBoxAccordion = styled(({ slots, ...props }: AccordionProps) => (
   },
   "&.Mui-expanded .Rule-expandIcon": {
     transform: "rotate(90deg)",
+  },
+  "& > .MuiAccordion-heading": {
+    borderBottom: `1px solid ${theme.palette.divider}`,
   },
 }));
 
@@ -65,13 +69,77 @@ const CategoryBoxAccordionSummary = styled(AccordionSummary)(() => ({
 }));
 
 export const CategoryBox = ({ category }: { category: Category }) => {
+  const categoryBoxRef = useRef<HTMLDivElement>(null);
+  const categoryHeadingRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const categoryBox = categoryBoxRef.current;
+    const categoryHeading = categoryHeadingRef.current;
+    if (!categoryBox || !categoryHeading) return;
+
+    const updateCategoryHeadingHeight = () => {
+      const height = categoryHeading.getBoundingClientRect().height;
+      if (height > 0) {
+        categoryBox.style.setProperty(
+          "--category-heading-height",
+          `${height}px`,
+        );
+      }
+    };
+
+    updateCategoryHeadingHeight();
+    if (typeof ResizeObserver !== "undefined") {
+      const resizeObserver = new ResizeObserver(updateCategoryHeadingHeight);
+      resizeObserver.observe(categoryHeading);
+
+      return () => resizeObserver.disconnect();
+    }
+
+    window.addEventListener("resize", updateCategoryHeadingHeight);
+    return () => {
+      window.removeEventListener("resize", updateCategoryHeadingHeight);
+    };
+  }, []);
+
+  const handleRuleExpansionChange = (
+    event: SyntheticEvent,
+    expanded: boolean,
+  ) => {
+    if (expanded) return;
+
+    const eventTarget = event.currentTarget;
+    if (!(eventTarget instanceof Element)) return;
+
+    const accordion = eventTarget.closest<HTMLElement>(".MuiAccordion-root");
+    const heading = eventTarget.closest<HTMLElement>(".MuiAccordion-heading");
+    if (!accordion || !heading) return;
+
+    // A sticky heading moves below its accordion's natural top. Restore that
+    // top before collapsing so removing the details does not leave the reader
+    // at content that followed the rule. Allow for borders and subpixel layout
+    // differences when the heading is already at its natural position.
+    const accordionTop = accordion.getBoundingClientRect().top;
+    const headingTop = heading.getBoundingClientRect().top;
+    const stickyPositionTolerance = 2;
+    if (accordionTop < headingTop - stickyPositionTolerance) {
+      accordion.scrollIntoView({ block: "start" });
+    }
+  };
+
   return (
     <Box
+      ref={categoryBoxRef}
       sx={{
         border: `1px solid ${categoryColor}`,
+        "--category-heading-height": "56px",
+        "--rule-heading-sticky-top": {
+          xs: "var(--category-heading-height)",
+          md: "calc(var(--sticky-search-height, 88px) + var(--category-heading-height))",
+        },
       }}
     >
       <Box
+        ref={categoryHeadingRef}
         sx={{
           p: 2,
           color: categoryTextColor,
@@ -102,7 +170,15 @@ export const CategoryBox = ({ category }: { category: Category }) => {
         return (
           <CategoryBoxAccordion
             id={f.id}
+            onChange={handleRuleExpansionChange}
             slotProps={{
+              heading: {
+                style: {
+                  position: "sticky",
+                  top: "var(--rule-heading-sticky-top)",
+                  zIndex: 890,
+                },
+              },
               region: { id: regionId, "aria-labelledby": summaryId },
               transition: { unmountOnExit: true },
             }}
