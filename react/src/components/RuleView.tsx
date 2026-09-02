@@ -13,6 +13,7 @@ import { Star as StarIcon } from "@mui/icons-material";
 import type { KarabinerFile } from "../models";
 import { ExtraDescription } from "./ExtraDescription";
 import { ImportButton } from "./ImportButton";
+import { LinkifiedText } from "./LinkifiedText";
 import { ruleHeaderLineHeight } from "./ruleHeaderLayout";
 
 const color = "#28A745";
@@ -71,7 +72,11 @@ export const RuleMetadata = ({ file }: { file: KarabinerFile }) => {
       {author && (
         <Chip
           component="span"
-          label={`Author: ${author}`}
+          label={
+            <>
+              Author: <LinkifiedText>{author}</LinkifiedText>
+            </>
+          }
           variant="outlined"
           sx={metadataChipSx}
         />
@@ -162,9 +167,15 @@ export const RuleHeaderContent = ({
       }),
     }}
   >
-    <Box component="span" aria-hidden={overlaidBySummary ? true : undefined}>
-      {leading}
-      <Box component="span">{file.object.metadata.title}</Box>
+    <Box component="span">
+      <Box component="span" aria-hidden={overlaidBySummary ? true : undefined}>
+        {leading}
+      </Box>
+      <Box component="span">
+        <LinkifiedText overlaidByControl={overlaidBySummary}>
+          {file.object.metadata.title}
+        </LinkifiedText>
+      </Box>
     </Box>
     <RuleMetadata file={file} />
   </Box>
@@ -187,7 +198,7 @@ export const RuleDetails = ({ file }: { file: KarabinerFile }) => (
                 <StarIcon sx={{ color }} />
               </ListItemIcon>
               <ListItemText
-                primary={rule.description}
+                primary={<LinkifiedText>{rule.description}</LinkifiedText>}
                 secondary={
                   secondaryLines.length === 0
                     ? undefined
@@ -197,7 +208,7 @@ export const RuleDetails = ({ file }: { file: KarabinerFile }) => (
                           sx={{ display: "block" }}
                           key={`${lineIndex}-${line}`}
                         >
-                          {line}
+                          <LinkifiedText>{line}</LinkifiedText>
                         </Box>
                       ))
                 }
