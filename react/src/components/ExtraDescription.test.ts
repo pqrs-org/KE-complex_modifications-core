@@ -162,31 +162,87 @@ describe("ExtraDescription", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("aborts an in-flight request when unmounted", async () => {
-    let requestSignal: AbortSignal | undefined;
-    vi.stubGlobal(
-      "fetch",
-      vi
-        .fn()
-        .mockImplementation(
-          (_src: string, { signal }: { signal: AbortSignal }) => {
-            requestSignal = signal;
-            return new Promise<Response>((_resolve, reject) => {
-              signal.addEventListener("abort", () =>
-                reject(new DOMException("Aborted", "AbortError")),
-              );
-            });
-          },
-        ),
+  it("reuses a loaded description after reopening", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      text: vi.fn().mockResolvedValue("<p>Cached description</p>"),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const props = { src: "cached-description.html" };
+    const first = render(createElement(ExtraDescription, props));
+    const firstHost = first.container.firstElementChild as HTMLElement;
+    await waitFor(() =>
+      expect(firstHost.shadowRoot?.textContent).toContain("Cached description"),
     );
+    first.unmount();
 
-    const view = render(
-      createElement(ExtraDescription, { src: "description.html" }),
+    const second = render(createElement(ExtraDescription, props));
+    const secondHost = second.container.firstElementChild as HTMLElement;
+    await waitFor(() =>
+      expect(secondHost.shadowRoot?.textContent).toContain(
+        "Cached description",
+      ),
     );
-    await waitFor(() => expect(requestSignal).not.toBeUndefined());
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    for (const host of [firstHost, secondHost]) {
+      expect(
+        host.shadowRoot?.querySelector('link[rel="stylesheet"]'),
+      ).toBeNull();
+    }
+    expect(
+      secondHost.shadowRoot?.querySelector("style")?.textContent,
+    ).toContain("--bs-blue:");
+  });
 
-    view.unmount();
+  it("shares an in-flight request across unmounts and concurrent views", async () => {
+    let resolveText!: (html: string) => void;
+    const text = new Promise<string>((resolve) => {
+      resolveText = resolve;
+    });
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, text: () => text });
+    vi.stubGlobal("fetch", fetchMock);
+    const props = { src: "pending-description.html" };
+    const first = render(createElement(ExtraDescription, props));
+    const firstHost = first.container.firstElementChild as HTMLElement;
+    first.unmount();
+    const second = render(createElement(ExtraDescription, props));
+    const third = render(createElement(ExtraDescription, props));
+    resolveText("<p>Shared description</p>");
 
-    expect(requestSignal?.aborted).toBe(true);
+    for (const view of [second, third]) {
+      const host = view.container.firstElementChild as HTMLElement;
+      await waitFor(() =>
+        expect(host.shadowRoot?.textContent).toContain("Shared description"),
+      );
+    }
+    expect(firstHost.shadowRoot?.textContent).toBe("");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries the same URL after an unsuccessful response", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        statusText: "Unavailable",
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: vi.fn().mockResolvedValue("<p>Retry succeeded</p>"),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    const props = { src: "retry-description.html" };
+    const first = render(createElement(ExtraDescription, props));
+    await screen.findByRole("alert");
+    first.unmount();
+
+    const second = render(createElement(ExtraDescription, props));
+    const host = second.container.firstElementChild as HTMLElement;
+    await waitFor(() =>
+      expect(host.shadowRoot?.textContent).toContain("Retry succeeded"),
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 });

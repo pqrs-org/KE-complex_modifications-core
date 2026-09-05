@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import sirv from "sirv";
 import { resolve } from "node:path";
@@ -7,6 +7,9 @@ import { readFile } from "node:fs/promises";
 const dist = resolve(import.meta.dirname, "../../dist");
 
 export default defineConfig({
+  test: {
+    css: { include: /bootstrap/ },
+  },
   server: {
     fs: { allow: [import.meta.dirname, dist] },
   },

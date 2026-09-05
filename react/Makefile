@@ -5,8 +5,6 @@ dev:
 build:
 	rm -fr dist
 	pnpm run build
-	mkdir -p dist/vendor
-	cp node_modules/bootstrap/dist/css/bootstrap.min.css dist/vendor
 
 check:
 	pnpm run format:check

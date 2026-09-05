@@ -1,9 +1,31 @@
 import { useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
+import bootstrapCss from "bootstrap/dist/css/bootstrap.min.css?inline";
 import { toAbsoluteUrl } from "../utils/url";
 
 type Props = {
   src: string;
+};
+
+// Share pending and completed requests for the lifetime of the page.
+const descriptionCache = new Map<string, Promise<string>>();
+
+const loadDescription = (src: string): Promise<string> => {
+  const url = toAbsoluteUrl(src);
+  const cached = descriptionCache.get(url);
+  if (cached) return cached;
+
+  const request = (async () => {
+    const res = await fetch(url, { credentials: "same-origin" });
+    if (!res.ok)
+      throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+    return res.text();
+  })().catch((error: unknown) => {
+    descriptionCache.delete(url);
+    throw error;
+  });
+  descriptionCache.set(url, request);
+  return request;
 };
 
 const extraDescriptionCss = `
@@ -64,7 +86,7 @@ export const ExtraDescription = ({ src }: Props) => {
     const container = ref.current;
     if (container === null) return;
 
-    const controller = new AbortController();
+    let active = true;
     const shadow =
       container.shadowRoot ?? container.attachShadow({ mode: "open" });
     shadow.replaceChildren();
@@ -72,14 +94,8 @@ export const ExtraDescription = ({ src }: Props) => {
 
     (async () => {
       try {
-        const res = await fetch(src, {
-          credentials: "same-origin",
-          signal: controller.signal,
-        });
-        if (!res.ok)
-          throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
-        const html = await res.text();
-        if (controller.signal.aborted) return;
+        const html = await loadDescription(src);
+        if (!active) return;
 
         const wrapper = document.createElement("div");
         wrapper.innerHTML = html;
@@ -109,20 +125,16 @@ export const ExtraDescription = ({ src }: Props) => {
 
         wrapper.dataset.bsTheme = "light";
 
-        const link = document.createElement("link");
-        link.setAttribute("rel", "stylesheet");
-        link.setAttribute("href", "vendor/bootstrap.min.css");
-
         const style = document.createElement("style");
-        style.textContent = extraDescriptionCss;
+        style.textContent = bootstrapCss + extraDescriptionCss;
 
-        shadow.replaceChildren(link, style, wrapper);
+        shadow.replaceChildren(style, wrapper);
       } catch (e) {
-        if (!controller.signal.aborted) setErr(e);
+        if (active) setErr(e);
       }
     })();
     return () => {
-      controller.abort();
+      active = false;
       shadow.replaceChildren();
     };
   }, [src]);
