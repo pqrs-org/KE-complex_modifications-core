@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
-import bootstrapCss from "bootstrap/dist/css/bootstrap.min.css?inline";
 import { toAbsoluteUrl } from "../utils/url";
 
 type Props = {
@@ -94,7 +93,12 @@ export const ExtraDescription = ({ src }: Props) => {
 
     (async () => {
       try {
-        const html = await loadDescription(src);
+        // Load Bootstrap only when a description is opened. The module is
+        // shared across descriptions and reused on subsequent opens.
+        const [html, { default: bootstrapCss }] = await Promise.all([
+          loadDescription(src),
+          import("bootstrap/dist/css/bootstrap.min.css?inline"),
+        ]);
         if (!active) return;
 
         const wrapper = document.createElement("div");
