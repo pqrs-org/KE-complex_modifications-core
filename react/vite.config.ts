@@ -7,6 +7,9 @@ import { readFile } from "node:fs/promises";
 const dist = resolve(import.meta.dirname, "../../dist");
 
 export default defineConfig({
+  build: {
+    chunkSizeWarningLimit: 800,
+  },
   test: {
     css: { include: /bootstrap/ },
   },
